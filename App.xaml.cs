@@ -98,6 +98,17 @@ namespace WinSentryAI
                         Shutdown();
                         return;
                     }
+
+                    // Re-instantiate AI service with the provider chosen during onboarding
+                    string chosenProvider = settingsService.Get("AI", "Provider", "gemini").ToLowerInvariant();
+                    AppState.Instance.AI = chosenProvider switch
+                    {
+                        "ollama" => new OllamaAIService(settingsService),
+                        "openai" => new OpenAIAIService(dbService, settingsService),
+                        "claude" => new ClaudeAIService(dbService, settingsService),
+                        _ => new GeminiAIService(dbService, settingsService)
+                    };
+                    Log.Information("AI service re-instantiated after onboarding: {Provider}", chosenProvider);
                 }
                 catch (Exception ex)
                 {

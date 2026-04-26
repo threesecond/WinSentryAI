@@ -98,10 +98,10 @@
         <!-- 右側主要區域 -->
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>              <!-- Row 0: 主要內容 -->
-                <RowDefinition Height="4"/>              <!-- Row 1: 水平 GridSplitter -->
-                <RowDefinition Height="300" MinHeight="150"/> <!-- Row 2: 底部詳細面板 -->
-                <RowDefinition Height="30"/>             <!-- Row 3: 底部狀態列 -->
+                <RowDefinition Height="*"/>                                          <!-- Row 0: 主要內容 -->
+                <RowDefinition x:Name="SplitterRow" Height="4"/>                    <!-- Row 1: 水平 GridSplitter -->
+                <RowDefinition x:Name="DetailRow" Height="300" MinHeight="150"/>    <!-- Row 2: 底部詳細面板 -->
+                <RowDefinition Height="30"/>                                         <!-- Row 3: 底部狀態列 -->
             </Grid.RowDefinitions>
 
             <!-- Row 0: 主要內容區 -->
