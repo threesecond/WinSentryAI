@@ -1,0 +1,54 @@
+# WinSentryAI - Aider Configuration
+# 參考 CLAUDE.md 規範
+
+# --- 模型設定 ---
+# 既然你有 Gemini Pro 和 Claude Key，建議優先使用這兩個最強模型
+model: gemini/gemini-1.5-pro
+# 或者如果你想切換到 Claude (需設定 ANTHROPIC_API_KEY)
+# model: anthropic/claude-3-5-sonnet-20240620
+
+# --- 自動化設定 ---
+# 啟用自動 Commit，這符合你規格中的 Git Flow 需求
+auto-commit: false
+
+# 根據 CLAUDE.md 定義的 Conventional Commits 格式進行 Commit
+# Aider 預設 commit message 已經很接近，這裡強化格式要求
+commit-prompt: "遵循 Conventional Commits 格式 (feat|fix|refactor|perf|docs|test|chore|ci)，針對變更內容撰寫簡短中文說明。"
+
+# --- 專案上下文 ---
+# 強制 Aider 每次啟動都讀取這份核心規範
+read: 
+  - CLAUDE.md
+  - CODEX.md
+  - ".ai/*.md"
+
+# --- 程式碼風格與技術規範 ---
+# 這裡定義的指令會讓 Aider 在修改後嘗試建置，確保代碼正確性
+check-command: "dotnet build"
+
+# 排除不需要掃描的資料夾與檔案，減少 Token 浪費
+ignore:
+  - "**/bin/**"
+  - "**/obj/**"
+  - "*.db"
+  - "*.log"
+  - "publish/"
+  - "logs/"
+
+# --- Aider 行為微調 ---
+# 讓 Aider 知道我們使用 WPF / MVVM 模式
+# 並強制執行 Nullable Enable 的規範
+chat-language: "zh-TW" # 與 Aider 對話使用繁體中文
+
+# 自定義指令，告訴 Aider 關於命名與架構的強硬限制
+# 這些會作為系統提示詞的一部分
+architect-instructions: |
+  你正在開發 WinSentryAI (WPF / .NET 8)。
+  必須嚴格遵守以下規則：
+  1. 遵循 MVVM 模式。邏輯寫在 ViewModels，UI 寫在 Views。
+  2. 禁止在 *.xaml.cs (code-behind) 撰寫業務邏輯。
+  3. 檔案命名：Page 結尾為 .xaml，ViewModel 結尾為 ViewModel.cs，介面以 I 開頭。
+  4. 使用 CommunityToolkit.Mvvm 進行資料繫結與命令實作。
+  5. 啟用 Nullable 參考型別，必須處理潛在的 Null 警告。
+  6. 非同步操作必須傳入並處理 CancellationToken。
+  7. 資源路徑與字串必須使用 Resources/Strings/ 中的 DynamicResource。

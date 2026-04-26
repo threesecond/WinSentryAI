@@ -1,0 +1,189 @@
+<UserControl x:Class="WinSentryAI.Views.EventListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:models="clr-namespace:WinSentryAI.Models"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="FilterChipStyle" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" CornerRadius="12"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{DynamicResource RegionBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SecondaryRegionBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Padding="8,6"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Filter chips -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <RadioButton GroupName="LevelFilter" Style="{StaticResource FilterChipStyle}"
+                                 Content="{DynamicResource EventList_Filter_All}"
+                                 IsChecked="{Binding FilterLevel, Converter={StaticResource StringEqualityConverter}, ConverterParameter=All}"/>
+                    <RadioButton GroupName="LevelFilter" Style="{StaticResource FilterChipStyle}"
+                                 Content="{DynamicResource EventList_Filter_Critical}"
+                                 IsChecked="{Binding FilterLevel, Converter={StaticResource StringEqualityConverter}, ConverterParameter=Critical}"/>
+                    <RadioButton GroupName="LevelFilter" Style="{StaticResource FilterChipStyle}"
+                                 Content="{DynamicResource EventList_Filter_Error}"
+                                 IsChecked="{Binding FilterLevel, Converter={StaticResource StringEqualityConverter}, ConverterParameter=Error}"/>
+                    <RadioButton GroupName="LevelFilter" Style="{StaticResource FilterChipStyle}"
+                                 Content="{DynamicResource EventList_Filter_Warning}"
+                                 IsChecked="{Binding FilterLevel, Converter={StaticResource StringEqualityConverter}, ConverterParameter=Warning}"/>
+                </StackPanel>
+
+                <!-- Search box -->
+                <Grid Grid.Column="1" Margin="12,0">
+                    <TextBox x:Name="SearchBox"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="6,4" VerticalContentAlignment="Center"/>
+                    <TextBlock IsHitTestVisible="False" Padding="8,4"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               Text="{DynamicResource EventList_Search_Placeholder}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SearchText}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <!-- Refresh button -->
+                <Button Grid.Column="2" Command="{Binding LoadEventsCommand}"
+                        Content="↺" ToolTip="Refresh" Padding="10,4" FontSize="14"
+                        VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <ListView Grid.Row="1" ItemsSource="{Binding FilteredEvents}"
+                  SelectedItem="{Binding SelectedEvent}"
+                  BorderThickness="0" Padding="5">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="{DynamicResource EventList_Column_Level}" Width="80">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:EventRecord}">
+                                <Border CornerRadius="3" Padding="8,2" HorizontalAlignment="Center">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#767676"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Level}" Value="Critical">
+                                                    <Setter Property="Background" Value="#c42b1c"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="Error">
+                                                    <Setter Property="Background" Value="#d83b01"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="Warning">
+                                                    <Setter Property="Background" Value="#9d5d00"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Level}" Value="Info">
+                                                    <Setter Property="Background" Value="#005a9e"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock FontWeight="Bold" FontSize="11" Foreground="White">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="Unknown"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Level}" Value="Critical">
+                                                        <Setter Property="Text" Value="Critical"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Level}" Value="Error">
+                                                        <Setter Property="Text" Value="Error"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Level}" Value="Warning">
+                                                        <Setter Property="Text" Value="Warning"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Level}" Value="Info">
+                                                        <Setter Property="Text" Value="Information"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="{DynamicResource EventList_Column_Time}" DisplayMemberBinding="{Binding Timestamp, StringFormat='HH:mm:ss'}" Width="80"/>
+                    <GridViewColumn Header="{DynamicResource EventList_Column_Source}" DisplayMemberBinding="{Binding Source}" Width="110"/>
+                    <GridViewColumn Header="{DynamicResource EventList_Column_EventId}" DisplayMemberBinding="{Binding EventId}" Width="60"/>
+                    <GridViewColumn Header="{DynamicResource EventList_Column_Message}" Width="500">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:EventRecord}">
+                                <TextBlock Text="{Binding Message}" TextTrimming="CharacterEllipsis" MaxHeight="20"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="AI" Width="70">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type models:EventRecord}">
+                                <TextBlock HorizontalAlignment="Center" FontSize="11">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="—"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsAnalyzed}" Value="True">
+                                                    <Setter Property="Text" Value="✓ Analyzed"/>
+                                                    <Setter Property="Foreground" Value="#107c10"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>

@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinSentryAI — 設定</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ── CSS Variables ── */
+:root {
+  --accent:        #0078d4;
+  --accent-hover:  #006cbd;
+  --accent-light:  #cce4f6;
+  --danger:        #c42b1c;
+  --danger-hover:  #a52315;
+  --danger-light:  #fde7e9;
+  --success:       #107c10;
+  --success-light: #dff6dd;
+  --warning:       #9d5d00;
+  --warning-light: #fff4ce;
+
+  --bg:            #f3f3f3;
+  --surface:       #ffffff;
+  --surface-alt:   #f9f9f9;
+  --sidebar-bg:    #ebebeb;
+  --border:        #e0e0e0;
+  --border-focus:  #0078d4;
+
+  --text-primary:  #1a1a1a;
+  --text-secondary:#5a5a5a;
+  --text-disabled: #a0a0a0;
+  --text-accent:   #0078d4;
+
+  --sidebar-w:     220px;
+  --radius:        6px;
+  --radius-sm:     4px;
+  --shadow:        0 2px 8px rgba(0,0,0,0.08);
+  --transition:    0.15s ease;
+
+  --font-ui:       'IBM Plex Sans', -apple-system, sans-serif;
+  --font-mono:     'IBM Plex Mono', 'Consolas', monospace;
+}
+
+[data-theme="dark"] {
+  --bg:            #202020;
+  --surface:       #2c2c2c;
+  --surface-alt:   #252525;
+  --sidebar-bg:    #262626;
+  --border:        #404040;
+  --border-focus:  #60b0f4;
+
+  --text-primary:  #f0f0f0;
+  --text-secondary:#a8a8a8;
+  --text-disabled: #606060;
+  --text-accent:   #60b0f4;
+
+  --accent:        #60b0f4;
+  --accent-hover:  #7dc0f6;
+  --accent-light:  #1a3a54;
+  --danger:        #f87171;
+  --danger-hover:  #ef4444;
+  --danger-light:  #3d1a1a;
+  --success:       #4ade80;
+  --success-light: #1a3d1a;
+  --shadow:        0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text-primary);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Title Bar ── */
+.titlebar {
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.titlebar-icon {
+  width: 20px; height: 20px;
+  background: var(--accent);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.titlebar-icon svg { width:14px; height:14px; fill: white; }
+.titlebar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.titlebar-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.titlebar-sep { color: var(--border); margin: 0 4px; }
+.titlebar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+/* Theme toggle */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  transition: var(--transition);
+}
+.theme-toggle:hover { background: var(--surface-alt); }
+.toggle-track {
+  width: 32px; height: 18px;
+  background: var(--border);
+  border-radius: 9px;
+  position: relative;
+  transition: background var(--transition);
+}
+.toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  background: white;
+  border-radius: 50%;
+  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .toggle-track { background: var(--accent); }
+[data-theme="dark"] .toggle-thumb { transform: translateX(14px); }
+
+/* ── Layout ── */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.sidebar-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-disabled);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 12px 16px 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 0;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background var(--transition), color var(--transition);
+  position: relative;
+  user-select: none;
+}
+.nav-item:hover { background: rgba(0,0,0,0.05); color: var(--text-primary); }
+[data-theme="dark"] .nav-item:hover { background: rgba(255,255,255,0.06); }
+
+.nav-item.active {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 3px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+.nav-icon {
+  width: 18px; height: 18px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+.nav-item.active .nav-icon { opacity: 1; }
+
+/* ── Main Content ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  background: var(--bg);
+}
+
+.section { display: none; }
+.section.active { display: block; }
+
+.section-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.section-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.card-body { padding: 6px 0; }
+
+/* ── Form Row ── */
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  gap: 16px;
+  min-height: 48px;
+}
+.form-row + .form-row { border-top: 1px solid var(--border); }
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.label-text {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.label-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.form-control { flex-shrink: 0; }
+
+/* ── Inputs ── */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+input:focus, select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(0,120,212,0.15);
+}
+input[type="number"] { width: 80px; text-align: right; }
+input[type="text"], input[type="password"] { width: 260px; }
+select { width: 180px; }
+
+.input-with-unit {
+  display: flex; align-items: center; gap: 6px;
+}
+.unit-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.input-with-btn {
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Password with eye toggle */
+.pw-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.pw-wrap input[type="password"],
+.pw-wrap input[type="text"] {
+  padding-right: 34px;
+  width: 240px;
+}
+.pw-toggle {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 2px;
+}
+.pw-toggle:hover { color: var(--text-primary); }
+
+/* ── Buttons ── */
+.btn {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background var(--transition), border-color var(--transition), opacity var(--transition);
+  white-space: nowrap;
+  line-height: 1;
+}
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+.btn-secondary:hover { background: var(--surface-alt); }
+
+.btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.btn-danger:hover { background: var(--danger-light); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-accent);
+  border-color: transparent;
+  padding: 6px 8px;
+}
+.btn-ghost:hover { background: var(--accent-light); }
+
+.btn-sm { font-size: 12px; padding: 4px 10px; }
+
+/* ── Status Badge ── */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+.status-idle { color: var(--text-disabled); }
+.status-idle .status-dot { background: var(--text-disabled); }
+.status-ok { background: var(--success-light); color: var(--success); }
+.status-ok .status-dot { background: var(--success); }
+.status-error { background: var(--danger-light); color: var(--danger); }
+.status-error .status-dot { background: var(--danger); }
+.status-loading { color: var(--text-secondary); }
+.status-loading .status-dot { background: var(--accent); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── Segmented Control ── */
+.seg {
+  display: inline-flex;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+.seg-btn {
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: background var(--transition), color var(--transition);
+  white-space: nowrap;
+}
+.seg-btn:hover { color: var(--text-primary); }
+.seg-btn.active {
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+[data-theme="dark"] .seg-btn.active { box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+
+/* ── Provider Radio ── */
+.provider-grid {
+  display: flex;
+  gap: 10px;
+  padding: 14px 18px;
+  flex-wrap: wrap;
+}
+.provider-card {
+  flex: 1;
+  min-width: 100px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+.provider-card:hover { border-color: var(--accent); background: var(--accent-light); }
+.provider-card.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.provider-radio {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--transition);
+}
+.provider-card.active .provider-radio {
+  border-color: var(--accent);
+}
+.provider-radio-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.provider-card.active .provider-radio-dot { opacity: 1; }
+.provider-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.provider-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* ── Provider Sections ── */
+.provider-section { display: none; }
+.provider-section.active { display: block; }
+
+/* ── Note Box ── */
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  background: var(--surface-alt);
+  border-top: 1px solid var(--border);
+}
+.note svg { flex-shrink: 0; margin-top: 1px; color: var(--warning); }
+
+/* ── Path Display ── */
+.path-row {
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.path-row + .path-row { border-top: 1px solid var(--border); }
+.path-info { flex: 1; }
+.path-label { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 3px; }
+.path-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--surface-alt);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: inline-block;
+}
+.path-meta { font-size: 11.5px; color: var(--text-disabled); margin-top: 3px; }
+.path-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 18px;
+}
+
+/* ── Footer ── */
+.footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-disabled); }
+
+/* ── Danger Zone ── */
+.danger-zone {
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.danger-zone .card-header { border-bottom-color: rgba(196,43,28,0.2); }
+.danger-zone .card-title { color: var(--danger); }
+
+/* Ollama model row */
+.model-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.model-row select { flex: 1; width: auto; }
+
+</style>
+</head>
+<body>
+
+<!-- Title Bar -->
+<div class="titlebar">
+  <div class="titlebar-icon">
+    <svg viewBox="0 0 16 16"><path d="M8 1L1 4v4c0 4 3.5 7 7 8 3.5-1 7-4 7-8V4L8 1z"/></svg>
+  </div>
+  <span class="titlebar-title">WinSentryAI</span>
+  <span class="titlebar-sep">›</span>
+  <span class="titlebar-sub">設定</span>
+  <div class="titlebar-actions">
+    <button class="theme-toggle" onclick="toggleTheme()" title="切換主題">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
+      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+    </button>
+  </div>
+</div>
+
+<!-- App Body -->
+<div class="app-body">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-section-label">設定項目</div>
+
+    <div class="nav-item active" onclick="showSection('general', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      一般設定
+    </div>
+
+    <div class="nav-item" onclick="showSection('ai', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z"/>
+        <circle cx="9" cy="13" r="1" fill="currentColor"/>
+        <circle cx="15" cy="13" r="1" fill="currentColor"/>
+      </svg>
+      AI 設定
+    </div>
+
+    <div class="nav-item" onclick="showSection('error', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      錯誤處理
+    </div>
+
+    <div class="nav-item" onclick="showSection('remote', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+        <path d="M7 8h10M7 12h5"/>
+      </svg>
+      遠端連線
+    </div>
+
+    <div class="nav-item" onclick="showSection('ui', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M3 9h18M9 21V9"/>
+      </svg>
+      介面設定
+    </div>
+
+    <div class="nav-item" onclick="showSection('maintenance', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+      </svg>
+      維護
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- ══ 一般設定 ══ -->
+    <div id="section-general" class="section active">
+      <div class="section-header">
+        <div class="section-title">一般設定</div>
+        <div class="section-desc">資料保留與查詢行為的基本設定。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">資料管理</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">日誌保留天數</span>
+              <span class="label-hint">超過此天數的事件記錄將於啟動時自動清除</span>
+            </div>
+            <div class="form-control input-with-unit">
+              <input type="number" value="7" min="1" max="365">
+              <span class="unit-label">天</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">回溯查詢上限</span>
+              <span class="label-hint">啟動時從開機後回溯讀取的最大事件筆數</span>
+            </div>
+            <div class="form-control input-with-unit">
+              <input type="number" value="50" min="10" max="500">
+              <span class="unit-label">筆</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AI 設定 ══ -->
+    <div id="section-ai" class="section">
+      <div class="section-header">
+        <div class="section-title">AI 設定</div>
+        <div class="section-desc">選擇 AI 分析引擎並設定連線金鑰。API Key 以 DPAPI 加密儲存於本機。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">AI 提供者</div></div>
+        <div class="card-body">
+          <div class="provider-grid">
+            <div class="provider-card active" onclick="selectProvider('gemini', this)">
+              <div class="provider-radio"><div class="provider-radio-dot"></div></div>
+              <div class="provider-name">Gemini</div>
+              <span class="provider-badge">免費</span>
+            </div>
+            <div class="provider-card" onclick="selectProvider('openai', this)">
+              <div class="provider-radio"><div class="provider-radio-dot"></div></div>
+              <div class="provider-name">OpenAI</div>
+              <span class="provider-badge">付費</span>
+            </div>
+            <div class="provider-card" onclick="selectProvider('claude', this)">
+              <div class="provider-radio"><div class="provider-radio-dot"></div></div>
+              <div class="provider-name">Claude</div>
+              <span class="provider-badge">付費</span>
+            </div>
+            <div class="provider-card" onclick="selectProvider('ollama', this)">
+              <div class="provider-radio"><div class="provider-radio-dot"></div></div>
+              <div class="provider-name">Ollama</div>
+              <span class="provider-badge">本地端</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gemini -->
+      <div id="provider-gemini" class="card provider-section active">
+        <div class="card-header"><div class="card-title">Google Gemini 設定</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">API Key</span>
+              <span class="label-hint">Google AI Studio 申請：<span style="color:var(--text-accent)">aistudio.google.com</span></span>
+            </div>
+            <div class="form-control input-with-btn">
+              <div class="pw-wrap">
+                <input type="password" id="gemini-key" placeholder="AIza..." value="AIzaSyD••••••••••••••••••••">
+                <button class="pw-toggle" onclick="togglePw('gemini-key', this)" title="顯示/隱藏">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="testConnection('gemini-status', this)">驗證連線</button>
+              <span id="gemini-status" class="status status-ok"><span class="status-dot"></span>已連線</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Claude -->
+      <div id="provider-claude" class="card provider-section">
+        <div class="card-header"><div class="card-title">Claude (Anthropic) 設定</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">API Key</span>
+              <span class="label-hint">Anthropic Console 申請：<a href="https://console.anthropic.com/" target="_blank" style="color:var(--text-accent)">console.anthropic.com</a></span>
+            </div>
+            <div class="form-control input-with-btn">
+              <div class="pw-wrap">
+                <input type="password" id="claude-key" placeholder="sk-ant-api03-...">
+                <button class="pw-toggle" onclick="togglePw('claude-key', this)" title="顯示/隱藏">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="testConnection('claude-status', this)">驗證連線</button>
+              <span id="claude-status" class="status status-idle"><span class="status-dot"></span>未設定</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ollama -->
+      <div id="provider-ollama" class="card provider-section">
+        <div class="card-header"><div class="card-title">Ollama 本地端設定</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">Endpoint URL</span>
+              <span class="label-hint">Ollama 服務的 HTTP 位址</span>
+            </div>
+            <div class="form-control input-with-btn">
+              <input type="text" value="http://localhost:11434" style="width:220px">
+              <button class="btn btn-secondary btn-sm" onclick="testConnection('ollama-status', this)">測試連線</button>
+              <span id="ollama-status" class="status status-idle"><span class="status-dot"></span>未測試</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">模型</span>
+              <span class="label-hint">連線後自動讀取可用模型清單</span>
+            </div>
+            <div class="form-control model-row">
+              <select>
+                <option>llama3</option>
+                <option>mistral</option>
+                <option>phi3</option>
+                <option>gemma2</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" title="重新整理模型清單">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                重新整理
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OpenAI -->
+      <div id="provider-openai" class="card provider-section">
+        <div class="card-header"><div class="card-title">OpenAI 設定</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">API Key</span>
+              <span class="label-hint">platform.openai.com 取得</span>
+            </div>
+            <div class="form-control input-with-btn">
+              <div class="pw-wrap">
+                <input type="password" id="openai-key" placeholder="sk-...">
+                <button class="pw-toggle" onclick="togglePw('openai-key', this)" title="顯示/隱藏">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="testConnection('openai-status', this)">驗證連線</button>
+              <span id="openai-status" class="status status-idle"><span class="status-dot"></span>未設定</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 回應語言 -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">AI 回應語言</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">回應語言</span>
+              <span class="label-hint">AI 診斷報告的輸出語言</span>
+            </div>
+            <div class="form-control">
+              <div class="seg">
+                <button class="seg-btn active" onclick="activateSeg(this)">繁體中文</button>
+                <button class="seg-btn" onclick="activateSeg(this)">简体中文</button>
+                <button class="seg-btn" onclick="activateSeg(this)">English</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 錯誤處理 ══ -->
+    <div id="section-error" class="section">
+      <div class="section-header">
+        <div class="section-title">錯誤處理</div>
+        <div class="section-desc">AI API 呼叫失敗時的重試行為設定。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">重試策略</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">最大重試次數</span>
+              <span class="label-hint">逾時後以指數退避重試（1s → 2s → 4s），超過次數後標記失敗</span>
+            </div>
+            <div class="form-control input-with-unit">
+              <input type="number" value="3" min="1" max="10">
+              <span class="unit-label">次</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 遠端連線 ══ -->
+    <div id="section-remote" class="section">
+      <div class="section-header">
+        <div class="section-title">遠端連線</div>
+        <div class="section-desc">連線至遠端 Windows Server 讀取事件日誌。目標主機無需安裝任何程式。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">連線設定</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">主機名稱 / IP</span>
+              <span class="label-hint">目標 Windows Server 的主機名稱或 IP 位址</span>
+            </div>
+            <div class="form-control">
+              <input type="text" placeholder="server01 或 192.168.1.100" style="width:240px">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">網域</span>
+              <span class="label-hint">選填，留空使用本機認證</span>
+            </div>
+            <div class="form-control">
+              <input type="text" placeholder="CORP" style="width:240px">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">使用者名稱</span>
+              <span class="label-hint">選填，留空使用目前 Windows 登入帳號</span>
+            </div>
+            <div class="form-control input-with-btn">
+              <input type="text" placeholder="administrator" style="width:200px">
+              <button class="btn btn-secondary btn-sm" onclick="testConnection('remote-status', this)">測試連線</button>
+              <span id="remote-status" class="status status-idle"><span class="status-dot"></span>未測試</span>
+            </div>
+          </div>
+        </div>
+        <div class="note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          密碼於每次實際連線時輸入，不予儲存。
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 介面設定 ══ -->
+    <div id="section-ui" class="section">
+      <div class="section-header">
+        <div class="section-title">介面設定</div>
+        <div class="section-desc">應用程式外觀偏好設定。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">主題</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">色彩主題</span>
+              <span class="label-hint">「跟隨系統」將依 Windows 設定自動切換</span>
+            </div>
+            <div class="form-control">
+              <div class="seg">
+                <button class="seg-btn" onclick="activateSeg(this)">淺色</button>
+                <button class="seg-btn" onclick="activateSeg(this)">深色</button>
+                <button class="seg-btn active" onclick="activateSeg(this)">跟隨系統</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 維護 ══ -->
+    <div id="section-maintenance" class="section">
+      <div class="section-header">
+        <div class="section-title">維護</div>
+        <div class="section-desc">管理應用程式的本機資料與日誌檔案。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">除錯日誌</div></div>
+        <div class="card-body">
+          <div class="path-row">
+            <div class="path-info">
+              <div class="path-label">日誌資料夾</div>
+              <div class="path-value">.\logs\</div>
+              <div class="path-meta">目前共 3 個檔案 · 約 1.2 MB</div>
+            </div>
+            <div class="path-actions">
+              <button class="btn btn-secondary btn-sm">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                開啟資料夾
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">事件資料庫</div></div>
+        <div class="card-body">
+          <div class="path-row">
+            <div class="path-info">
+              <div class="path-label">SQLite 資料庫</div>
+              <div class="path-value">.\WinSentryAI.db</div>
+              <div class="path-meta">大小：4.7 MB · 事件記錄：1,248 筆</div>
+            </div>
+            <div class="path-actions">
+              <button class="btn btn-secondary btn-sm">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                開啟資料夾
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="danger-zone card">
+        <div class="card-header"><div class="card-title">危險操作</div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-label">
+              <span class="label-text">清除所有日誌</span>
+              <span class="label-hint">刪除 <code style="font-family:var(--font-mono);font-size:11.5px;background:var(--surface-alt);padding:1px 5px;border-radius:3px;border:1px solid var(--border)">.\logs\</code> 目錄下所有 .log 檔案，無法復原</span>
+            </div>
+            <div class="form-control">
+              <button class="btn btn-danger btn-sm" onclick="confirmClear()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                清除所有日誌
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <button class="btn btn-secondary" onclick="alert('已取消，設定未儲存')">取消</button>
+  <button class="btn btn-primary" onclick="saveSettings()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    儲存設定
+  </button>
+</div>
+
+<script>
+// ── Section Navigation ──
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── Theme Toggle ──
+function toggleTheme() {
+  const html = document.documentElement;
+  html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+// ── Provider Selection ──
+function selectProvider(provider, el) {
+  document.querySelectorAll('.provider-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.provider-section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('provider-' + provider).classList.add('active');
+}
+
+// ── Password Toggle ──
+function togglePw(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.innerHTML = isHidden
+    ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+    : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+}
+
+// ── Segmented Control ──
+function activateSeg(btn) {
+  const group = btn.closest('.seg');
+  group.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Test Connection (simulation) ──
+function testConnection(statusId, btn) {
+  const status = document.getElementById(statusId);
+  status.className = 'status status-loading';
+  status.innerHTML = '<span class="status-dot"></span>連線中…';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.disabled = false;
+    const ok = Math.random() > 0.25;
+    if (ok) {
+      status.className = 'status status-ok';
+      status.innerHTML = '<span class="status-dot"></span>連線成功';
+    } else {
+      status.className = 'status status-error';
+      status.innerHTML = '<span class="status-dot"></span>連線失敗';
+    }
+  }, 1400);
+}
+
+// ── Save Settings ──
+function saveSettings() {
+  const btn = event.currentTarget;
+  const orig = btn.innerHTML;
+  btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 已儲存`;
+  btn.disabled = true;
+  setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 1800);
+}
+
+// ── Clear Logs ──
+function confirmClear() {
+  if (confirm('確定要刪除所有日誌檔案嗎？\n\n此操作無法復原。')) {
+    alert('已清除 3 個日誌檔案（1.2 MB）');
+  }
+}
+</script>
+</body>
+</html>

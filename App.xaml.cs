@@ -1,50 +1,166 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using System.Runtime.InteropServices;
+using System.Windows;
+using Serilog;
+using WinSentryAI.Services;
+using WinSentryAI.Models;
+using WinSentryAI.ViewModels;
 
 namespace WinSentryAI
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     public partial class App : Application
     {
-        private Window? _window;
+        private const string AppId = "WinSentryAI.App";
+        public bool ShowOnboarding { get; private set; }
 
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
-        public App()
+        [DllImport("shell32.dll", SetLastError = true)]
+        private static extern void SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string AppID);
+
+        protected override void OnStartup(StartupEventArgs e)
         {
-            InitializeComponent();
+            base.OnStartup(e);
+
+            // 1. 初始化 Serilog
+            ConfigureLogging();
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            // 2. 註冊 AppUserModelId
+            try
+            {
+                SetCurrentProcessExplicitAppUserModelID(AppId);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to set AppUserModelID");
+            }
+
+            // 3. 檢查設定檔是否存在
+            string settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.ini");
+            ShowOnboarding = !File.Exists(settingsPath);
+
+            // 4. 初始化基礎服務
+            var settingsService = new SettingsService();
+            string lang = settingsService.Get("UI", "Language", "en");
+            ApplyLanguage(lang);
+
+            // 5. 初始化資料庫（含資料清理）
+            var retentionDays = settingsService.GetInt("General", "LogRetentionDays", 7);
+            var dbService = new DatabaseService();
+            dbService.Initialize(retentionDays);
+
+            // 6. 收集系統快照（背景執行，不等待）
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var snapshotService = new SystemSnapshotService();
+                    var snapshot = await snapshotService.CollectAsync();
+                    await dbService.SaveSystemSnapshotAsync(snapshot);
+                    Log.Information("System snapshot saved.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to save system snapshot at startup.");
+                }
+            });
+
+            // 7. 初始化全域狀態
+            var eventLogService = new EventLogService();
+            AppState.Instance.Database = dbService;
+            AppState.Instance.Settings = settingsService;
+            AppState.Instance.EventLog = eventLogService;
+            AppState.Instance.ContextLogCapture = new ContextLogCaptureService(eventLogService, dbService);
+
+            string aiProvider = settingsService.Get("AI", "Provider", "gemini").ToLowerInvariant();
+            AppState.Instance.AI = aiProvider switch
+            {
+                "ollama" => new OllamaAIService(settingsService),
+                "openai" => new OpenAIAIService(dbService, settingsService),
+                "claude" => new ClaudeAIService(dbService, settingsService),
+                _ => new GeminiAIService(dbService, settingsService)
+            };
+            
+            AppState.Instance.IsOnboarding = ShowOnboarding;
+
+            Log.Information("WinSentryAI initialized. ShowOnboarding: {ShowOnboarding}", ShowOnboarding);
+
+            // 8. Onboarding Wizard
+            bool hasCompleted = settingsService.Get("General", "HasCompletedOnboarding", "false") == "true";
+            if (!hasCompleted)
+            {
+                try
+                {
+                    var onboardingVm = new OnboardingViewModel(dbService, settingsService, AppState.Instance.AI);
+                    var onboardingWin = new OnboardingWindow { DataContext = onboardingVm };
+                    bool? result = onboardingWin.ShowDialog();
+                    if (result != true)
+                    {
+                        Shutdown();
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Fatal(ex, "Fatal error during Onboarding Wizard.");
+                    Shutdown();
+                    return;
+                }
+            }
+
+            // 9. Show MainWindow
+            try
+            {
+                var mainVm = new MainViewModel(settingsService, dbService);
+                var mainWin = new MainWindow { DataContext = mainVm };
+                mainWin.Show();
+                ShutdownMode = ShutdownMode.OnMainWindowClose;
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Fatal error during MainWindow startup.");
+                throw;
+            }
         }
 
-        /// <summary>
-        /// Invoked when the application is launched.
-        /// </summary>
-        /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        private void ConfigureLogging()
         {
-            _window = new MainWindow();
-            _window.Activate();
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "app-.log");
+            
+            var logConfig = new LoggerConfiguration()
+#if DEBUG
+                .MinimumLevel.Verbose()
+#else
+                .MinimumLevel.Warning()
+#endif
+                .WriteTo.File(logPath, 
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+
+            Log.Logger = logConfig;
+        }
+
+        internal void ApplyLanguage(string lang)
+        {
+            var merged = Resources.MergedDictionaries;
+            var oldLang = merged.FirstOrDefault(d => d.Source != null && d.Source.OriginalString.Contains("Strings."));
+            if (oldLang != null) merged.Remove(oldLang);
+
+            try
+            {
+                string uri = $"Resources/Strings/Strings.{lang}.xaml";
+                merged.Add(new ResourceDictionary { Source = new Uri(uri, UriKind.Relative) });
+            }
+            catch
+            {
+                if (lang != "en") ApplyLanguage("en");
+            }
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            Log.CloseAndFlush();
+            base.OnExit(e);
         }
     }
 }

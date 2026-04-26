@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinSentryAI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --accent:         #0078d4;
+  --accent-hover:   #006cbd;
+  --accent-light:   #cce4f6;
+  --danger:         #c42b1c;
+  --danger-bg:      #fde7e9;
+  --warning:        #9d5d00;
+  --warning-bg:     #fff4ce;
+  --success:        #107c10;
+  --success-bg:     #dff6dd;
+  --critical-color: #c42b1c;
+  --critical-bg:    #fde7e9;
+  --error-color:    #d83b01;
+  --error-bg:       #fce8de;
+  --warn-color:     #9d5d00;
+  --warn-bg:        #fff4ce;
+  --info-color:     #005a9e;
+  --info-bg:        #dce9f5;
+
+  --bg:             #f0f0f0;
+  --surface:        #ffffff;
+  --surface-alt:    #f9f9f9;
+  --surface-hover:  #f0f6fc;
+  --sidebar-bg:     #e8e8e8;
+  --border:         #e0e0e0;
+  --border-light:   #ebebeb;
+
+  --text-primary:   #1a1a1a;
+  --text-secondary: #5a5a5a;
+  --text-muted:     #8a8a8a;
+  --text-accent:    #0078d4;
+
+  --nav-w:      200px;
+  --radius:     6px;
+  --radius-sm:  4px;
+  --font-ui:    'IBM Plex Sans', -apple-system, sans-serif;
+  --font-mono:  'IBM Plex Mono', 'Consolas', monospace;
+  --transition: 0.15s ease;
+  --shadow-sm:  0 1px 4px rgba(0,0,0,0.08);
+  --shadow:     0 2px 10px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] {
+  --bg:             #1e1e1e;
+  --surface:        #2d2d2d;
+  --surface-alt:    #252525;
+  --surface-hover:  #2a3a4a;
+  --sidebar-bg:     #272727;
+  --border:         #3c3c3c;
+  --border-light:   #333;
+  --text-primary:   #f0f0f0;
+  --text-secondary: #aaaaaa;
+  --text-muted:     #666;
+  --text-accent:    #60b0f4;
+  --accent:         #60b0f4;
+  --accent-hover:   #7dc0f6;
+  --accent-light:   #1a3a54;
+  --critical-bg:    #3d1215;
+  --error-bg:       #3d2010;
+  --warn-bg:        #3d3000;
+  --info-bg:        #0d2a40;
+  --danger-bg:      #3d1215;
+  --success-bg:     #0d2a10;
+  --shadow-sm:      0 1px 4px rgba(0,0,0,0.3);
+  --shadow:         0 2px 10px rgba(0,0,0,0.4);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* ─── Title Bar ─── */
+.titlebar {
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 14px;
+  gap: 10px;
+  flex-shrink: 0;
+  user-select: none;
+}
+.tb-icon {
+  width: 22px; height: 22px;
+  background: var(--accent);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.tb-icon svg { width: 14px; height: 14px; fill: white; }
+.tb-title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+.tb-pills { display: flex; gap: 6px; align-items: center; margin-left: 16px; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+.pill-local  { background: var(--success-bg); color: var(--success); border-color: currentColor; }
+.pill-remote { background: var(--accent-light); color: var(--accent); border-color: currentColor; }
+.pill-monitor { background: var(--success-bg); color: var(--success); }
+.pill-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.tb-btn {
+  background: none; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 4px 10px;
+  font-family: var(--font-ui); font-size: 12px;
+  color: var(--text-secondary); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: var(--transition);
+}
+.tb-btn:hover { background: var(--surface-alt); color: var(--text-primary); }
+.tb-btn svg { width: 13px; height: 13px; }
+
+.theme-toggle-btn {
+  background: none; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 5px 7px;
+  cursor: pointer; display: flex; align-items: center;
+  color: var(--text-secondary); transition: var(--transition);
+}
+.theme-toggle-btn:hover { background: var(--surface-alt); }
+
+/* ─── App Layout ─── */
+.app {
+  display: flex;
+  height: calc(100vh - 44px);
+  overflow: hidden;
+}
+
+/* ─── Sidebar Nav ─── */
+.sidebar {
+  width: var(--nav-w);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  flex-shrink: 0;
+  padding: 10px 0;
+  position: relative;
+  user-select: none;
+}
+.nav-label {
+  font-size: 10.5px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.07em; padding: 10px 14px 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 14px; cursor: pointer;
+  color: var(--text-secondary); font-size: 13px; font-weight: 500;
+  position: relative; transition: background var(--transition), color var(--transition);
+  user-select: none;
+}
+.nav-item:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
+[data-theme="dark"] .nav-item:hover { background: rgba(255,255,255,0.05); }
+.nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+.nav-item.active::before {
+  content: ''; position: absolute;
+  left: 0; top: 5px; bottom: 5px;
+  width: 3px; background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.75; }
+.nav-item.active svg { opacity: 1; }
+.nav-badge {
+  margin-left: auto; min-width: 20px;
+  background: var(--danger); color: white;
+  font-size: 10px; font-weight: 700;
+  padding: 1px 5px; border-radius: 10px;
+  text-align: center;
+}
+.nav-spacer { flex: 1; }
+.nav-item.settings-link { border-top: 1px solid var(--border); margin-top: 4px; }
+
+/* ─── Main Panel ─── */
+.main {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+}
+
+/* ─── View ─── */
+.view { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+.view.active { display: flex; }
+
+/* ─── Toolbar ─── */
+.toolbar {
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.filter-chips { display: flex; gap: 4px; }
+.chip {
+  font-family: var(--font-ui); font-size: 11.5px; font-weight: 600;
+  padding: 4px 10px; border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent; color: var(--text-secondary);
+  cursor: pointer; transition: var(--transition);
+  display: flex; align-items: center; gap: 4px;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.active { background: var(--accent); border-color: var(--accent); color: white; }
+.chip-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.chip.chip-crit { --chip-c: var(--critical-color); }
+.chip.chip-err  { --chip-c: var(--error-color); }
+.chip.chip-warn { --chip-c: var(--warn-color); }
+.chip.active.chip-crit { background: var(--critical-color); border-color: var(--critical-color); }
+.chip.active.chip-err  { background: var(--error-color);    border-color: var(--error-color); }
+.chip.active.chip-warn { background: var(--warn-color);     border-color: var(--warn-color); }
+
+.search-box {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface-alt); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 5px 10px;
+  margin-left: 4px;
+}
+.search-box svg { color: var(--text-muted); flex-shrink: 0; width: 13px; height: 13px; }
+.search-box input {
+  background: none; border: none; outline: none;
+  font-family: var(--font-ui); font-size: 12.5px;
+  color: var(--text-primary); width: 180px;
+}
+.search-box input::placeholder { color: var(--text-muted); }
+
+.tb-spacer { flex: 1; }
+
+.btn {
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 500;
+  padding: 5px 12px; border-radius: var(--radius-sm);
+  border: 1px solid transparent; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: var(--transition); white-space: nowrap;
+}
+.btn svg { width: 13px; height: 13px; }
+.btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary { background: transparent; color: var(--text-primary); border-color: var(--border); }
+.btn-secondary:hover { background: var(--surface-alt); }
+.btn-ai {
+  background: linear-gradient(135deg, #6c3fc8 0%, #0078d4 100%);
+  color: white; border: none;
+  box-shadow: 0 1px 4px rgba(108,63,200,0.3);
+}
+.btn-ai:hover { opacity: 0.9; }
+.btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* ─── Event List ─── */
+.event-list-wrap { flex: 1; overflow-y: auto; min-height: 0; }
+
+.event-table { width: 100%; border-collapse: collapse; }
+.event-table thead th {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 8px 12px;
+  text-align: left; font-size: 11.5px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+  white-space: nowrap; user-select: none; cursor: pointer;
+}
+.event-table thead th:hover { color: var(--text-secondary); }
+
+.event-row {
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer; transition: background var(--transition);
+}
+.event-row:hover { background: var(--surface-hover); }
+.event-row.selected { background: var(--accent-light); }
+[data-theme="dark"] .event-row.selected { background: #1a2f45; }
+
+.event-row td {
+  padding: 9px 12px; font-size: 12.5px;
+  vertical-align: middle; white-space: nowrap;
+}
+.event-row td.msg-cell {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 360px;
+}
+
+.ts { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+.badge-critical { background: var(--critical-bg); color: var(--critical-color); }
+.badge-error    { background: var(--error-bg);    color: var(--error-color); }
+.badge-warning  { background: var(--warn-bg);     color: var(--warn-color); }
+.badge-info     { background: var(--info-bg);     color: var(--info-color); }
+
+.eid { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+.src { font-weight: 500; }
+
+/* ─── Detail Panel ─── */
+.detail-panel {
+  height: 340px; flex-shrink: 0;
+  background: var(--surface);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.detail-tabs {
+  display: flex; align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px; gap: 0;
+  flex-shrink: 0;
+}
+.detail-tab {
+  padding: 9px 16px; font-size: 12.5px; font-weight: 500;
+  color: var(--text-secondary); border-bottom: 2px solid transparent;
+  cursor: pointer; margin-bottom: -1px; transition: var(--transition);
+  white-space: nowrap;
+}
+.detail-tab:hover { color: var(--text-primary); }
+.detail-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.detail-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+.detail-body { flex: 1; overflow: hidden; display: flex; min-height: 0; }
+.detail-pane { display: none; width: 100%; overflow-y: auto; padding: 14px 18px; }
+.detail-pane.active { display: block; }
+
+/* Event detail */
+.detail-grid {
+  display: grid; grid-template-columns: 130px 1fr;
+  gap: 6px 12px; font-size: 12.5px; margin-bottom: 12px;
+}
+.detail-key { color: var(--text-secondary); font-weight: 500; }
+.detail-val { color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; word-break: break-all; }
+.detail-msg {
+  background: var(--surface-alt); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--text-primary); line-height: 1.6;
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* AI Analysis pane — flex layout for pinned input bar */
+.ai-pane { padding: 0 !important; }
+.ai-pane.active { display: flex !important; flex-direction: column; }
+.ai-scroll-area { flex: 1; overflow-y: auto; padding: 14px 18px; min-height: 0; }
+
+.ai-empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 160px; gap: 10px; color: var(--text-muted);
+}
+.ai-empty svg { width: 36px; height: 36px; opacity: 0.4; }
+.ai-empty p { font-size: 13px; }
+
+.ai-result { display: none; }
+.ai-result.visible { display: block; }
+
+.ai-section { margin-bottom: 14px; }
+.ai-section-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.ai-section-body { font-size: 13px; line-height: 1.65; color: var(--text-primary); }
+.ai-section-body ol { padding-left: 18px; }
+.ai-section-body li { margin-bottom: 4px; }
+
+.severity-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: var(--radius-sm);
+  font-size: 12.5px; font-weight: 700;
+}
+.sev-low      { background: var(--info-bg);     color: var(--info-color); }
+.sev-medium   { background: var(--warn-bg);     color: var(--warn-color); }
+.sev-high     { background: var(--error-bg);    color: var(--error-color); }
+.sev-critical { background: var(--critical-bg); color: var(--critical-color); }
+
+.ai-loading {
+  display: none; align-items: center; gap: 10px;
+  padding: 20px; color: var(--text-secondary); font-size: 13px;
+}
+.ai-loading.visible { display: flex; }
+.ai-spinner {
+  width: 20px; height: 20px; border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Context logs */
+.context-log {
+  display: flex; gap: 10px; padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 12px; line-height: 1.5;
+}
+.context-log:last-child { border-bottom: none; }
+.ctx-ts { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); flex-shrink: 0; width: 60px; padding-top: 1px; }
+.ctx-badge { flex-shrink: 0; }
+.ctx-msg { color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ─── AI Chat ─── */
+.chat-divider {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text-muted);
+  margin: 18px 0 12px;
+}
+.chat-divider::before, .chat-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+.chat-messages { display: flex; flex-direction: column; gap: 10px; padding-bottom: 6px; }
+.chat-msg { display: flex; flex-direction: column; gap: 3px; }
+.chat-msg-user { align-items: flex-end; }
+.chat-msg-ai   { align-items: flex-start; }
+.chat-sender   { font-size: 10.5px; color: var(--text-muted); padding: 0 4px; }
+.chat-bubble {
+  max-width: 88%; padding: 8px 12px;
+  font-size: 12.5px; line-height: 1.65;
+}
+.chat-bubble-user {
+  background: var(--accent); color: white;
+  border-radius: 12px 12px 3px 12px;
+}
+.chat-bubble-ai {
+  background: var(--surface-alt); border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 3px 12px 12px 12px;
+}
+.chat-typing-bubble {
+  background: var(--surface-alt); border: 1px solid var(--border);
+  border-radius: 3px 12px 12px 12px;
+  padding: 10px 14px; display: flex; gap: 4px; align-items: center;
+}
+.chat-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--text-muted);
+  animation: chatBounce 1.2s ease-in-out infinite;
+}
+.chat-dot:nth-child(2) { animation-delay: 0.2s; }
+.chat-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes chatBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+.ai-disclaimer {
+  display: none; align-items: flex-start; gap: 7px;
+  padding: 7px 14px;
+  background: var(--surface-alt);
+  border-top: 1px solid var(--border-light);
+  font-size: 11px; line-height: 1.55;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.ai-disclaimer.visible { display: flex; }
+.ai-disclaimer svg { flex-shrink: 0; margin-top: 1px; opacity: 0.55; }
+.ai-disclaimer-sep { color: var(--border); margin: 0 4px; }
+
+.chat-input-bar {
+  display: none; align-items: center; gap: 8px;
+  padding: 8px 14px; border-top: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+.chat-input-bar.visible { display: flex; }
+.chat-text-input {
+  flex: 1; background: var(--surface-alt);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 6px 10px; font-family: var(--font-ui);
+  font-size: 12.5px; color: var(--text-primary); outline: none;
+  transition: border-color var(--transition);
+}
+.chat-text-input:focus { border-color: var(--accent); }
+.chat-text-input::placeholder { color: var(--text-muted); }
+
+/* ─── System Info View ─── */
+.sysinfo-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px; padding: 20px;
+  overflow-y: auto;
+}
+.si-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.si-card-full { grid-column: 1 / -1; }
+.si-card-header {
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  display: flex; align-items: center; gap: 7px;
+}
+.si-card-header svg { width: 14px; height: 14px; color: var(--accent); }
+.si-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 8px 14px; font-size: 12.5px;
+}
+.si-row + .si-row { border-top: 1px solid var(--border-light); }
+.si-key { color: var(--text-secondary); flex-shrink: 0; }
+.si-val { font-family: var(--font-mono); font-size: 12px; color: var(--text-primary); text-align: right; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.si-ip-list { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; }
+
+/* GPU sub-group inside GPU card */
+.gpu-group { }
+.gpu-group + .gpu-group { border-top: 2px solid var(--border); }
+.gpu-group-label {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-muted);
+  padding: 6px 14px 0; background: var(--surface-alt);
+  border-bottom: 1px solid var(--border-light);
+  display: flex; align-items: center; gap: 6px;
+}
+.gpu-group-label span {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); opacity: 0.7;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ─── Resize Handles ─── */
+.sidebar-resize-handle {
+  position: absolute;
+  right: -3px; top: 0; bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 30;
+  border-radius: 3px;
+  transition: background var(--transition);
+}
+.sidebar-resize-handle::after {
+  content: '';
+  position: absolute;
+  left: 2px; top: 50%; transform: translateY(-50%);
+  width: 2px; height: 32px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background var(--transition), height var(--transition);
+}
+.sidebar-resize-handle:hover::after,
+.sidebar-resize-handle.is-dragging::after {
+  background: var(--accent);
+  height: 48px;
+}
+
+.detail-resize-handle {
+  height: 5px;
+  flex-shrink: 0;
+  cursor: row-resize;
+  background: var(--border);
+  position: relative;
+  transition: background var(--transition);
+}
+.detail-resize-handle::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px; height: 2px;
+  border-radius: 2px;
+  background: var(--text-muted);
+  opacity: 0.5;
+  transition: width var(--transition), opacity var(--transition);
+}
+.detail-resize-handle:hover,
+.detail-resize-handle.is-dragging {
+  background: var(--accent-light);
+}
+.detail-resize-handle:hover::after,
+.detail-resize-handle.is-dragging::after {
+  background: var(--accent);
+  width: 48px;
+  opacity: 1;
+}
+
+/* Status bar */
+.statusbar {
+  height: 24px; flex-shrink: 0;
+  background: var(--accent);
+  display: flex; align-items: center;
+  padding: 0 14px; gap: 16px;
+}
+.sb-item {
+  font-size: 11.5px; color: rgba(255,255,255,0.9);
+  display: flex; align-items: center; gap: 5px;
+}
+.sb-dot { width: 5px; height: 5px; border-radius: 50%; background: #7fffb0; }
+</style>
+</head>
+<body>
+
+<!-- Title Bar -->
+<div class="titlebar">
+  <div class="tb-icon">
+    <svg viewBox="0 0 16 16"><path d="M8 1L1 4v4c0 4 3.5 7 7 8 3.5-1 7-4 7-8V4L8 1z"/></svg>
+  </div>
+  <span class="tb-title">WinSentryAI</span>
+  <div class="tb-pills">
+    <span class="pill pill-local"><span class="pill-dot"></span>本機</span>
+    <span class="pill pill-monitor"><span class="pill-dot"></span>監控中</span>
+  </div>
+  <div class="tb-right">
+    <button class="tb-btn" onclick="switchMode()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      連線至遠端
+    </button>
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="切換主題">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-resize-handle" id="sidebar-handle"></div>
+    <div class="nav-label">檢視</div>
+    <div class="nav-item active" onclick="showView('events', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      事件日誌
+      <span class="nav-badge">12</span>
+    </div>
+    <div class="nav-item" onclick="showView('sysinfo', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M6 8h.01M6 12h.01"/></svg>
+      系統資訊
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-item settings-link" onclick="alert('開啟設定頁')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      設定
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- ═══ Event Log View ═══ -->
+    <div id="view-events" class="view active">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="filter-chips">
+          <button class="chip active" onclick="filterChip(this,'all')">全部</button>
+          <button class="chip chip-crit" onclick="filterChip(this,'crit')"><span class="chip-dot"></span>嚴重</button>
+          <button class="chip chip-err"  onclick="filterChip(this,'err')"><span class="chip-dot"></span>錯誤</button>
+          <button class="chip chip-warn" onclick="filterChip(this,'warn')"><span class="chip-dot"></span>警告</button>
+        </div>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="搜尋事件來源、訊息…">
+        </div>
+        <div class="tb-spacer"></div>
+        <button class="btn btn-secondary" onclick="simulateNewEvent()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          重新整理
+        </button>
+      </div>
+
+      <!-- Event Table -->
+      <div class="event-list-wrap">
+        <table class="event-table">
+          <thead>
+            <tr>
+              <th style="width:120px">時間 ↓</th>
+              <th style="width:80px">等級</th>
+              <th style="width:130px">來源</th>
+              <th style="width:70px">事件ID</th>
+              <th>訊息</th>
+              <th style="width:80px">AI</th>
+            </tr>
+          </thead>
+          <tbody id="event-tbody">
+            <tr class="event-row selected" onclick="selectEvent(this,0)">
+              <td><span class="ts">09:42:31</span></td>
+              <td><span class="badge badge-critical">CRITICAL</span></td>
+              <td class="src">Kernel-Power</td>
+              <td class="eid">41</td>
+              <td class="msg-cell">The system has rebooted without cleanly shutting down first.</td>
+              <td><span style="font-size:11px;color:var(--success)">✓ 已分析</span></td>
+            </tr>
+            <tr class="event-row" onclick="selectEvent(this,1)">
+              <td><span class="ts">09:38:14</span></td>
+              <td><span class="badge badge-error">ERROR</span></td>
+              <td class="src">Application Error</td>
+              <td class="eid">1000</td>
+              <td class="msg-cell">Faulting application name: svchost.exe, version: 10.0.26100.1, time stamp: 0x...</td>
+              <td><span style="font-size:11px;color:var(--text-muted)">—</span></td>
+            </tr>
+            <tr class="event-row" onclick="selectEvent(this,2)">
+              <td><span class="ts">09:35:07</span></td>
+              <td><span class="badge badge-warning">WARNING</span></td>
+              <td class="src">Disk</td>
+              <td class="eid">51</td>
+              <td class="msg-cell">An error was detected on device \Device\Harddisk0\DR0 during a paging operation.</td>
+              <td><span style="font-size:11px;color:var(--text-muted)">—</span></td>
+            </tr>
+            <tr class="event-row" onclick="selectEvent(this,3)">
+              <td><span class="ts">09:31:55</span></td>
+              <td><span class="badge badge-error">ERROR</span></td>
+              <td class="src">DCOM</td>
+              <td class="eid">10016</td>
+              <td class="msg-cell">The application-specific permission settings do not grant Local Activation...</td>
+              <td><span style="font-size:11px;color:var(--text-muted)">—</span></td>
+            </tr>
+            <tr class="event-row" onclick="selectEvent(this,4)">
+              <td><span class="ts">09:28:44</span></td>
+              <td><span class="badge badge-warning">WARNING</span></td>
+              <td class="src">Windows Update</td>
+              <td class="eid">20</td>
+              <td class="msg-cell">Installation Failure: Windows failed to install the following update with error 0x80070643.</td>
+              <td><span style="font-size:11px;color:var(--text-muted)">—</span></td>
+            </tr>
+            <tr class="event-row" onclick="selectEvent(this,5)">
+              <td><span class="ts">09:21:18</span></td>
+              <td><span class="badge badge-error">ERROR</span></td>
+              <td class="src">NTFS</td>
+              <td class="eid">55</td>
+              <td class="msg-cell">The file system structure on the disk is corrupt and unusable. Please run the chkdsk utility.</td>
+              <td><span style="font-size:11px;color:var(--text-muted)">—</span></td>
+            </tr>
+            <tr class="event-row" onclick="selectEvent(this,6)">
+              <td><span class="ts">09:14:03</span></td>
+              <td><span class="badge badge-warning">WARNING</span></td>
+              <td class="src">Security-SPP</td>
+              <td class="eid">903</td>
+              <td class="msg-cell">The Software Protection service has stopped.</td>
+              <td><span style="font-size:11px;color:var(--text-muted)">—</span></td>
+            </tr>
+            <tr class="event-row" onclick="selectEvent(this,7)">
+              <td><span class="ts">08:59:32</span></td>
+              <td><span class="badge badge-critical">CRITICAL</span></td>
+              <td class="src">Kernel-Power</td>
+              <td class="eid">41</td>
+              <td class="msg-cell">The system has rebooted without cleanly shutting down first. BugcheckCode: 0x0000007E.</td>
+              <td><span style="font-size:11px;color:var(--text-muted)">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Detail Panel -->
+      <div class="detail-panel">
+        <div class="detail-resize-handle" id="detail-handle"></div>
+        <div class="detail-tabs">
+          <div class="detail-tab active" onclick="showDetailTab('raw',this)">事件詳細</div>
+          <div class="detail-tab" onclick="showDetailTab('ai',this)">
+            AI 分析
+            <span id="ai-badge" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--success);color:white;font-size:10px;font-weight:700;border-radius:50%;margin-left:5px">✓</span>
+          </div>
+          <div class="detail-tab" onclick="showDetailTab('ctx',this)">上下文事件 <span style="font-size:11px;color:var(--text-muted)">(8)</span></div>
+          <div class="detail-actions">
+            <button class="btn btn-ai" id="ai-btn" onclick="runAI()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              AI 分析
+            </button>
+          </div>
+        </div>
+        <div class="detail-body">
+
+          <!-- Raw Event -->
+          <div id="tab-raw" class="detail-pane active">
+            <div class="detail-grid" id="detail-grid">
+              <span class="detail-key">時間</span>       <span class="detail-val">2026-04-25 09:42:31</span>
+              <span class="detail-key">等級</span>       <span class="detail-val"><span class="badge badge-critical">CRITICAL</span></span>
+              <span class="detail-key">來源</span>       <span class="detail-val">System</span>
+              <span class="detail-key">提供者</span>     <span class="detail-val">Microsoft-Windows-Kernel-Power</span>
+              <span class="detail-key">事件 ID</span>    <span class="detail-val">41</span>
+              <span class="detail-key">電腦</span>       <span class="detail-val">DESKTOP-IT001</span>
+            </div>
+            <div class="detail-msg" id="detail-msg">The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.
+
+BugcheckCode      : 0
+BugcheckParameter1: 0x0
+BugcheckParameter2: 0x0
+BugcheckParameter3: 0x0
+SleepInProgress   : 0
+PowerButtonTimestamp: 0</div>
+          </div>
+
+          <!-- AI Analysis — flex column: scrollable content + pinned chat input -->
+          <div id="tab-ai" class="detail-pane ai-pane">
+
+            <!-- Scrollable area: analysis result + chat history -->
+            <div class="ai-scroll-area" id="ai-scroll-area">
+              <div class="ai-loading" id="ai-loading">
+                <div class="ai-spinner"></div>
+                正在呼叫 Gemini 分析中…
+              </div>
+              <div class="ai-empty" id="ai-empty" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <p>點擊「AI 分析」按鈕開始分析此事件</p>
+              </div>
+              <div class="ai-result visible" id="ai-result">
+                <div class="ai-section">
+                  <div class="ai-section-title">Summary</div>
+                  <div class="ai-section-body">系統發生非正常關機，可能為電源中斷、硬體錯誤或核心崩潰（BSOD）所致。</div>
+                </div>
+                <div class="ai-section">
+                  <div class="ai-section-title">Possible Causes</div>
+                  <div class="ai-section-body"><ol>
+                    <li>電源供應器（PSU）不穩定或突然斷電，導致系統未正常關機</li>
+                    <li>記憶體（RAM）故障或過熱，觸發 Windows 保護性重啟</li>
+                    <li>驅動程式衝突或核心錯誤（BugcheckCode 為 0 表示無完整 dump，可能為硬體斷電）</li>
+                  </ol></div>
+                </div>
+                <div class="ai-section">
+                  <div class="ai-section-title">Recommended Actions</div>
+                  <div class="ai-section-body"><ol>
+                    <li>執行 <code style="font-family:var(--font-mono);font-size:11.5px;background:var(--surface-alt);padding:1px 5px;border-radius:3px">eventvwr.msc</code> 查看同時段是否有 Disk (51) 或 NTFS (55) 錯誤，確認磁碟健康狀態</li>
+                    <li>執行 <code style="font-family:var(--font-mono);font-size:11.5px;background:var(--surface-alt);padding:1px 5px;border-radius:3px">sfc /scannow</code> 和 <code style="font-family:var(--font-mono);font-size:11.5px;background:var(--surface-alt);padding:1px 5px;border-radius:3px">chkdsk C: /f /r</code> 檢查系統檔案完整性</li>
+                    <li>以 MemTest86 進行記憶體壓力測試（建議執行 2 小時以上）</li>
+                    <li>檢查 Windows 小型傾印（<code style="font-family:var(--font-mono);font-size:11.5px;background:var(--surface-alt);padding:1px 5px;border-radius:3px">%SystemRoot%\Minidump</code>）是否有 .dmp 檔案</li>
+                  </ol></div>
+                </div>
+                <div class="ai-section">
+                  <div class="ai-section-title">Severity</div>
+                  <div class="ai-section-body"><span class="severity-badge sev-high">High</span> &nbsp;—&nbsp; 非正常關機可能造成資料遺失或磁碟損毀，需盡快排查根本原因。</div>
+                </div>
+                <div class="ai-section">
+                  <div class="ai-section-title">Additional Information Needed</div>
+                  <div class="ai-section-body">提供 <code style="font-family:var(--font-mono);font-size:11.5px;background:var(--surface-alt);padding:1px 5px;border-radius:3px">%SystemRoot%\Minidump</code> 目錄內容，以及前後 5 分鐘的 System 與 Hardware Events。</div>
+                </div>
+
+                <!-- Chat history appended here -->
+                <div class="chat-divider" id="chat-divider">繼續詢問 AI</div>
+                <div id="chat-messages" class="chat-messages"></div>
+              </div><!-- /ai-result -->
+            </div><!-- /ai-scroll-area -->
+
+            <!-- Disclaimer bar (visible when AI result exists) -->
+            <div class="ai-disclaimer visible" id="ai-disclaimer">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>AI 分析結果僅供輔助診斷參考，不構成任何技術保證；依據建議執行操作前，請由 IT 人員自行評估風險。<span class="ai-disclaimer-sep">·</span>使用雲端 AI 服務（Gemini / OpenAI）時，請留意 API 使用量，以避免超出配額或產生非預期費用。</span>
+            </div>
+
+            <!-- Pinned chat input bar (visible when AI result exists) -->
+            <div class="chat-input-bar visible" id="chat-input-bar">
+              <input
+                type="text"
+                id="chat-input"
+                class="chat-text-input"
+                placeholder="針對此事件繼續詢問 AI…（Enter 傳送）"
+                onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendChat(); }"
+              >
+              <button class="btn btn-ai btn-sm" onclick="sendChat()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                傳送
+              </button>
+            </div>
+
+          </div><!-- /tab-ai -->
+
+          <!-- Context -->
+          <div id="tab-ctx" class="detail-pane">
+            <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:10px;">事件時間前後 ±1 分鐘的關聯日誌（共 8 筆）</div>
+            <div class="context-log"><span class="ctx-ts">09:41:18</span><span class="ctx-badge"><span class="badge badge-info">INFO</span></span><span class="ctx-msg">Service Control Manager (7036): The Windows Update service entered the running state.</span></div>
+            <div class="context-log"><span class="ctx-ts">09:41:44</span><span class="ctx-badge"><span class="badge badge-warning">WARN</span></span><span class="ctx-msg">Disk (51): An error was detected on \Device\Harddisk0\DR0 during a paging operation.</span></div>
+            <div class="context-log"><span class="ctx-ts">09:42:01</span><span class="ctx-badge"><span class="badge badge-error">ERR</span></span><span class="ctx-msg">NTFS (55): The file system structure on the disk is corrupt and unusable.</span></div>
+            <div class="context-log"><span class="ctx-ts">09:42:31</span><span class="ctx-badge"><span class="badge badge-critical">CRIT</span></span><span class="ctx-msg">Kernel-Power (41): The system has rebooted without cleanly shutting down first. ◀ 觸發事件</span></div>
+            <div class="context-log"><span class="ctx-ts">09:43:05</span><span class="ctx-badge"><span class="badge badge-info">INFO</span></span><span class="ctx-msg">EventLog (6013): The system uptime is 432 seconds.</span></div>
+            <div class="context-log"><span class="ctx-ts">09:43:08</span><span class="ctx-badge"><span class="badge badge-info">INFO</span></span><span class="ctx-msg">Kernel-General (12): The operating system started at system time 2026‑04‑25T01:42:31Z.</span></div>
+            <div class="context-log"><span class="ctx-ts">09:43:11</span><span class="ctx-badge"><span class="badge badge-warning">WARN</span></span><span class="ctx-msg">Volsnap (36): The shadow copies of volume C: were deleted because the shadow copy storage could not grow.</span></div>
+            <div class="context-log"><span class="ctx-ts">09:43:22</span><span class="ctx-badge"><span class="badge badge-info">INFO</span></span><span class="ctx-msg">Security-SPP (1073751949): Offline downlevel migration succeeded.</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ System Info View ═══ -->
+    <div id="view-sysinfo" class="view">
+      <div class="toolbar">
+        <span style="font-size:13px;font-weight:600;color:var(--text-primary)">系統環境資訊</span>
+        <div class="tb-spacer"></div>
+        <span style="font-size:11.5px;color:var(--text-muted)">擷取時間：2026-04-25 09:43:22</span>
+        <button class="btn btn-secondary">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          重新整理
+        </button>
+      </div>
+      <div class="sysinfo-grid">
+
+        <!-- OS -->
+        <div class="si-card">
+          <div class="si-card-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            作業系統
+          </div>
+          <div class="si-row"><span class="si-key">版本</span><span class="si-val">Windows 11 Pro</span></div>
+          <div class="si-row"><span class="si-key">Build</span><span class="si-val">26100.3775 (24H2)</span></div>
+          <div class="si-row"><span class="si-key">架構</span><span class="si-val">x64</span></div>
+          <div class="si-row"><span class="si-key">安裝日期</span><span class="si-val">2025-08-14</span></div>
+        </div>
+
+        <!-- Host Identity -->
+        <div class="si-card">
+          <div class="si-card-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            主機識別
+          </div>
+          <div class="si-row"><span class="si-key">電腦名稱</span><span class="si-val">DESKTOP-IT001</span></div>
+          <div class="si-row"><span class="si-key">網域</span><span class="si-val">CORP.LOCAL</span></div>
+          <div class="si-row"><span class="si-key">工作群組</span><span class="si-val">—</span></div>
+          <div class="si-row"><span class="si-key">使用者</span><span class="si-val">administrator</span></div>
+        </div>
+
+        <!-- Network -->
+        <div class="si-card">
+          <div class="si-card-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            網路
+          </div>
+          <div class="si-row"><span class="si-key">IP 位址</span>
+            <span class="si-val">
+              <div class="si-ip-list">
+                <span>192.168.1.105</span>
+                <span>10.0.0.42</span>
+              </div>
+            </span>
+          </div>
+          <div class="si-row"><span class="si-key">閘道</span><span class="si-val">192.168.1.1</span></div>
+          <div class="si-row"><span class="si-key">DNS</span><span class="si-val">192.168.1.1 / 8.8.8.8</span></div>
+        </div>
+
+        <!-- CPU / RAM -->
+        <div class="si-card">
+          <div class="si-card-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+            處理器 / 記憶體
+          </div>
+          <div class="si-row"><span class="si-key">CPU</span><span class="si-val">Intel Core i7-1355U</span></div>
+          <div class="si-row"><span class="si-key">核心數</span><span class="si-val">10C / 12T @ 3.70 GHz</span></div>
+          <div class="si-row"><span class="si-key">記憶體</span><span class="si-val">16,384 MB DDR5</span></div>
+          <div class="si-row"><span class="si-key">磁碟 C:</span><span class="si-val">512 GB SSD (剩餘 187 GB)</span></div>
+        </div>
+
+        <!-- GPU — full width, supports multiple cards -->
+        <div class="si-card si-card-full">
+          <div class="si-card-header">
+            <!-- GPU icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="6" width="22" height="12" rx="2"/>
+              <path d="M6 6V4M10 6V4M14 6V4M18 6V4"/>
+              <path d="M6 18v2M10 18v2M14 18v2M18 18v2"/>
+              <rect x="5" y="9" width="4" height="6" rx="1"/>
+              <rect x="15" y="9" width="4" height="6" rx="1"/>
+            </svg>
+            顯示卡 (GPU)
+          </div>
+
+          <!-- GPU 0 -->
+          <div class="gpu-group">
+            <div class="gpu-group-label"><span></span>GPU 0 · 獨立顯示卡</div>
+            <div class="si-row"><span class="si-key">型號</span><span class="si-val">NVIDIA GeForce RTX 4060 Laptop GPU</span></div>
+            <div class="si-row"><span class="si-key">顯示記憶體</span><span class="si-val">8,192 MB GDDR6</span></div>
+            <div class="si-row"><span class="si-key">驅動版本</span><span class="si-val">566.36 (WDDM 3.1)</span></div>
+            <div class="si-row"><span class="si-key">DirectX</span><span class="si-val">DirectX 12 Ultimate</span></div>
+          </div>
+
+          <!-- GPU 1 -->
+          <div class="gpu-group">
+            <div class="gpu-group-label"><span></span>GPU 1 · 整合顯示卡</div>
+            <div class="si-row"><span class="si-key">型號</span><span class="si-val">Intel Iris Xe Graphics (96EU)</span></div>
+            <div class="si-row"><span class="si-key">顯示記憶體</span><span class="si-val">共享記憶體（最大 8,192 MB）</span></div>
+            <div class="si-row"><span class="si-key">驅動版本</span><span class="si-val">31.0.101.5084 (WDDM 3.0)</span></div>
+            <div class="si-row"><span class="si-key">DirectX</span><span class="si-val">DirectX 12</span></div>
+          </div>
+
+        </div><!-- /GPU card -->
+
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Status Bar -->
+<div class="statusbar">
+  <div class="sb-item"><span class="sb-dot"></span>即時監控中</div>
+  <div class="sb-item">本機 · DESKTOP-IT001</div>
+  <div class="sb-item" id="sb-count">事件：12 筆（今日開機後）</div>
+  <div class="sb-item" style="margin-left:auto">Gemini 1.5 Pro · 繁體中文</div>
+</div>
+
+<script>
+// ── View switching ──
+function showView(id, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── Theme ──
+function toggleTheme() {
+  const html = document.documentElement;
+  html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+// ── Filter chips ──
+function filterChip(btn, type) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Select event row ──
+const eventData = [
+  { ts:'2026-04-25 09:42:31', level:'CRITICAL', levelClass:'badge-critical', source:'System', provider:'Microsoft-Windows-Kernel-Power', eid:'41', host:'DESKTOP-IT001',
+    msg:`The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.\n\nBugcheckCode      : 0\nBugcheckParameter1: 0x0\nBugcheckParameter2: 0x0\nBugcheckParameter3: 0x0\nSleepInProgress   : 0\nPowerButtonTimestamp: 0`, hasAI: true },
+  { ts:'2026-04-25 09:38:14', level:'ERROR', levelClass:'badge-error', source:'Application', provider:'Application Error', eid:'1000', host:'DESKTOP-IT001',
+    msg:`Faulting application name: svchost.exe, version: 10.0.26100.1, time stamp: 0x65e3a2f1\nFaulting module name: ntdll.dll, version: 10.0.26100.1, time stamp: 0x65e3a2ee\nException code: 0xc0000005\nFault offset: 0x00000000000f6ab3\nFaulting process id: 0x1a4c\nFaulting application start time: 0x01da9f3b2c4e8d20`, hasAI: false },
+  { ts:'2026-04-25 09:35:07', level:'WARNING', levelClass:'badge-warning', source:'System', provider:'Disk', eid:'51', host:'DESKTOP-IT001',
+    msg:`An error was detected on device \\Device\\Harddisk0\\DR0 during a paging operation.\n\nThis may indicate a hardware problem with the disk or the disk controller. Please check your disk health using diagnostic tools.`, hasAI: false },
+  { ts:'2026-04-25 09:31:55', level:'ERROR', levelClass:'badge-error', source:'System', provider:'DCOM', eid:'10016', host:'DESKTOP-IT001',
+    msg:`The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID {D63B10C5-BB46-4990-A94F-E40B9D520160} and APPID {9CA88EE3-ACB7-47C8-AFC4-AB702511C276} to the user NT AUTHORITY\\LOCAL SERVICE SID (S-1-5-19).`, hasAI: false },
+  { ts:'2026-04-25 09:28:44', level:'WARNING', levelClass:'badge-warning', source:'System', provider:'Windows Update', eid:'20', host:'DESKTOP-IT001',
+    msg:`Installation Failure: Windows failed to install the following update with error 0x80070643:\nSecurity Update for Microsoft Defender Antivirus antimalware platform - KB4052623 (Version 4.18.24090.11)`, hasAI: false },
+  { ts:'2026-04-25 09:21:18', level:'ERROR', levelClass:'badge-error', source:'System', provider:'NTFS', eid:'55', host:'DESKTOP-IT001',
+    msg:`The file system structure on the disk is corrupt and unusable. Please run the chkdsk utility on the volume \\Device\\HarddiskVolume3.\n\nDevice: \\Device\\HarddiskVolume3\nDrive: C:\nVolume ID: {b4c3d2e1-f0a9-4b2c-8d5e-1a2b3c4d5e6f}`, hasAI: false },
+  { ts:'2026-04-25 09:14:03', level:'WARNING', levelClass:'badge-warning', source:'System', provider:'Security-SPP', eid:'903', host:'DESKTOP-IT001',
+    msg:'The Software Protection service has stopped. Please check the service status.', hasAI: false },
+  { ts:'2026-04-25 08:59:32', level:'CRITICAL', levelClass:'badge-critical', source:'System', provider:'Microsoft-Windows-Kernel-Power', eid:'41', host:'DESKTOP-IT001',
+    msg:`The system has rebooted without cleanly shutting down first.\n\nBugcheckCode      : 0x0000007E\nBugcheckParameter1: 0xffffffffc0000005\nBugcheckParameter2: 0xfffff8047a2c1234\nBugcheckParameter3: 0xffffd20012345678\nBugcheckParameter4: 0xffffd20012345000`, hasAI: false },
+];
+
+let currentRow = 0;
+
+function selectEvent(row, idx) {
+  document.querySelectorAll('.event-row').forEach(r => r.classList.remove('selected'));
+  row.classList.add('selected');
+  currentRow = idx;
+  const e = eventData[idx];
+
+  // Update detail grid
+  document.getElementById('detail-grid').innerHTML = `
+    <span class="detail-key">時間</span><span class="detail-val">${e.ts}</span>
+    <span class="detail-key">等級</span><span class="detail-val"><span class="badge ${e.levelClass}">${e.level}</span></span>
+    <span class="detail-key">來源</span><span class="detail-val">${e.source}</span>
+    <span class="detail-key">提供者</span><span class="detail-val">${e.provider}</span>
+    <span class="detail-key">事件 ID</span><span class="detail-val">${e.eid}</span>
+    <span class="detail-key">電腦</span><span class="detail-val">${e.host}</span>
+  `;
+  document.getElementById('detail-msg').textContent = e.msg;
+
+  // Update AI pane
+  const badge    = document.getElementById('ai-badge');
+  const empty    = document.getElementById('ai-empty');
+  const result   = document.getElementById('ai-result');
+  const loading  = document.getElementById('ai-loading');
+  const inputBar   = document.getElementById('chat-input-bar');
+  const disclaimer = document.getElementById('ai-disclaimer');
+
+  loading.classList.remove('visible');
+  // Clear chat history when switching events
+  document.getElementById('chat-messages').innerHTML = '';
+
+  if (e.hasAI) {
+    empty.style.display = 'none';
+    result.classList.add('visible');
+    badge.style.display = 'inline-flex';
+    disclaimer.classList.add('visible');
+    inputBar.classList.add('visible');
+  } else {
+    result.classList.remove('visible');
+    empty.style.display = 'flex';
+    badge.style.display = 'none';
+    disclaimer.classList.remove('visible');
+    inputBar.classList.remove('visible');
+  }
+
+  // Back to raw tab
+  showDetailTab('raw', document.querySelector('.detail-tab'));
+}
+
+// ── Detail tabs ──
+function showDetailTab(id, el) {
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.detail-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── AI analysis simulation ──
+function runAI() {
+  const btn      = document.getElementById('ai-btn');
+  const loading  = document.getElementById('ai-loading');
+  const empty    = document.getElementById('ai-empty');
+  const result   = document.getElementById('ai-result');
+  const badge    = document.getElementById('ai-badge');
+  const inputBar   = document.getElementById('chat-input-bar');
+  const disclaimer = document.getElementById('ai-disclaimer');
+
+  // Switch to AI tab
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.detail-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.detail-tab')[1].classList.add('active');
+  document.getElementById('tab-ai').classList.add('active');
+
+  empty.style.display = 'none';
+  result.classList.remove('visible');
+  loading.classList.add('visible');
+  disclaimer.classList.remove('visible');
+  inputBar.classList.remove('visible');
+  btn.disabled = true;
+
+  setTimeout(() => {
+    loading.classList.remove('visible');
+    result.classList.add('visible');
+    badge.style.display = 'inline-flex';
+    disclaimer.classList.add('visible');
+    inputBar.classList.add('visible');
+    btn.disabled = false;
+    eventData[currentRow].hasAI = true;
+
+    // Update table cell
+    const rows = document.querySelectorAll('.event-row');
+    rows[currentRow].querySelectorAll('td')[5].innerHTML =
+      '<span style="font-size:11px;color:var(--success)">✓ 已分析</span>';
+
+    // Focus the chat input
+    document.getElementById('chat-input').focus();
+  }, 2200);
+}
+
+// ── AI Chat ──
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const chatSimResponses = [
+  '根據您的補充，這進一步指向電源供應器（PSU）穩壓問題。建議使用 HWiNFO64 監控 12V 電壓軌道，正常範圍應在 11.4V–12.6V 之間；若電壓頻繁跌落至 11V 以下，建議更換 PSU。',
+  '您提到的情況與磁碟 I/O 壓力下的異常相符。根據上下文事件，Disk (51) 出現在 Kernel-Power (41) 之前，這強烈暗示是磁碟子系統故障引發當機，而非電源問題。建議優先執行 <code style="font-family:var(--font-mono);font-size:11px;background:var(--surface-alt);padding:1px 4px;border-radius:2px">CrystalDiskInfo</code> 確認硬碟 S.M.A.R.T. 數值。',
+  '這是個很好的問題。BugcheckCode 為 0 通常代表系統未能記錄完整的 dump，最常見於硬體強制斷電。如果您有 UPS（不斷電系統），建議查看 UPS 管理軟體的事件記錄，確認當時是否有電源切換事件。',
+  '根據您描述的頻率（每週數次），這排除了偶發性的電力波動，指向更持續性的硬體問題。建議依序排查：① 重新插拔所有記憶體條 ② 更換 SATA / NVMe 連接線 ③ 若以上無效，考慮更換主機板電容已老化的 PSU。',
+  '您提到最近更新了顯卡驅動程式，這是個重要線索。部分 NVIDIA 驅動版本（尤其是 560.x 系列）在特定平台上有已知的電源管理問題，建議回退至 546.33 或更新至最新的 566.36 並觀察。',
+];
+let chatResponseIdx = 0;
+
+function sendChat() {
+  const input    = document.getElementById('chat-input');
+  const messages = document.getElementById('chat-messages');
+  const scroll   = document.getElementById('ai-scroll-area');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  input.disabled = true;
+
+  // User bubble
+  const userEl = document.createElement('div');
+  userEl.className = 'chat-msg chat-msg-user';
+  userEl.innerHTML = `
+    <span class="chat-sender">您</span>
+    <div class="chat-bubble chat-bubble-user">${escapeHtml(msg)}</div>
+  `;
+  messages.appendChild(userEl);
+  scroll.scrollTop = scroll.scrollHeight;
+
+  // Typing indicator
+  const typingEl = document.createElement('div');
+  typingEl.className = 'chat-msg chat-msg-ai';
+  typingEl.innerHTML = `
+    <span class="chat-sender">Gemini 1.5 Pro</span>
+    <div class="chat-typing-bubble">
+      <div class="chat-dot"></div>
+      <div class="chat-dot"></div>
+      <div class="chat-dot"></div>
+    </div>
+  `;
+  messages.appendChild(typingEl);
+  scroll.scrollTop = scroll.scrollHeight;
+
+  // Simulated AI response after ~1.4s
+  setTimeout(() => {
+    messages.removeChild(typingEl);
+    const resp = chatSimResponses[chatResponseIdx % chatSimResponses.length];
+    chatResponseIdx++;
+    const aiEl = document.createElement('div');
+    aiEl.className = 'chat-msg chat-msg-ai';
+    aiEl.innerHTML = `
+      <span class="chat-sender">Gemini 1.5 Pro</span>
+      <div class="chat-bubble chat-bubble-ai">${resp}</div>
+    `;
+    messages.appendChild(aiEl);
+    scroll.scrollTop = scroll.scrollHeight;
+    input.disabled = false;
+    input.focus();
+  }, 1400);
+}
+
+// ── Simulate new event ──
+function simulateNewEvent() {
+  const tbody = document.getElementById('event-tbody');
+  const newRow = document.createElement('tr');
+  newRow.className = 'event-row';
+  newRow.style.animation = 'fadeIn 0.3s ease';
+  newRow.style.background = 'var(--warn-bg)';
+  newRow.innerHTML = `
+    <td><span class="ts">${new Date().toTimeString().slice(0,8)}</span></td>
+    <td><span class="badge badge-warning">WARNING</span></td>
+    <td class="src">Service Control Manager</td>
+    <td class="eid">7034</td>
+    <td class="msg-cell">The Windows Search service terminated unexpectedly. It has done this 1 time(s).</td>
+    <td><span style="font-size:11px;color:var(--text-muted)">—</span></td>
+  `;
+  const idx = eventData.length;
+  eventData.push({ ts: new Date().toISOString().replace('T',' ').slice(0,19), level:'WARNING', levelClass:'badge-warning', source:'System', provider:'Service Control Manager', eid:'7034', host:'DESKTOP-IT001', msg:'The Windows Search service terminated unexpectedly. It has done this 1 time(s).', hasAI: false });
+  newRow.onclick = () => selectEvent(newRow, idx);
+  tbody.insertBefore(newRow, tbody.firstChild);
+  setTimeout(() => newRow.style.background = '', 1200);
+
+  const cnt = document.getElementById('sb-count');
+  const n = parseInt(cnt.textContent.match(/\d+/)[0]) + 1;
+  cnt.textContent = `事件：${n} 筆（今日開機後）`;
+  const badge = document.querySelector('.nav-badge');
+  badge.textContent = n;
+}
+
+// ── Sidebar resize ──
+(function () {
+  const handle  = document.getElementById('sidebar-handle');
+  const sidebar = document.querySelector('.sidebar');
+  const MIN_W = 120, MAX_W = 320;
+  let dragging = false;
+
+  handle.addEventListener('mousedown', e => {
+    dragging = true;
+    handle.classList.add('is-dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const w = Math.max(MIN_W, Math.min(MAX_W, e.clientX));
+    sidebar.style.width = w + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('is-dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+})();
+
+// ── Detail panel resize ──
+(function () {
+  const handle      = document.getElementById('detail-handle');
+  const detailPanel = document.querySelector('.detail-panel');
+  const view        = document.getElementById('view-events');
+  const MIN_DETAIL  = 100;   // min detail panel height (px)
+  const MIN_LIST    = 120;   // min event list height (px)
+  let dragging = false;
+
+  handle.addEventListener('mousedown', e => {
+    dragging = true;
+    handle.classList.add('is-dragging');
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const viewRect   = view.getBoundingClientRect();
+    const maxDetail  = viewRect.height - MIN_LIST;
+    const newDetail  = Math.max(MIN_DETAIL, Math.min(maxDetail, viewRect.bottom - e.clientY));
+    detailPanel.style.height = newDetail + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('is-dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+})();
+
+// ── Remote mode toggle ──
+function switchMode() {
+  const pill = document.querySelector('.pill-local, .pill-remote');
+  const btn = document.querySelector('.tb-btn');
+  if (pill.classList.contains('pill-local')) {
+    pill.className = 'pill pill-remote';
+    pill.innerHTML = '<span class="pill-dot"></span>遠端 · SERVER01';
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> 切換至本機`;
+    document.getElementById('sb-count').textContent = '事件：遠端模式 · SERVER01';
+  } else {
+    pill.className = 'pill pill-local';
+    pill.innerHTML = '<span class="pill-dot"></span>本機';
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> 連線至遠端`;
+    document.getElementById('sb-count').textContent = '事件：12 筆（今日開機後）';
+  }
+}
+</script>
+</body>
+</html>

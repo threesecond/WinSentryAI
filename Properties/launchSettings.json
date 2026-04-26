@@ -1,9 +1,6 @@
 {
   "profiles": {
-    "WinSentryAI (Package)": {
-      "commandName": "MsixPackage"
-    },
-    "WinSentryAI (Unpackaged)": {
+    "WinSentryAI": {
       "commandName": "Project"
     }
   }

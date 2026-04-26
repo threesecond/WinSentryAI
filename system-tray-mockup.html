@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinSentryAI — System Tray 原型</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --font:'IBM Plex Sans',-apple-system,sans-serif;
+  --accent:#0078d4;
+  --danger:#d13438;
+  --warn:#ca5010;
+  --success:#107c10;
+}
+
+body{
+  font-family:var(--font);
+  background:#1a3a5c;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  user-select:none;
+}
+
+/* ── Windows Desktop Wallpaper simulation ── */
+.desktop{
+  flex:1;
+  background:linear-gradient(160deg,#1a3a5c 0%,#0f2340 40%,#1a2d4a 100%);
+  position:relative;
+  overflow:hidden;
+  cursor:default;
+}
+.desktop::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 40%,rgba(0,120,212,.12) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 70%,rgba(0,80,160,.10) 0%,transparent 50%);
+}
+
+/* Desktop icons */
+.desk-icon{
+  position:absolute;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  width:68px;padding:6px;border-radius:4px;cursor:pointer;
+  transition:.1s;
+}
+.desk-icon:hover{background:rgba(255,255,255,.08)}
+.desk-icon-img{
+  width:40px;height:40px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+}
+.desk-icon-label{font-size:11px;color:rgba(255,255,255,.85);text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.9);line-height:1.3}
+
+/* ── Controls panel (top center) ── */
+.controls{
+  position:absolute;top:20px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.55);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.12);border-radius:10px;
+  padding:14px 20px;
+  display:flex;flex-direction:column;gap:12px;
+  min-width:340px;
+}
+.ctrl-label{
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.4);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;
+}
+.ctrl-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ctrl-btn{
+  font-family:var(--font);font-size:12px;font-weight:500;
+  padding:5px 14px;border-radius:5px;border:1px solid rgba(255,255,255,.18);
+  cursor:pointer;color:rgba(255,255,255,.75);background:rgba(255,255,255,.06);
+  transition:.13s;
+}
+.ctrl-btn:hover{background:rgba(255,255,255,.14);color:#fff}
+.ctrl-btn.active-state{background:rgba(0,120,212,.5);border-color:rgba(0,120,212,.8);color:#fff}
+.ctrl-btn.danger-state{background:rgba(209,52,56,.5);border-color:rgba(209,52,56,.8);color:#fff}
+.ctrl-divider{width:1px;height:20px;background:rgba(255,255,255,.12)}
+.ctrl-hint{font-size:11px;color:rgba(255,255,255,.35);line-height:1.5}
+
+/* ── Windows Taskbar ── */
+.taskbar{
+  height:48px;
+  background:rgba(18,18,28,.92);
+  backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;
+  flex-shrink:0;
+  position:relative;
+  z-index:10;
+}
+
+/* Start button area */
+.taskbar-start{
+  width:48px;height:48px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:.1s;
+}
+.taskbar-start:hover{background:rgba(255,255,255,.07)}
+.taskbar-start svg{width:18px;height:18px}
+
+/* Pinned app icons on taskbar */
+.taskbar-apps{
+  display:flex;align-items:center;padding:0 4px;flex:1;
+}
+.taskbar-app{
+  width:44px;height:44px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.1s;position:relative;
+}
+.taskbar-app:hover{background:rgba(255,255,255,.07)}
+.taskbar-app-active{
+  background:rgba(255,255,255,.1);
+}
+.taskbar-app-active::after{
+  content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:16px;height:3px;border-radius:2px 2px 0 0;background:var(--accent);
+}
+.taskbar-app svg,.taskbar-app img{width:24px;height:24px}
+
+/* ── Tray area ── */
+.tray-area{
+  display:flex;align-items:center;gap:0;
+  padding:0 4px;
+  margin-left:auto;
+}
+
+.tray-chevron{
+  width:18px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border-radius:3px;
+  color:rgba(255,255,255,.5);transition:.1s;
+}
+.tray-chevron:hover{background:rgba(255,255,255,.07);color:#fff}
+
+/* Tray icon slot */
+.tray-icon-slot{
+  width:36px;height:36px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.1s;position:relative;
+}
+.tray-icon-slot:hover{background:rgba(255,255,255,.08)}
+.tray-icon-slot svg.tray-icon{width:20px;height:20px}
+
+/* Alert badge on tray icon */
+.tray-badge{
+  position:absolute;top:4px;right:4px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--danger);
+  border:1.5px solid rgba(18,18,28,.9);
+  animation:pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.2)}}
+
+/* Other tray icons (decorative) */
+.tray-misc{
+  display:flex;align-items:center;padding:0 4px;
+  color:rgba(255,255,255,.55);font-size:11px;gap:2px;
+}
+.tray-misc-icon{
+  width:32px;height:36px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border-radius:3px;transition:.1s;
+}
+.tray-misc-icon:hover{background:rgba(255,255,255,.07)}
+.tray-misc-icon svg{width:14px;height:14px}
+
+/* Clock */
+.tray-clock{
+  padding:0 12px 0 4px;cursor:pointer;border-radius:3px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;height:40px;transition:.1s;
+}
+.tray-clock:hover{background:rgba(255,255,255,.07)}
+.tray-clock-time{font-size:12px;color:rgba(255,255,255,.85);line-height:1.2}
+.tray-clock-date{font-size:11px;color:rgba(255,255,255,.5);line-height:1.2}
+
+/* ── Context Menu ── */
+.ctx-menu{
+  position:absolute;
+  bottom:52px;
+  width:220px;
+  background:#fff;
+  border:1px solid #d4d4d4;
+  border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.22),0 2px 6px rgba(0,0,0,.12);
+  overflow:hidden;
+  z-index:200;
+  display:none;
+  animation:menu-in .12s ease;
+}
+@keyframes menu-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ctx-menu.show{display:block}
+
+.ctx-header{
+  padding:10px 14px 8px;border-bottom:1px solid #ebebeb;
+  display:flex;align-items:center;gap:8px;
+}
+.ctx-app-icon{
+  width:24px;height:24px;border-radius:5px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.ctx-app-name{font-size:13px;font-weight:600;color:#1a1a1a;line-height:1.2}
+.ctx-app-ver{font-size:11px;color:#8a8a8a}
+
+.ctx-sep{height:1px;background:#ebebeb;margin:2px 0}
+
+.ctx-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 14px;font-size:13px;color:#1a1a1a;
+  cursor:pointer;transition:.1s;
+}
+.ctx-item:hover{background:#f0f6fc}
+.ctx-item svg{width:15px;height:15px;flex-shrink:0;color:#5a5a5a}
+.ctx-item.primary{font-weight:600;color:#0078d4}
+.ctx-item.primary svg{color:#0078d4}
+.ctx-item.danger{color:#c42b1c}
+.ctx-item.danger svg{color:#c42b1c}
+.ctx-item.danger:hover{background:#fde7e9}
+.ctx-item.disabled{color:#a0a0a0;cursor:default}
+.ctx-item.disabled:hover{background:transparent}
+
+/* Status block in menu */
+.ctx-status{
+  padding:8px 14px;
+  display:flex;align-items:flex-start;gap:8px;
+}
+.ctx-status-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px;
+}
+.dot-ok{background:var(--success)}
+.dot-alert{background:var(--danger);animation:pulse-dot 1.8s ease-in-out infinite}
+.ctx-status-body{}
+.ctx-status-line{font-size:12.5px;font-weight:500;color:#1a1a1a}
+.ctx-status-sub{font-size:11.5px;color:#6a6a6a;margin-top:1px}
+
+/* ── Tooltip ── */
+.tray-tooltip{
+  position:absolute;bottom:56px;
+  background:rgba(28,28,36,.94);
+  color:#fff;font-size:12px;
+  padding:5px 10px;border-radius:5px;
+  pointer-events:none;white-space:nowrap;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+  display:none;
+  z-index:300;
+}
+.tray-tooltip.show{display:block}
+
+/* ── Spec panel ── */
+.spec-panel{
+  position:absolute;bottom:60px;left:20px;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  padding:14px 16px;width:260px;
+  color:rgba(255,255,255,.8);
+}
+.spec-panel h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-bottom:8px}
+.spec-row{font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06);display:flex;gap:8px}
+.spec-row:last-child{border-bottom:none}
+.spec-k{color:rgba(255,255,255,.45);flex-shrink:0;min-width:70px}
+.spec-v{color:rgba(255,255,255,.8);font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+
+/* Icon SVGs */
+.icon-shield-ok path{fill:none;stroke:#60b4f8;stroke-width:1.8}
+.icon-shield-ok .shield-inner{fill:#60b4f8;opacity:.15}
+.icon-shield-alert path{fill:none;stroke:#f04747;stroke-width:1.8}
+.icon-shield-alert .shield-inner{fill:#f04747;opacity:.2}
+</style>
+</head>
+<body>
+
+<div class="desktop" id="desktop" onclick="closeMenu()">
+
+  <!-- Desktop icons -->
+  <div class="desk-icon" style="top:80px;left:20px">
+    <div class="desk-icon-img"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+    <div class="desk-icon-label">This PC</div>
+  </div>
+  <div class="desk-icon" style="top:80px;left:96px">
+    <div class="desk-icon-img"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+    <div class="desk-icon-label">Documents</div>
+  </div>
+
+  <!-- Controls panel -->
+  <div class="controls" onclick="event.stopPropagation()">
+    <div>
+      <div class="ctrl-label">圖示狀態</div>
+      <div class="ctrl-row">
+        <button class="ctrl-btn active-state" id="btn-normal" onclick="setState('normal')">
+          🛡 正常監控中
+        </button>
+        <button class="ctrl-btn" id="btn-alert" onclick="setState('alert')">
+          🔴 偵測到嚴重事件
+        </button>
+      </div>
+    </div>
+    <div>
+      <div class="ctrl-label">互動</div>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="showMenu()">右鍵選單</button>
+        <button class="ctrl-btn" onclick="showTooltip()">Hover 提示</button>
+        <button class="ctrl-btn" onclick="closeMenu();hideTooltip()">關閉</button>
+      </div>
+    </div>
+    <div class="ctrl-hint">點擊系統匣圖示可切換右鍵選單 · 桌面任意處關閉</div>
+  </div>
+
+  <!-- Spec panel -->
+  <div class="spec-panel">
+    <h4>實作規格</h4>
+    <div class="spec-row"><span class="spec-k">套件</span><span class="spec-v">Hardcodet.NotifyIcon.Wpf</span></div>
+    <div class="spec-row"><span class="spec-k">關閉視窗</span><span class="spec-v">縮小至匣，不結束</span></div>
+    <div class="spec-row"><span class="spec-k">雙擊圖示</span><span class="spec-v">顯示/還原主視窗</span></div>
+    <div class="spec-row"><span class="spec-k">警示觸發</span><span class="spec-v">AI Severity = High/Critical</span></div>
+    <div class="spec-row"><span class="spec-k">圖示還原</span><span class="spec-v">所有警示標記已讀後</span></div>
+    <div class="spec-row"><span class="spec-k">AppUserModelId</span><span class="spec-v">WinSentryAI.App</span></div>
+  </div>
+
+</div><!-- /desktop -->
+
+<!-- Windows Taskbar -->
+<div class="taskbar">
+
+  <!-- Start button -->
+  <div class="taskbar-start">
+    <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1" fill="rgba(255,255,255,.7)"/><rect x="13" y="3" width="8" height="8" rx="1" fill="rgba(255,255,255,.7)"/><rect x="3" y="13" width="8" height="8" rx="1" fill="rgba(255,255,255,.7)"/><rect x="13" y="13" width="8" height="8" rx="1" fill="rgba(255,255,255,.7)"/></svg>
+  </div>
+
+  <!-- Search (decorative) -->
+  <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border-radius:6px;padding:6px 14px;margin:0 4px;cursor:pointer">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span style="font-size:12px;color:rgba(255,255,255,.4)">Search</span>
+  </div>
+
+  <!-- Pinned apps -->
+  <div class="taskbar-apps">
+    <div class="taskbar-app taskbar-app-active" title="File Explorer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="taskbar-app" title="Edge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4"/><path d="M8 12h8"/></svg>
+    </div>
+    <div class="taskbar-app" title="WinSentryAI" style="position:relative" id="app-taskbar-btn">
+      <!-- WinSentryAI shield icon on taskbar -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(100,180,255,.9)" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+  </div>
+
+  <!-- Tray area -->
+  <div class="tray-area">
+    <!-- Chevron (show hidden icons) -->
+    <div class="tray-chevron">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+
+    <!-- Other tray icons (decorative) -->
+    <div class="tray-misc">
+      <div class="tray-misc-icon" title="Network">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.8"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+      </div>
+      <div class="tray-misc-icon" title="Volume">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.8"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </div>
+    </div>
+
+    <!-- WinSentryAI tray icon -->
+    <div class="tray-icon-slot" id="tray-icon-slot"
+         onclick="event.stopPropagation();toggleMenu()"
+         onmouseenter="showTooltip()"
+         onmouseleave="hideTooltip()">
+      <!-- Normal state icon -->
+      <svg id="icon-normal" class="tray-icon" viewBox="0 0 24 24" fill="none">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#60b4f8" stroke-width="1.8" stroke-linejoin="round"/>
+        <polyline points="8 12 11 15 16 9" stroke="#60b4f8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <!-- Alert state icon (hidden by default) -->
+      <svg id="icon-alert" class="tray-icon" viewBox="0 0 24 24" fill="none" style="display:none">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#f04747" stroke-width="1.8" stroke-linejoin="round" fill="rgba(240,71,71,.08)"/>
+        <line x1="12" y1="9" x2="12" y2="13" stroke="#f04747" stroke-width="2" stroke-linecap="round"/>
+        <line x1="12" y1="16" x2="12.01" y2="16" stroke="#f04747" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <!-- Alert badge (hidden by default) -->
+      <div class="tray-badge" id="tray-badge" style="display:none"></div>
+    </div>
+
+    <!-- Vertical separator -->
+    <div style="width:1px;height:28px;background:rgba(255,255,255,.08);margin:0 2px"></div>
+
+    <!-- Clock -->
+    <div class="tray-clock">
+      <div class="tray-clock-time" id="clock-time">09:14</div>
+      <div class="tray-clock-date" id="clock-date">2026/4/25</div>
+    </div>
+  </div>
+
+  <!-- Tooltip (anchored to tray icon) -->
+  <div class="tray-tooltip" id="tray-tooltip" style="right:106px"></div>
+
+  <!-- Context Menu (anchored above tray icon) -->
+  <div class="ctx-menu" id="ctx-menu" style="right:60px" onclick="event.stopPropagation()">
+
+    <!-- Normal state content -->
+    <div id="menu-normal-content">
+      <div class="ctx-header">
+        <div class="ctx-app-icon" style="background:#e8f3fc">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0078d4" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="ctx-app-name">WinSentryAI</div>
+          <div class="ctx-app-ver">v0.1.0</div>
+        </div>
+      </div>
+
+      <div class="ctx-sep"></div>
+
+      <div class="ctx-item primary" onclick="fakeAction('顯示主視窗')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        顯示主視窗
+      </div>
+
+      <div class="ctx-sep"></div>
+
+      <div class="ctx-status">
+        <div class="ctx-status-dot dot-ok"></div>
+        <div class="ctx-status-body">
+          <div class="ctx-status-line">正常監控中</div>
+          <div class="ctx-status-sub">最後事件：08:55 Critical 41</div>
+        </div>
+      </div>
+
+      <div class="ctx-sep"></div>
+
+      <div class="ctx-item danger" onclick="fakeAction('結束 WinSentryAI')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+        結束 WinSentryAI
+      </div>
+    </div>
+
+    <!-- Alert state content -->
+    <div id="menu-alert-content" style="display:none">
+      <div class="ctx-header">
+        <div class="ctx-app-icon" style="background:#fde8e8">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c42b1c" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <div class="ctx-app-name">WinSentryAI</div>
+          <div class="ctx-app-ver">v0.1.0</div>
+        </div>
+      </div>
+
+      <div class="ctx-sep"></div>
+
+      <div class="ctx-item primary" onclick="fakeAction('顯示主視窗')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        顯示主視窗
+      </div>
+
+      <div class="ctx-sep"></div>
+
+      <div class="ctx-status">
+        <div class="ctx-status-dot dot-alert"></div>
+        <div class="ctx-status-body">
+          <div class="ctx-status-line" style="color:#c42b1c">偵測到 2 筆嚴重事件</div>
+          <div class="ctx-status-sub">最後：09:14 Critical EventID 41</div>
+        </div>
+      </div>
+
+      <div class="ctx-item" onclick="fakeAction('標記所有已讀')" style="padding-top:4px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        全部標記已讀
+      </div>
+
+      <div class="ctx-sep"></div>
+
+      <div class="ctx-item danger" onclick="fakeAction('結束 WinSentryAI')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+        結束 WinSentryAI
+      </div>
+    </div>
+
+  </div><!-- /ctx-menu -->
+
+</div><!-- /taskbar -->
+
+<script>
+let currentState = 'normal';
+let menuOpen = false;
+let tooltipTimer = null;
+
+// ── State management ──
+function setState(state) {
+  currentState = state;
+
+  // Toggle control buttons
+  document.getElementById('btn-normal').className = 'ctrl-btn' + (state === 'normal' ? ' active-state' : '');
+  document.getElementById('btn-alert').className  = 'ctrl-btn' + (state === 'alert'  ? ' danger-state' : '');
+
+  // Toggle tray icons
+  document.getElementById('icon-normal').style.display = state === 'normal' ? 'block' : 'none';
+  document.getElementById('icon-alert').style.display  = state === 'alert'  ? 'block' : 'none';
+  document.getElementById('tray-badge').style.display  = state === 'alert'  ? 'block' : 'none';
+
+  // Toggle menu content
+  document.getElementById('menu-normal-content').style.display = state === 'normal' ? 'block' : 'none';
+  document.getElementById('menu-alert-content').style.display  = state === 'alert'  ? 'block' : 'none';
+
+  // Update taskbar app indicator color
+  const taskbarIcon = document.querySelector('#app-taskbar-btn svg');
+  taskbarIcon.style.stroke = state === 'normal' ? 'rgba(100,180,255,.9)' : 'rgba(240,71,71,.9)';
+
+  // Update tooltip text
+  updateTooltip();
+
+  closeMenu();
+}
+
+// ── Menu ──
+function toggleMenu() {
+  menuOpen ? closeMenu() : showMenu();
+}
+
+function showMenu() {
+  document.getElementById('ctx-menu').classList.add('show');
+  menuOpen = true;
+}
+
+function closeMenu() {
+  document.getElementById('ctx-menu').classList.remove('show');
+  menuOpen = false;
+}
+
+// ── Tooltip ──
+function updateTooltip() {
+  const tip = document.getElementById('tray-tooltip');
+  if (currentState === 'normal') {
+    tip.textContent = 'WinSentryAI — 正常監控中';
+  } else {
+    tip.textContent = 'WinSentryAI — ⚠ 偵測到 2 筆嚴重事件';
+  }
+}
+
+function showTooltip() {
+  if (menuOpen) return;
+  clearTimeout(tooltipTimer);
+  updateTooltip();
+  tooltipTimer = setTimeout(() => {
+    document.getElementById('tray-tooltip').classList.add('show');
+  }, 400);
+}
+
+function hideTooltip() {
+  clearTimeout(tooltipTimer);
+  document.getElementById('tray-tooltip').classList.remove('show');
+}
+
+// ── Actions ──
+function fakeAction(label) {
+  closeMenu();
+  if (label === '顯示主視窗') {
+    alert('[模擬] 顯示主視窗 / 從最小化還原');
+  } else if (label.includes('結束')) {
+    if (confirm('確定要結束 WinSentryAI？\n\n結束後將停止事件監控。')) {
+      alert('[模擬] 程式結束');
+    }
+  } else if (label === '標記所有已讀') {
+    setState('normal');
+  }
+}
+
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock-time').textContent =
+    now.getHours().toString().padStart(2,'0') + ':' +
+    now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('clock-date').textContent =
+    `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// Init
+updateTooltip();
+</script>
+</body>
+</html>

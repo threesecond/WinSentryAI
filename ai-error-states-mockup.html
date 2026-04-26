@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinSentryAI — AI 錯誤狀態原型</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:           #f3f3f3;
+    --surface:      #ffffff;
+    --surface-alt:  #fafafa;
+    --border:       #e1e1e1;
+    --border-light: #ebebeb;
+    --text:         #1a1a1a;
+    --text-muted:   #6b6b6b;
+    --text-subtle:  #a0a0a0;
+    --accent:       #0067c0;
+    --accent-hover: #005ba1;
+    --red:          #d13438;
+    --red-bg:       #fdf3f3;
+    --red-border:   #f4c3c2;
+    --orange:       #ca5010;
+    --orange-bg:    #fef5ef;
+    --orange-border:#f4cba8;
+    --yellow:       #b86900;
+    --yellow-bg:    #fefaec;
+    --yellow-border:#f0d990;
+    --green:        #107c10;
+    --green-bg:     #f1faf1;
+    --green-border: #9fd89f;
+    --blue:         #0067c0;
+    --blue-bg:      #eff6fd;
+    --blue-border:  #a8d0f0;
+    --radius:       6px;
+    --shadow:       0 1px 4px rgba(0,0,0,.10);
+    --font:         'Segoe UI', system-ui, sans-serif;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── Page header ─────────────────────────────────────── */
+  .page-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px 16px;
+  }
+  .page-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── State selector tabs ─────────────────────────────── */
+  .state-nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+  }
+  .state-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color .15s, border-color .15s;
+    position: relative;
+    top: 1px;
+  }
+  .state-tab:hover { color: var(--text); }
+  .state-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .state-tab .dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .dot-red    { background: var(--red); }
+  .dot-orange { background: var(--orange); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-blue   { background: var(--blue); }
+  .dot-purple { background: #8764b8; }
+
+  /* ── Main layout ─────────────────────────────────────── */
+  .workspace {
+    display: flex;
+    gap: 20px;
+    padding: 24px 32px;
+    flex: 1;
+    align-items: flex-start;
+  }
+
+  /* ── Context panel (simulated event list sidebar) ────── */
+  .context-panel {
+    width: 240px;
+    flex-shrink: 0;
+  }
+  .context-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+  }
+  .event-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    cursor: default;
+  }
+  .event-item.selected {
+    border-color: var(--accent);
+    background: var(--blue-bg);
+  }
+  .event-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .badge-err  { background: #fde8e8; color: var(--red); }
+  .badge-warn { background: #fff3e0; color: var(--orange); }
+  .badge-crit { background: #fde8e8; color: var(--red); border: 1px solid var(--red); }
+  .event-id   { font-size: 11px; color: var(--text-muted); font-family: 'Consolas', monospace; }
+  .event-desc { font-size: 12px; color: var(--text); line-height: 1.4; }
+  .event-time { font-size: 11px; color: var(--text-subtle); margin-top: 2px; }
+
+  .context-divider {
+    font-size: 11px;
+    color: var(--text-subtle);
+    padding: 8px 0 4px;
+  }
+
+  /* ── AI panel ────────────────────────────────────────── */
+  .ai-panel {
+    flex: 1;
+    min-width: 0;
+  }
+  .ai-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .ai-panel-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .ai-panel-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Error state card ──────────────────────────────────── */
+  .error-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  /* colored top bar */
+  .error-card .ec-stripe {
+    height: 3px;
+  }
+  .stripe-red    { background: var(--red); }
+  .stripe-orange { background: var(--orange); }
+  .stripe-yellow { background: var(--yellow); }
+  .stripe-blue   { background: var(--blue); }
+  .stripe-purple { background: #8764b8; }
+
+  .ec-body {
+    padding: 28px 28px 24px;
+  }
+
+  /* icon + title row */
+  .ec-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .ec-icon-wrap {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-red    { background: var(--red-bg); }
+  .icon-orange { background: var(--orange-bg); }
+  .icon-yellow { background: var(--yellow-bg); }
+  .icon-blue   { background: var(--blue-bg); }
+  .icon-purple { background: #f4f0fb; }
+
+  .ec-icon-wrap svg {
+    width: 24px; height: 24px;
+  }
+
+  .ec-title-block {}
+  .ec-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .ec-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'Consolas', monospace;
+  }
+
+  /* description */
+  .ec-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+
+  /* detail box */
+  .ec-detail {
+    background: var(--surface-alt);
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .ec-detail-toggle {
+    width: 100%;
+    text-align: left;
+    padding: 9px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color .12s;
+  }
+  .ec-detail-toggle:hover { color: var(--text); }
+  .ec-detail-toggle .chevron {
+    transition: transform .2s;
+    width: 12px; height: 12px;
+  }
+  .ec-detail-toggle.open .chevron { transform: rotate(90deg); }
+  .ec-detail-content {
+    display: none;
+    padding: 0 12px 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'Consolas', monospace;
+    line-height: 1.7;
+    border-top: 1px solid var(--border-light);
+  }
+  .ec-detail-content.show { display: block; }
+
+  /* steps */
+  .ec-steps {
+    margin-bottom: 20px;
+  }
+  .ec-steps-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 10px;
+  }
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .step-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .step-code {
+    display: inline-block;
+    background: #f0f0f0;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--text);
+    margin: 2px 0;
+  }
+
+  /* action buttons */
+  .ec-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all .12s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font);
+  }
+  .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-danger {
+    background: var(--red-bg);
+    color: var(--red);
+    border-color: var(--red-border);
+  }
+  .btn-danger:hover { background: #fce4e4; }
+  .btn-ghost {
+    background: none;
+    color: var(--text-muted);
+    border-color: transparent;
+  }
+  .btn-ghost:hover { background: var(--bg); color: var(--text); }
+
+  /* retry counter pill */
+  .retry-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--red);
+    margin-bottom: 16px;
+  }
+
+  /* inline alert */
+  .inline-alert {
+    border-radius: 5px;
+    padding: 10px 12px;
+    font-size: 13px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .inline-alert svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+  .alert-yellow { background: var(--yellow-bg); border: 1px solid var(--yellow-border); color: var(--yellow); }
+  .alert-blue   { background: var(--blue-bg); border: 1px solid var(--blue-border); color: var(--blue); }
+  .alert-orange { background: var(--orange-bg); border: 1px solid var(--orange-border); color: var(--orange); }
+
+  /* state visibility */
+  .error-state { display: none; }
+  .error-state.active { display: block; }
+
+  /* ── Description area below error card ───────────────── */
+  .state-description {
+    margin-top: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .state-description h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+  }
+  .spec-row {
+    display: flex;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 13px;
+  }
+  .spec-row:last-child { border-bottom: none; }
+  .spec-key { color: var(--text-muted); flex-shrink: 0; min-width: 120px; }
+  .spec-val { color: var(--text); }
+  .spec-code { font-family: 'Consolas', monospace; font-size: 12px; }
+
+  /* ── Footer ──────────────────────────────────────────── */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-subtle);
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>AI 分析面板 — 錯誤狀態原型</h1>
+  <p>WinSentryAI · 切換上方頁籤預覽各種 AI 分析失敗狀態</p>
+</div>
+
+<!-- State switcher tabs -->
+<nav class="state-nav" role="tablist">
+  <button class="state-tab active" onclick="showState('state-key-invalid')" role="tab">
+    <span class="dot dot-red"></span>API Key 無效
+  </button>
+  <button class="state-tab" onclick="showState('state-key-missing')" role="tab">
+    <span class="dot dot-orange"></span>未設定 Key
+  </button>
+  <button class="state-tab" onclick="showState('state-timeout')" role="tab">
+    <span class="dot dot-red"></span>逾時 / 重試耗盡
+  </button>
+  <button class="state-tab" onclick="showState('state-ollama-down')" role="tab">
+    <span class="dot dot-orange"></span>Ollama 未啟動
+  </button>
+  <button class="state-tab" onclick="showState('state-rate-limit')" role="tab">
+    <span class="dot dot-yellow"></span>超出配額 (429)
+  </button>
+  <button class="state-tab" onclick="showState('state-network')" role="tab">
+    <span class="dot dot-purple"></span>網路錯誤
+  </button>
+</nav>
+
+<div class="workspace">
+
+  <!-- Left: simulated event context -->
+  <div class="context-panel">
+    <div class="context-label">選取的事件</div>
+    <div class="event-item selected">
+      <div class="event-meta">
+        <span class="badge badge-err">Error</span>
+        <span class="event-id">1000</span>
+      </div>
+      <div class="event-desc">Application crash: WinSentryAI.exe faulting module ntdll.dll</div>
+      <div class="event-time">2026-04-25 09:14:33</div>
+    </div>
+    <div class="context-divider">其他事件</div>
+    <div class="event-item">
+      <div class="event-meta"><span class="badge badge-warn">Warn</span><span class="event-id">4201</span></div>
+      <div class="event-desc">The system detected a power failure...</div>
+      <div class="event-time">2026-04-25 09:10:11</div>
+    </div>
+    <div class="event-item">
+      <div class="event-meta"><span class="badge badge-crit">Crit</span><span class="event-id">41</span></div>
+      <div class="event-desc">The system has rebooted without cleanly shutting down first.</div>
+      <div class="event-time">2026-04-25 08:55:02</div>
+    </div>
+  </div>
+
+  <!-- Right: AI panel with error states -->
+  <div class="ai-panel">
+    <div class="ai-panel-header">
+      <span class="ai-panel-title">AI 分析</span>
+      <span class="ai-panel-meta" id="panel-meta">分析失敗</span>
+    </div>
+
+    <!-- ── State 1: API Key Invalid ───────────────────── -->
+    <div class="error-state active" id="state-key-invalid">
+      <div class="error-card">
+        <div class="ec-stripe stripe-red"></div>
+        <div class="ec-body">
+          <div class="ec-header">
+            <div class="ec-icon-wrap icon-red">
+              <!-- key-slash icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="#d13438" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="15" r="3"/>
+                <path d="M10.85 12.15 18 5"/>
+                <path d="M17 6l1 1"/>
+                <path d="M15 8l1 1"/>
+                <line x1="3" y1="3" x2="21" y2="21"/>
+              </svg>
+            </div>
+            <div class="ec-title-block">
+              <div class="ec-title">API Key 驗證失敗</div>
+              <div class="ec-subtitle">HTTP 401 Unauthorized — Gemini API</div>
+            </div>
+          </div>
+
+          <p class="ec-desc">
+            提供的 Gemini API Key 遭服務端拒絕，可能已過期、被撤銷或輸入有誤。請至 Google AI Studio 確認 Key 狀態，然後在設定頁重新輸入。
+          </p>
+
+          <div class="ec-detail">
+            <button class="ec-detail-toggle" onclick="toggleDetail(this)">
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+              技術詳情
+            </button>
+            <div class="ec-detail-content">
+              Provider  : Gemini 1.5 Pro<br>
+              Endpoint  : https://generativelanguage.googleapis.com/v1beta/models/...<br>
+              HTTP Code : 401 Unauthorized<br>
+              Message   : "API key not valid. Please pass a valid API key."<br>
+              Timestamp : 2026-04-25 09:14:51
+            </div>
+          </div>
+
+          <div class="ec-actions">
+            <button class="btn btn-primary" onclick="fakeNav('settings')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+              </svg>
+              前往 AI 設定
+            </button>
+            <button class="btn btn-secondary" onclick="fakeRetry()">重試</button>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="btn btn-ghost">取得 Key →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="state-description">
+        <h3>實作規格</h3>
+        <div class="spec-row"><span class="spec-key">觸發條件</span><span class="spec-val spec-code">HTTP 401 / 403</span></div>
+        <div class="spec-row"><span class="spec-key">AnalysisResults</span><span class="spec-val spec-code">IsSuccess=0, ErrorMessage="HTTP 401"</span></div>
+        <div class="spec-row"><span class="spec-key">UI 狀態</span><span class="spec-val">顯示此錯誤卡，隱藏 AI 分析結果與對話輸入列</span></div>
+        <div class="spec-row"><span class="spec-key">「前往 AI 設定」</span><span class="spec-val">導航至設定頁 AI 設定區段，自動展開 Key 輸入欄</span></div>
+      </div>
+    </div>
+
+    <!-- ── State 2: Key Not Configured ───────────────── -->
+    <div class="error-state" id="state-key-missing">
+      <div class="error-card">
+        <div class="ec-stripe stripe-orange"></div>
+        <div class="ec-body">
+          <div class="ec-header">
+            <div class="ec-icon-wrap icon-orange">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#ca5010" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+              </svg>
+            </div>
+            <div class="ec-title-block">
+              <div class="ec-title">尚未設定 API Key</div>
+              <div class="ec-subtitle">Provider: Gemini · Key 未配置</div>
+            </div>
+          </div>
+
+          <div class="inline-alert alert-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>Gemini 提供免費 API Key。申請不需信用卡，每日免費配額足夠個人使用。</span>
+          </div>
+
+          <p class="ec-desc">
+            目前選用的 AI 提供者（Gemini）尚未配置 API Key，無法執行 AI 分析。請在設定頁完成設定，或重新執行 Onboarding Wizard。
+          </p>
+
+          <div class="ec-actions">
+            <button class="btn btn-primary" onclick="fakeNav('settings')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+              </svg>
+              前往 AI 設定
+            </button>
+            <button class="btn btn-secondary" onclick="fakeNav('onboarding')">重新執行設定嚮導</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="state-description">
+        <h3>實作規格</h3>
+        <div class="spec-row"><span class="spec-key">觸發條件</span><span class="spec-val"><span class="spec-code">AppSettings</span> 中無對應 Provider 的 Key 紀錄</span></div>
+        <div class="spec-row"><span class="spec-key">AnalysisResults</span><span class="spec-val">不寫入（尚未呼叫 API）</span></div>
+        <div class="spec-row"><span class="spec-key">UI 狀態</span><span class="spec-val">分析按鈕 disable 或按下後顯示此畫面</span></div>
+        <div class="spec-row"><span class="spec-key">Ollama 例外</span><span class="spec-val">選 Ollama 時無需 Key，改為檢查 Endpoint 連線</span></div>
+      </div>
+    </div>
+
+    <!-- ── State 3: Timeout / Retry Exhausted ─────────── -->
+    <div class="error-state" id="state-timeout">
+      <div class="error-card">
+        <div class="ec-stripe stripe-red"></div>
+        <div class="ec-body">
+          <div class="ec-header">
+            <div class="ec-icon-wrap icon-red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#d13438" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+                <line x1="4.22" y1="4.22" x2="19.78" y2="19.78"/>
+              </svg>
+            </div>
+            <div class="ec-title-block">
+              <div class="ec-title">請求逾時，重試次數耗盡</div>
+              <div class="ec-subtitle">RequestTimeout — 已重試 3 / 3 次</div>
+            </div>
+          </div>
+
+          <div class="retry-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px">
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/>
+            </svg>
+            第 1 次重試：等待 1 秒 · 第 2 次重試：等待 2 秒 · 第 3 次重試：等待 4 秒 — 全部逾時
+          </div>
+
+          <p class="ec-desc">
+            AI API 連續 3 次請求均超過逾時上限（30 秒），可能是網路不穩定、API 服務壅塞或防火牆封鎖。請確認網路連線後重試，或稍後再試。
+          </p>
+
+          <div class="ec-detail">
+            <button class="ec-detail-toggle" onclick="toggleDetail(this)">
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+              技術詳情
+            </button>
+            <div class="ec-detail-content">
+              Provider  : Gemini 1.5 Pro<br>
+              Attempt 1 : 2026-04-25 09:14:51 → Timeout after 30s<br>
+              Attempt 2 : 2026-04-25 09:15:23 → Timeout after 30s (backoff 1s)<br>
+              Attempt 3 : 2026-04-25 09:15:56 → Timeout after 30s (backoff 2s)<br>
+              Exception : TaskCanceledException (HttpClient timeout)
+            </div>
+          </div>
+
+          <div class="ec-actions">
+            <button class="btn btn-primary" onclick="fakeRetry()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/>
+              </svg>
+              重試
+            </button>
+            <button class="btn btn-secondary">稍後分析</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="state-description">
+        <h3>實作規格</h3>
+        <div class="spec-row"><span class="spec-key">觸發條件</span><span class="spec-val"><span class="spec-code">TaskCanceledException</span> / <span class="spec-code">HttpRequestException</span>，重試 N 次（<span class="spec-code">MaxRetryCount</span>）後仍失敗</span></div>
+        <div class="spec-row"><span class="spec-key">退避策略</span><span class="spec-val">指數退避：1s → 2s → 4s（<span class="spec-code">MaxRetryCount=3</span> 預設）</span></div>
+        <div class="spec-row"><span class="spec-key">AnalysisResults</span><span class="spec-val spec-code">IsSuccess=0, ErrorMessage="RequestTimeout after 3 retries"</span></div>
+        <div class="spec-row"><span class="spec-key">「重試」按鈕</span><span class="spec-val">重置重試計數，重新呼叫 AI API</span></div>
+        <div class="spec-row"><span class="spec-key">「稍後分析」</span><span class="spec-val">關閉錯誤狀態，回到「尚未分析」空白狀態，事件仍標記 IsAnalyzed=0</span></div>
+      </div>
+    </div>
+
+    <!-- ── State 4: Ollama Not Running ────────────────── -->
+    <div class="error-state" id="state-ollama-down">
+      <div class="error-card">
+        <div class="ec-stripe stripe-orange"></div>
+        <div class="ec-body">
+          <div class="ec-header">
+            <div class="ec-icon-wrap icon-orange">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#ca5010" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+                <line x1="9" y1="10" x2="9" y2="10" stroke-width="3"/>
+                <line x1="15" y1="10" x2="15" y2="10" stroke-width="3"/>
+                <path d="M12 7 C12 7 10 9 10 10.5 s1 2 2 2 2-.5 2-2 S12 7 12 7"/>
+                <line x1="4.22" y1="4.22" x2="19.78" y2="19.78"/>
+              </svg>
+            </div>
+            <div class="ec-title-block">
+              <div class="ec-title">Ollama 服務未啟動</div>
+              <div class="ec-subtitle">Connection Refused — http://localhost:11434</div>
+            </div>
+          </div>
+
+          <p class="ec-desc">
+            無法連線至本機 Ollama 服務（<code style="font-family:Consolas;font-size:12px;background:#f0f0f0;padding:1px 5px;border-radius:3px">localhost:11434</code>），連線遭拒。請確認 Ollama 已安裝並正在執行。
+          </p>
+
+          <div class="ec-steps">
+            <div class="ec-steps-label">排查步驟</div>
+            <div class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-text">開啟命令提示字元，執行 <span class="step-code">ollama serve</span> 或從系統匣重新啟動 Ollama</div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-text">確認 Ollama 已安裝：<span class="step-code">ollama --version</span>（若未安裝請至 ollama.com 下載）</div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-text">確認所選模型已下載：<span class="step-code">ollama list</span>；若無則執行 <span class="step-code">ollama pull llama3</span></div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">4</div>
+              <div class="step-text">若使用自訂 Endpoint，請在設定頁確認 URL 正確</div>
+            </div>
+          </div>
+
+          <div class="ec-actions">
+            <button class="btn btn-primary" onclick="fakeRetry()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/>
+              </svg>
+              重試連線
+            </button>
+            <button class="btn btn-secondary" onclick="fakeNav('settings')">檢查 Endpoint 設定</button>
+            <a href="https://ollama.com/download/windows" target="_blank" class="btn btn-ghost">下載 Ollama →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="state-description">
+        <h3>實作規格</h3>
+        <div class="spec-row"><span class="spec-key">觸發條件</span><span class="spec-val"><span class="spec-code">HttpRequestException: Connection refused</span>（Ollama Endpoint 無回應）</span></div>
+        <div class="spec-row"><span class="spec-key">偵測時機</span><span class="spec-val">點擊「AI 分析」時；Onboarding 與設定頁的「測試連線」也使用相同邏輯</span></div>
+        <div class="spec-row"><span class="spec-key">AnalysisResults</span><span class="spec-val spec-code">IsSuccess=0, ErrorMessage="Connection refused (localhost:11434)"</span></div>
+        <div class="spec-row"><span class="spec-key">「重試連線」</span><span class="spec-val">重新 GET <span class="spec-code">/api/tags</span> 測試連通，成功後自動繼續送出分析請求</span></div>
+      </div>
+    </div>
+
+    <!-- ── State 5: Rate Limit / 429 ──────────────────── -->
+    <div class="error-state" id="state-rate-limit">
+      <div class="error-card">
+        <div class="ec-stripe stripe-yellow"></div>
+        <div class="ec-body">
+          <div class="ec-header">
+            <div class="ec-icon-wrap icon-yellow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b86900" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
+            <div class="ec-title-block">
+              <div class="ec-title">已超出 API 使用配額</div>
+              <div class="ec-subtitle">HTTP 429 Too Many Requests — Gemini API</div>
+            </div>
+          </div>
+
+          <div class="inline-alert alert-yellow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span>免費方案每分鐘有請求數限制（Gemini 免費版 RPM 限制視模型而定）。短暫等待後即可繼續使用。</span>
+          </div>
+
+          <p class="ec-desc">
+            短時間內送出的請求數超出 API 免費配額上限。這不會計費，但需等待配額重置（通常為 1 分鐘）後再繼續。
+          </p>
+
+          <div class="ec-detail">
+            <button class="ec-detail-toggle" onclick="toggleDetail(this)">
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+              技術詳情
+            </button>
+            <div class="ec-detail-content">
+              Provider        : Gemini 1.5 Pro<br>
+              HTTP Code       : 429 Too Many Requests<br>
+              Retry-After     : 60 秒<br>
+              Message         : "Resource has been exhausted (e.g. check quota)."<br>
+              Timestamp       : 2026-04-25 09:14:51
+            </div>
+          </div>
+
+          <div class="ec-actions">
+            <button class="btn btn-primary" id="retry-btn-rate" onclick="startCountdown()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/>
+              </svg>
+              <span id="retry-label-rate">等待後重試</span>
+            </button>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" class="btn btn-ghost">查看配額 →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="state-description">
+        <h3>實作規格</h3>
+        <div class="spec-row"><span class="spec-key">觸發條件</span><span class="spec-val"><span class="spec-code">HTTP 429</span>（不重試，直接顯示此狀態）</span></div>
+        <div class="spec-row"><span class="spec-key">Retry-After</span><span class="spec-val">讀取 Response Header <span class="spec-code">Retry-After</span>，若無則預設 60 秒</span></div>
+        <div class="spec-row"><span class="spec-key">「等待後重試」</span><span class="spec-val">按鈕顯示倒數計時（<span class="spec-code">等待後重試 (58s)</span>），倒數結束自動啟動重試</span></div>
+        <div class="spec-row"><span class="spec-key">AnalysisResults</span><span class="spec-val spec-code">IsSuccess=0, ErrorMessage="HTTP 429 Rate limited"</span></div>
+      </div>
+    </div>
+
+    <!-- ── State 6: Network Error ──────────────────────── -->
+    <div class="error-state" id="state-network">
+      <div class="error-card">
+        <div class="ec-stripe stripe-purple"></div>
+        <div class="ec-body">
+          <div class="ec-header">
+            <div class="ec-icon-wrap icon-purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8764b8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="1" y1="1" x2="23" y2="23"/>
+                <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+                <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+                <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+                <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                <line x1="12" y1="20" x2="12.01" y2="20" stroke-width="3"/>
+              </svg>
+            </div>
+            <div class="ec-title-block">
+              <div class="ec-title">無法連線至網路</div>
+              <div class="ec-subtitle">No Internet Connection — HttpRequestException</div>
+            </div>
+          </div>
+
+          <p class="ec-desc">
+            裝置目前無法連線至網際網路，雲端 AI 服務（Gemini / OpenAI / Claude）無法使用。若您有 Ollama 本地端服務，可切換至 Ollama 進行離線分析。
+          </p>
+
+          <div class="inline-alert alert-orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>使用 Ollama 本地端 AI 時無需網路連線，完全在本機執行，不傳送任何資料至外部。</span>
+          </div>
+
+          <div class="ec-detail">
+            <button class="ec-detail-toggle" onclick="toggleDetail(this)">
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+              技術詳情
+            </button>
+            <div class="ec-detail-content">
+              Provider        : Gemini 1.5 Pro<br>
+              Exception       : System.Net.Http.HttpRequestException<br>
+              Inner Exception : System.Net.Sockets.SocketException<br>
+              Message         : "No such host is known. (generativelanguage.googleapis.com:443)"<br>
+              Timestamp       : 2026-04-25 09:14:51
+            </div>
+          </div>
+
+          <div class="ec-actions">
+            <button class="btn btn-primary" onclick="fakeRetry()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/>
+              </svg>
+              重試
+            </button>
+            <button class="btn btn-secondary" onclick="fakeNav('settings')">切換至 Ollama</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="state-description">
+        <h3>實作規格</h3>
+        <div class="spec-row"><span class="spec-key">觸發條件</span><span class="spec-val"><span class="spec-code">SocketException: No such host</span> 或 <span class="spec-code">Network unreachable</span></span></div>
+        <div class="spec-row"><span class="spec-key">與 Timeout 區分</span><span class="spec-val">Socket 連線階段即失敗（非 HTTP 逾時）；錯誤訊息不同</span></div>
+        <div class="spec-row"><span class="spec-key">「切換至 Ollama」</span><span class="spec-val">導航至設定頁 AI 設定，預選 Ollama 選項</span></div>
+        <div class="spec-row"><span class="spec-key">AnalysisResults</span><span class="spec-val spec-code">IsSuccess=0, ErrorMessage="Network unreachable"</span></div>
+      </div>
+    </div>
+
+  </div><!-- /.ai-panel -->
+</div><!-- /.workspace -->
+
+<div class="footer">
+  WinSentryAI · AI 錯誤狀態設計原型 · 僅供 WPF 實作參考，不進入正式建置流程
+</div>
+
+<script>
+  function showState(id) {
+    // switch active state
+    document.querySelectorAll('.error-state').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+
+    // update tab highlight
+    document.querySelectorAll('.state-tab').forEach(tab => tab.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    // update meta
+    const metaMap = {
+      'state-key-invalid' : 'HTTP 401 — Gemini API',
+      'state-key-missing' : 'Key 未配置 — Gemini',
+      'state-timeout'     : '逾時 — 重試 3/3 次',
+      'state-ollama-down' : 'Connection Refused — localhost:11434',
+      'state-rate-limit'  : 'HTTP 429 — 配額超限',
+      'state-network'     : 'Network Unreachable',
+    };
+    document.getElementById('panel-meta').textContent = metaMap[id] || '分析失敗';
+  }
+
+  function toggleDetail(btn) {
+    btn.classList.toggle('open');
+    const content = btn.nextElementSibling;
+    content.classList.toggle('show');
+  }
+
+  function fakeRetry() {
+    const btn = event.currentTarget;
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;animation:spin .7s linear infinite"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/></svg> 連線中…`;
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    }, 2000);
+  }
+
+  function fakeNav(dest) {
+    const map = { settings: '設定頁 → AI 設定', onboarding: '設定嚮導 (Onboarding)' };
+    alert(`[模擬導航] → ${map[dest] || dest}`);
+  }
+
+  /* Rate limit countdown (60→0) */
+  let countdownTimer = null;
+  function startCountdown() {
+    if (countdownTimer) return;
+    let secs = 59;
+    const btn   = document.getElementById('retry-btn-rate');
+    const label = document.getElementById('retry-label-rate');
+    btn.disabled = true;
+    label.textContent = `等待後重試 (${secs}s)`;
+    countdownTimer = setInterval(() => {
+      secs--;
+      if (secs <= 0) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+        btn.disabled = false;
+        label.textContent = '重試';
+        // simulate the retry
+        fakeRetry.call({ currentTarget: btn });
+      } else {
+        label.textContent = `等待後重試 (${secs}s)`;
+      }
+    }, 1000);
+  }
+</script>
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</body>
+</html>

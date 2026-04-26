@@ -1,0 +1,282 @@
+<Window x:Class="WinSentryAI.OnboardingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:vm="clr-namespace:WinSentryAI.ViewModels"
+        mc:Ignorable="d"
+        Title="{DynamicResource Onboarding_Title}" Height="600" Width="500"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        d:DataContext="{d:DesignInstance vm:OnboardingViewModel}"
+        Background="{DynamicResource RegionBrush}">
+
+    <Border CornerRadius="0" Background="{DynamicResource RegionBrush}">
+        <Grid Margin="30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Header -->
+                <RowDefinition Height="Auto"/> <!-- StepBar -->
+                <RowDefinition Height="*"/>    <!-- Content -->
+                <RowDefinition Height="Auto"/> <!-- Footer -->
+            </Grid.RowDefinitions>
+
+            <!-- Header Title -->
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock x:Name="StepTitle" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{DynamicResource Onboarding_Step1_Title}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentStep}" Value="2"><Setter Property="Text" Value="{DynamicResource Onboarding_Step2_Title}"/></DataTrigger>
+                                <DataTrigger Binding="{Binding CurrentStep}" Value="3"><Setter Property="Text" Value="{DynamicResource Onboarding_Step3_Title}"/></DataTrigger>
+                                <DataTrigger Binding="{Binding CurrentStep}" Value="4"><Setter Property="Text" Value="{DynamicResource Onboarding_Step4_Title}"/></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <hc:Divider Margin="0,10,0,0"/>
+            </StackPanel>
+
+            <!-- Step Bar (Visual Progress) -->
+            <hc:StepBar Grid.Row="1" StepIndex="{Binding StepIndex, Mode=OneWay}" Margin="0,0,0,30">
+                <hc:StepBarItem Content="1"/>
+                <hc:StepBarItem Content="2"/>
+                <hc:StepBarItem Content="3"/>
+                <hc:StepBarItem Content="4"/>
+            </hc:StepBar>
+
+            <!-- Step Content Area -->
+            <Grid Grid.Row="2" VerticalAlignment="Top">
+                <!-- Step 1: Language -->
+                <hc:Card>
+                    <hc:Card.Style>
+                        <Style TargetType="hc:Card">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="1"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                        </Style>
+                    </hc:Card.Style>
+                    <StackPanel Margin="15">
+                        <TextBlock Text="Welcome! Please select your preferred display language." Margin="0,0,0,15" TextWrapping="Wrap"/>
+                        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" hc:InfoElement.Placeholder="Select Language">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="en"><Setter Property="Text" Value="English"/></DataTrigger>
+                                                    <DataTrigger Binding="{Binding}" Value="zh-TW"><Setter Property="Text" Value="繁體中文 (Traditional Chinese)"/></DataTrigger>
+                                                    <DataTrigger Binding="{Binding}" Value="zh-CN"><Setter Property="Text" Value="简体中文 (Simplified Chinese)"/></DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </hc:Card>
+
+                <!-- Step 2: AI Provider -->
+                <hc:Card>
+                    <hc:Card.Style>
+                        <Style TargetType="hc:Card">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="2"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                        </Style>
+                    </hc:Card.Style>
+                    <StackPanel Margin="15">
+                        <TextBlock Text="Choose an AI Provider for system diagnosis. You can change this later in settings." Margin="0,0,0,15" TextWrapping="Wrap"/>
+                        <ComboBox ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}" hc:InfoElement.Placeholder="Select Provider">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="gemini"><Setter Property="Text" Value="Google Gemini (Recommended)"/></DataTrigger>
+                                                    <DataTrigger Binding="{Binding}" Value="openai"><Setter Property="Text" Value="OpenAI GPT"/></DataTrigger>
+                                                    <DataTrigger Binding="{Binding}" Value="claude"><Setter Property="Text" Value="Anthropic Claude"/></DataTrigger>
+                                                    <DataTrigger Binding="{Binding}" Value="ollama"><Setter Property="Text" Value="Ollama (Local)"/></DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </hc:Card>
+
+                <!-- Step 3: Configuration -->
+                <hc:Card>
+                    <hc:Card.Style>
+                        <Style TargetType="hc:Card">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="3"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                        </Style>
+                    </hc:Card.Style>
+                    <StackPanel Margin="15">
+                        <!-- Step 3a: API Key (Not Ollama) -->
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers><DataTrigger Binding="{Binding SelectedProvider}" Value="ollama"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="Enter your API Key. It will be encrypted with Windows DPAPI." Margin="0,0,0,10"/>
+                            <hc:TextBox hc:InfoElement.Title="API Key" 
+                                        hc:InfoElement.Placeholder="Enter API Key"
+                                        Text="{Binding ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                        Margin="0,0,0,10"/>
+                        </StackPanel>
+
+                        <!-- Step 3b: Ollama Endpoint -->
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers><DataTrigger Binding="{Binding SelectedProvider}" Value="ollama"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="Enter Ollama server endpoint (usually localhost)." Margin="0,0,0,10"/>
+                            <hc:TextBox Text="{Binding OllamaEndpoint}" hc:InfoElement.Placeholder="http://localhost:11434" hc:InfoElement.Title="Endpoint" Margin="0,0,0,10"/>
+                        </StackPanel>
+
+                        <Button Content="{DynamicResource Onboarding_Button_Test}" 
+                                Command="{Binding TestAndSaveCommand}" 
+                                Style="{StaticResource ButtonPrimary}"
+                                HorizontalAlignment="Left" Margin="0,10,0,10"/>
+
+                        <TextBlock Text="{Binding TestResultMessage}" TextWrapping="Wrap" Margin="0,5,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TestPassed}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- Fetching Models Indicator -->
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsFetchingModels}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <hc:LoadingCircle Width="18" Height="18" Margin="0,0,8,0"/>
+                            <TextBlock Text="Fetching available models…" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        </StackPanel>
+
+                        <!-- Model Dropdown (Gemini / Ollama — HasAvailableModels=True) -->
+                        <StackPanel Margin="0,12,0,0">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasAvailableModels}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="Select Model" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <ComboBox ItemsSource="{Binding AvailableModels}"
+                                      SelectedItem="{Binding SelectedModel, Mode=TwoWay}"/>
+                        </StackPanel>
+
+                        <!-- Manual Model TextBox (OpenAI / Claude — TestPassed=True, no list) -->
+                        <StackPanel Margin="0,12,0,0">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding TestPassed}" Value="True"/>
+                                                <Condition Binding="{Binding HasAvailableModels}" Value="False"/>
+                                                <Condition Binding="{Binding IsFetchingModels}" Value="False"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <hc:TextBox hc:InfoElement.Title="Model"
+                                        hc:InfoElement.Placeholder="e.g. gpt-4o"
+                                        Text="{Binding SelectedModel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </hc:Card>
+
+                <!-- Step 4: Summary -->
+                <hc:Card>
+                    <hc:Card.Style>
+                        <Style TargetType="hc:Card">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="4"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                        </Style>
+                    </hc:Card.Style>
+                    <StackPanel Margin="15">
+                        <TextBlock Text="{DynamicResource Onboarding_Step4_Complete}" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="{DynamicResource SuccessBrush}"/>
+                        
+                        <hc:Row Margin="0,0,0,10">
+                            <hc:Col Span="10"><TextBlock Text="{DynamicResource Onboarding_Step4_ProviderLabel}" FontWeight="SemiBold"/></hc:Col>
+                            <hc:Col Span="14"><TextBlock Text="{Binding SelectedProvider}"/></hc:Col>
+                        </hc:Row>
+                        <hc:Row Margin="0,0,0,10">
+                            <hc:Col Span="10"><TextBlock Text="{DynamicResource Onboarding_Step4_LanguageLabel}" FontWeight="SemiBold"/></hc:Col>
+                            <hc:Col Span="14"><TextBlock Text="{Binding SelectedLanguage}"/></hc:Col>
+                        </hc:Row>
+
+                        <TextBlock Text="{DynamicResource Onboarding_Step4_Desc}" 
+                                   Margin="0,20,0,0" TextWrapping="Wrap" Opacity="0.7"/>
+                    </StackPanel>
+                </hc:Card>
+            </Grid>
+
+            <!-- Footer Buttons -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <!-- Back Button: Hide on Step 1 -->
+                <Button Content="{DynamicResource Onboarding_Button_Back}" Command="{Binding BackCommand}" Margin="0,0,10,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
+                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="1"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <!-- Next Button: Hide on Step 4 -->
+                <Button Content="{DynamicResource Onboarding_Button_Next}" Command="{Binding NextCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
+                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="4"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <!-- Finish Button: Show only on Step 4 -->
+                <Button Content="{DynamicResource Onboarding_Button_Finish}" Command="{Binding FinishCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ButtonSuccess}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="4"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

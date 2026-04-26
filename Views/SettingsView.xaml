@@ -1,0 +1,216 @@
+<UserControl x:Class="WinSentryAI.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:viewmodels="clr-namespace:WinSentryAI.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance viewmodels:SettingsViewModel}"
+             Background="{DynamicResource SecondaryRegionBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Padding="15" Background="{DynamicResource RegionBrush}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderBrush}">
+            <TextBlock Text="{DynamicResource Settings_Title}" FontWeight="Bold" FontSize="20"/>
+        </Border>
+
+        <!-- Settings Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20">
+                <!-- General Settings -->
+                <hc:Card Header="{DynamicResource Settings_Section_General}" Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <hc:FlexPanel Margin="0,5">
+                            <TextBlock Text="{DynamicResource Settings_Label_LogRetentionDays}" Width="150" VerticalAlignment="Center"/>
+                            <hc:NumericUpDown Value="{Binding LogRetentionDays}" Minimum="1" Maximum="365" Width="100"/>
+                            <TextBlock Text="{DynamicResource Settings_Unit_Days}" Margin="5,0" VerticalAlignment="Center"/>
+                        </hc:FlexPanel>
+                        <hc:FlexPanel Margin="0,5">
+                            <TextBlock Text="{DynamicResource Settings_Label_MaxRetroQueryCount}" Width="150" VerticalAlignment="Center"/>
+                            <hc:NumericUpDown Value="{Binding MaxRetroQueryCount}" Minimum="10" Maximum="500" Width="100"/>
+                            <TextBlock Text="{DynamicResource Settings_Unit_Events}" Margin="5,0" VerticalAlignment="Center"/>
+                        </hc:FlexPanel>
+                    </StackPanel>
+                </hc:Card>
+
+                <!-- AI Configuration -->
+                <hc:Card Header="{DynamicResource Settings_Section_AI}" Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <!-- Provider Selector -->
+                        <hc:FlexPanel Margin="0,5">
+                            <TextBlock Text="{DynamicResource Settings_Label_AIProvider}" Width="150" VerticalAlignment="Center"/>
+                            <ComboBox ItemsSource="{Binding AiProviders}" SelectedItem="{Binding AiProvider}" Width="200"/>
+                        </hc:FlexPanel>
+
+                        <!-- Restart Notice Banner -->
+                        <Border Background="{DynamicResource WarningBrush}" CornerRadius="4" Margin="0,10" Padding="10"
+                                Visibility="{Binding NeedsRestart, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <hc:FlexPanel>
+                                <TextBlock Text="{DynamicResource Settings_Restart_Notice}" Foreground="White" VerticalAlignment="Center" FontWeight="Bold"/>
+                                <Button Content="{DynamicResource Settings_Button_Restart}" 
+                                        Command="{Binding RestartCommand}" 
+                                        Style="{StaticResource ButtonDefault}" 
+                                        hc:BorderElement.CornerRadius="4"
+                                        Margin="15,0,0,0"/>
+                            </hc:FlexPanel>
+                        </Border>
+
+                        <hc:Divider Margin="0,15"/>
+
+                        <!-- Provider Panels -->
+                        <Grid>
+                            <!-- Gemini Panel -->
+                            <StackPanel>
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AiProvider}" Value="gemini">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="{Binding GeminiKeyStatusText}" Margin="0,0,0,10" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <hc:FlexPanel Margin="0,5">
+                                    <TextBlock Text="{DynamicResource Settings_Label_GeminiModel}" Width="150" VerticalAlignment="Center"/>
+                                    <ComboBox IsEditable="True" ItemsSource="{Binding GeminiModels}"
+                                              Text="{Binding GeminiModel, UpdateSourceTrigger=PropertyChanged}" Width="280"/>
+                                </hc:FlexPanel>
+                                <hc:FlexPanel Margin="0,5">
+                                    <TextBlock Text="{DynamicResource Settings_Label_GeminiApiKey}" Width="150" VerticalAlignment="Center"/>
+                                    <PasswordBox x:Name="GeminiKeyPasswordBox" Width="320"/>
+                                </hc:FlexPanel>
+                                <StackPanel Orientation="Horizontal" Margin="150,10,0,0">
+                                    <Button Content="{DynamicResource Settings_Button_SaveGeminiKey}" Style="{StaticResource ButtonPrimary}" Click="SaveGeminiKey_Click" Margin="0,0,8,0"/>
+                                    <Button Content="{DynamicResource Settings_Button_ClearGeminiKey}" Style="{StaticResource ButtonDanger}" Click="ClearGeminiKey_Click"/>
+                                    <Button Content="{DynamicResource Settings_Button_FetchGeminiModels}" Command="{Binding FetchGeminiModelsCommand}"
+                                            IsEnabled="{Binding IsGeminiKeySet}" Style="{StaticResource ButtonInfo}" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- OpenAI Panel -->
+                            <StackPanel>
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AiProvider}" Value="openai">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="{Binding OpenAiKeyStatusText}" Margin="0,0,0,10" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <hc:FlexPanel Margin="0,5">
+                                    <TextBlock Text="{DynamicResource Settings_Label_OpenAiModel}" Width="150" VerticalAlignment="Center"/>
+                                    <hc:TextBox Text="{Binding OpenAiModel, UpdateSourceTrigger=PropertyChanged}" Width="280" hc:InfoElement.Placeholder="gpt-4o"/>
+                                </hc:FlexPanel>
+                                <hc:FlexPanel Margin="0,5">
+                                    <TextBlock Text="{DynamicResource Settings_Label_OpenAiApiKey}" Width="150" VerticalAlignment="Center"/>
+                                    <PasswordBox x:Name="OpenAiKeyPasswordBox" Width="320"/>
+                                </hc:FlexPanel>
+                                <StackPanel Orientation="Horizontal" Margin="150,10,0,0">
+                                    <Button Content="{DynamicResource Settings_Button_SaveOpenAiKey}" Style="{StaticResource ButtonPrimary}" Click="SaveOpenAiKey_Click" Margin="0,0,8,0"/>
+                                    <Button Content="{DynamicResource Settings_Button_ClearOpenAiKey}" Style="{StaticResource ButtonDanger}" Click="ClearOpenAiKey_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Claude Panel -->
+                            <StackPanel>
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AiProvider}" Value="claude">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="{Binding ClaudeKeyStatusText}" Margin="0,0,0,10" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <hc:FlexPanel Margin="0,5">
+                                    <TextBlock Text="{DynamicResource Settings_Label_ClaudeModel}" Width="150" VerticalAlignment="Center"/>
+                                    <hc:TextBox Text="{Binding ClaudeModel, UpdateSourceTrigger=PropertyChanged}" Width="280" hc:InfoElement.Placeholder="claude-3-7-sonnet-latest"/>
+                                </hc:FlexPanel>
+                                <hc:FlexPanel Margin="0,5">
+                                    <TextBlock Text="{DynamicResource Settings_Label_ClaudeApiKey}" Width="150" VerticalAlignment="Center"/>
+                                    <PasswordBox x:Name="ClaudeKeyPasswordBox" Width="320"/>
+                                </hc:FlexPanel>
+                                <StackPanel Orientation="Horizontal" Margin="150,10,0,0">
+                                    <Button Content="{DynamicResource Settings_Button_SaveClaudeKey}" Style="{StaticResource ButtonPrimary}" Click="SaveClaudeKey_Click" Margin="0,0,8,0"/>
+                                    <Button Content="{DynamicResource Settings_Button_ClearClaudeKey}" Style="{StaticResource ButtonDanger}" Click="ClearClaudeKey_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Ollama Panel -->
+                            <StackPanel>
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AiProvider}" Value="ollama">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <hc:FlexPanel Margin="0,5">
+                                    <TextBlock Text="{DynamicResource Settings_Label_OllamaEndpoint}" Width="150" VerticalAlignment="Center"/>
+                                    <hc:TextBox Text="{Binding OllamaEndpoint}" Width="300" hc:InfoElement.Placeholder="http://localhost:11434"/>
+                                </hc:FlexPanel>
+                                <hc:FlexPanel Margin="0,5">
+                                    <TextBlock Text="{DynamicResource Settings_Label_OllamaModel}" Width="150" VerticalAlignment="Center"/>
+                                    <ComboBox ItemsSource="{Binding OllamaModels}" SelectedItem="{Binding OllamaModel}" Width="200" IsEditable="True"/>
+                                    <Button Content="{DynamicResource Settings_Ollama_TestAndFetch}" 
+                                            Command="{Binding FetchOllamaModelsCommand}"
+                                            Style="{StaticResource ButtonInfo}" 
+                                            Margin="10,0,0,0"/>
+                                </hc:FlexPanel>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </hc:Card>
+
+                <!-- Error Handling -->
+                <hc:Card Header="{DynamicResource Settings_Section_ErrorHandling}" Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <hc:FlexPanel Margin="0,5">
+                            <TextBlock Text="{DynamicResource Settings_Label_MaxRetryCount}" Width="150" VerticalAlignment="Center"/>
+                            <hc:NumericUpDown Value="{Binding MaxRetryCount}" Minimum="1" Maximum="10" Width="100"/>
+                            <TextBlock Text="{DynamicResource Settings_Unit_Times}" Margin="5,0" VerticalAlignment="Center"/>
+                        </hc:FlexPanel>
+                    </StackPanel>
+                </hc:Card>
+
+                <!-- UI Settings -->
+                <hc:Card Header="{DynamicResource Settings_Section_UI}" Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <hc:FlexPanel Margin="0,5">
+                            <TextBlock Text="{DynamicResource Settings_Label_Theme}" Width="150" VerticalAlignment="Center"/>
+                            <ComboBox ItemsSource="{Binding UiThemes}" SelectedItem="{Binding UiTheme}" Width="200"/>
+                        </hc:FlexPanel>
+                        <hc:FlexPanel Margin="0,5">
+                            <TextBlock Text="{DynamicResource Settings_Label_Language}" Width="150" VerticalAlignment="Center"/>
+                            <ComboBox ItemsSource="{Binding UiLanguages}" SelectedItem="{Binding UiLanguage}" Width="200"/>
+                        </hc:FlexPanel>
+                    </StackPanel>
+                </hc:Card>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Buttons -->
+        <Border Grid.Row="2" Padding="10" Background="{DynamicResource RegionBrush}" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="{DynamicResource Settings_Button_Load}" Command="{Binding LoadSettingsCommand}" Style="{StaticResource ButtonInfo}" Margin="0,0,10,0"/>
+                <Button Content="{DynamicResource Settings_Button_Save}" Command="{Binding SaveSettingsCommand}" Style="{StaticResource ButtonPrimary}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

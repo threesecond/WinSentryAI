@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinSentryAI — Toast / 確認 Dialog / About 原型</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --font:'IBM Plex Sans',-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',Consolas,monospace;
+  --accent:#0078d4;
+  --accent-h:#006cbd;
+  --danger:#c42b1c;
+  --danger-bg:#fde7e9;
+  --danger-border:#f4c3c2;
+  --warn:#ca5010;
+  --warn-bg:#fff3ec;
+  --success:#107c10;
+  --bg:#f3f3f3;
+  --surface:#fff;
+  --border:#e0e0e0;
+  --border-light:#ebebeb;
+  --text:#1a1a1a;
+  --text-muted:#5a5a5a;
+  --text-subtle:#9a9a9a;
+  --radius:8px;
+  --shadow-dialog:0 16px 48px rgba(0,0,0,.22),0 4px 12px rgba(0,0,0,.12);
+  --shadow-toast:0 8px 24px rgba(0,0,0,.18),0 2px 6px rgba(0,0,0,.10);
+}
+
+body{font-family:var(--font);font-size:13px;color:var(--text);background:#1e1e2e;min-height:100vh;overflow:hidden}
+
+/* ── Page tabs ── */
+.page-tabs{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(14,14,22,.94);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  padding:10px 24px;display:flex;gap:8px;align-items:center;
+}
+.page-tab{
+  padding:5px 16px;border-radius:5px;font-size:12px;font-weight:500;
+  border:1px solid rgba(255,255,255,.14);cursor:pointer;color:rgba(255,255,255,.55);
+  background:transparent;transition:.14s;font-family:var(--font);
+}
+.page-tab:hover{color:#fff;background:rgba(255,255,255,.09)}
+.page-tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.pg-label{font-size:11px;color:rgba(255,255,255,.28);margin-left:6px}
+
+/* ── Scenes ── */
+.scene{display:none;position:fixed;inset:48px 0 0;overflow:hidden}
+.scene.active{display:flex}
+
+/* ═══════════════════════════════════════════════════════════
+   SCENE 1 — TOAST NOTIFICATIONS
+════════════════════════════════════════════════════════════ */
+#scene-toast{
+  background:linear-gradient(150deg,#1e2d42 0%,#0f1a2e 100%);
+  align-items:flex-end;justify-content:flex-end;
+  flex-direction:column;
+  padding:0 20px 60px;gap:10px;
+}
+
+/* Simulated taskbar strip at bottom */
+#scene-toast::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:52px;
+  background:rgba(18,18,28,.95);border-top:1px solid rgba(255,255,255,.05);
+}
+
+/* Controls */
+.toast-controls{
+  position:absolute;top:16px;left:24px;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  padding:14px 16px;display:flex;flex-direction:column;gap:10px;
+  min-width:280px;z-index:10;
+}
+.tc-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.35);margin-bottom:2px}
+.tc-row{display:flex;gap:7px;flex-wrap:wrap}
+.tc-btn{
+  font-family:var(--font);font-size:12px;font-weight:500;
+  padding:5px 12px;border-radius:5px;border:1px solid rgba(255,255,255,.16);
+  cursor:pointer;color:rgba(255,255,255,.7);background:rgba(255,255,255,.06);
+  transition:.13s;
+}
+.tc-btn:hover{background:rgba(255,255,255,.14);color:#fff}
+
+/* Toast card */
+.toast{
+  width:360px;background:#fff;border-radius:10px;
+  box-shadow:var(--shadow-toast);
+  overflow:hidden;position:relative;z-index:20;
+  animation:toast-in .25s cubic-bezier(.34,1.56,.64,1);
+  flex-shrink:0;
+}
+@keyframes toast-in{
+  from{opacity:0;transform:translateX(30px) scale(.96)}
+  to{opacity:1;transform:translateX(0) scale(1)}
+}
+.toast.dismissing{animation:toast-out .2s ease forwards}
+@keyframes toast-out{
+  to{opacity:0;transform:translateX(32px) scale(.95);max-height:0;margin:0;padding:0}
+}
+
+/* accent stripe */
+.toast-stripe{height:3px}
+.stripe-crit{background:linear-gradient(90deg,#c42b1c,#e03e42)}
+.stripe-high{background:linear-gradient(90deg,#ca5010,#e07040)}
+
+/* toast header */
+.toast-header{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px 6px;
+}
+.toast-app-icon{
+  width:18px;height:18px;border-radius:4px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.toast-app-name{font-size:11.5px;font-weight:600;color:var(--text-muted);flex:1}
+.toast-time{font-size:11px;color:var(--text-subtle)}
+.toast-close{
+  width:20px;height:20px;border-radius:3px;border:none;
+  background:none;cursor:pointer;color:var(--text-subtle);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;transition:.1s;
+}
+.toast-close:hover{background:#f0f0f0;color:var(--text)}
+
+/* toast body */
+.toast-body{padding:2px 14px 12px}
+.toast-severity{
+  font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:5px;
+}
+.sev-crit{background:#fde7e9;color:var(--danger)}
+.sev-high{background:#fff3ec;color:var(--warn)}
+
+.toast-title{font-size:13.5px;font-weight:600;line-height:1.35;margin-bottom:3px}
+.toast-msg{font-size:12px;color:var(--text-muted);line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* toast footer */
+.toast-footer{
+  padding:8px 12px 10px;display:flex;gap:6px;
+  border-top:1px solid var(--border-light);
+}
+.toast-btn{
+  font-family:var(--font);font-size:12px;font-weight:500;
+  padding:5px 12px;border-radius:4px;cursor:pointer;border:1px solid transparent;
+  transition:.12s;
+}
+.toast-btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.toast-btn-primary:hover{background:var(--accent-h)}
+.toast-btn-ghost{background:none;color:var(--text-muted);border-color:var(--border)}
+.toast-btn-ghost:hover{background:#f3f3f3}
+
+/* progress bar */
+.toast-progress{
+  height:3px;background:var(--border-light);
+  position:absolute;bottom:0;left:0;right:0;
+}
+.toast-progress-bar{
+  height:100%;border-radius:0 2px 2px 0;
+  transition:width linear;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   SCENE 2 — CONFIRM DIALOGS
+════════════════════════════════════════════════════════════ */
+#scene-confirm{
+  background:var(--bg);
+  flex-direction:column;align-items:stretch;
+}
+
+.confirm-tab-bar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 24px;display:flex;gap:0;
+}
+.confirm-tab{
+  padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;
+  border:none;background:none;color:var(--text-muted);
+  border-bottom:2px solid transparent;transition:.14s;
+  position:relative;top:1px;
+}
+.confirm-tab:hover{color:var(--text)}
+.confirm-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.confirm-workspace{
+  flex:1;display:flex;align-items:center;justify-content:center;padding:24px;
+  position:relative;
+}
+
+/* simulated blurred background */
+.confirm-bg-sim{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,#e8e8e8 0%,#f0f0f0 100%);
+  display:flex;align-items:center;justify-content:center;
+  filter:blur(2px);
+}
+.bg-sim-win{
+  width:600px;height:340px;background:#fff;border:1px solid var(--border);
+  border-radius:6px;opacity:.5;
+}
+
+.confirm-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;
+}
+
+.confirm-pane{display:none}
+.confirm-pane.active{display:flex}
+
+/* Dialog box */
+.dlg{
+  width:420px;background:var(--surface);border-radius:10px;
+  box-shadow:var(--shadow-dialog);overflow:hidden;
+  position:relative;z-index:10;
+}
+.dlg-top-stripe{height:3px}
+.stripe-warn{background:linear-gradient(90deg,#ca5010,#e07040)}
+.stripe-danger{background:linear-gradient(90deg,#c42b1c,#e03e42)}
+.stripe-info{background:linear-gradient(90deg,#0078d4,#40a0e8)}
+
+.dlg-body{padding:26px 26px 20px}
+
+.dlg-icon-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.dlg-icon{
+  width:44px;height:44px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.icon-warn  {background:var(--warn-bg);border:1.5px solid #f4b57a}
+.icon-danger{background:var(--danger-bg);border:1.5px solid var(--danger-border)}
+.icon-info  {background:#e8f3fc;border:1.5px solid #a8d0f0}
+.dlg-icon svg{width:22px;height:22px}
+
+.dlg-text-wrap{}
+.dlg-title{font-size:15px;font-weight:600;line-height:1.3;margin-bottom:4px}
+.dlg-desc{font-size:12.5px;color:var(--text-muted);line-height:1.6}
+
+/* affected list */
+.dlg-scope{
+  background:#fef9f6;border:1px solid #f4d8c0;border-radius:6px;
+  padding:10px 14px;margin-bottom:16px;
+}
+.dlg-scope-label{font-size:11px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.dlg-scope-item{font-size:12.5px;color:var(--text-muted);padding:2px 0;display:flex;gap:6px}
+.dlg-scope-item::before{content:'•';color:var(--warn);flex-shrink:0}
+
+/* danger confirm input */
+.dlg-confirm-input-wrap{margin-bottom:16px}
+.dlg-confirm-label{font-size:12px;color:var(--text-muted);margin-bottom:6px;line-height:1.5}
+.dlg-confirm-label code{
+  font-family:var(--mono);font-size:11.5px;background:#f0f0f0;
+  padding:1px 5px;border-radius:3px;border:1px solid var(--border);color:var(--danger);
+}
+.dlg-confirm-input{
+  width:100%;font-family:var(--mono);font-size:13px;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:5px;
+  padding:8px 10px;color:var(--text);outline:none;
+  transition:border-color .14s;
+}
+.dlg-confirm-input:focus{border-color:var(--danger)}
+.dlg-confirm-input.match{border-color:var(--danger);background:#fdf3f3}
+
+/* actions */
+.dlg-actions{display:flex;gap:8px;justify-content:flex-end;padding-top:4px}
+.btn{
+  font-family:var(--font);font-size:13px;font-weight:500;
+  padding:7px 18px;border-radius:5px;border:1px solid transparent;
+  cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  transition:.12s;white-space:nowrap;
+}
+.btn svg{width:13px;height:13px;flex-shrink:0}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent-h)}
+.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-danger:hover{background:#a52315}
+.btn-danger:disabled{background:#e0a0a0;border-color:#e0a0a0;cursor:not-allowed}
+.btn-secondary{background:#fff;color:var(--text);border-color:var(--border)}
+.btn-secondary:hover{background:var(--bg)}
+
+
+/* ═══════════════════════════════════════════════════════════
+   SCENE 3 — ABOUT DIALOG
+════════════════════════════════════════════════════════════ */
+#scene-about{
+  background:var(--bg);
+  align-items:center;justify-content:center;
+}
+
+.about-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,#e8e8e8,#f0f0f0);
+  filter:blur(2px);opacity:.6;
+}
+.about-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.3);
+  display:flex;align-items:center;justify-content:center;
+}
+.about-dlg{
+  width:460px;background:var(--surface);border-radius:12px;
+  box-shadow:var(--shadow-dialog);overflow:hidden;
+  position:relative;z-index:10;
+}
+.about-header{
+  padding:28px 28px 20px;
+  display:flex;align-items:center;gap:18px;
+  border-bottom:1px solid var(--border-light);
+}
+.about-app-icon{
+  width:60px;height:60px;background:var(--accent);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,120,212,.35);
+}
+.about-app-icon svg{width:32px;height:32px;fill:#fff}
+.about-app-name{font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+.about-app-ver{
+  display:inline-block;font-size:12px;font-weight:600;
+  background:#e8f3fc;color:var(--accent);padding:2px 8px;border-radius:10px;
+  margin-top:4px;
+}
+.about-app-tagline{font-size:12.5px;color:var(--text-muted);margin-top:3px;line-height:1.4}
+
+/* tabs inside about */
+.about-tabs{
+  display:flex;background:var(--bg);border-bottom:1px solid var(--border);
+}
+.about-tab{
+  padding:10px 18px;font-size:12.5px;font-weight:500;cursor:pointer;
+  border:none;background:none;color:var(--text-muted);
+  border-bottom:2px solid transparent;transition:.14s;
+  position:relative;top:1px;flex:1;text-align:center;
+}
+.about-tab:hover{color:var(--text)}
+.about-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--surface)}
+
+/* about content panels */
+.about-panel{display:none;padding:18px 24px;max-height:280px;overflow-y:auto}
+.about-panel.active{display:block}
+
+.info-row{
+  display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--border-light);
+  font-size:12.5px;
+}
+.info-row:last-child{border-bottom:none}
+.info-key{color:var(--text-subtle);flex-shrink:0;min-width:110px}
+.info-val{color:var(--text);font-family:var(--mono);font-size:12px}
+.info-val a{color:var(--accent);text-decoration:none}
+.info-val a:hover{text-decoration:underline}
+
+.lib-row{
+  display:grid;grid-template-columns:1fr auto auto;gap:8px;
+  padding:7px 0;border-bottom:1px solid var(--border-light);
+  font-size:12.5px;align-items:baseline;
+}
+.lib-row:last-child{border-bottom:none}
+.lib-name{font-weight:500;color:var(--text)}
+.lib-ver{font-family:var(--mono);font-size:11.5px;color:var(--text-subtle)}
+.lib-badge{
+  font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;
+  background:#e8f3fc;color:var(--accent);white-space:nowrap;
+}
+
+.license-block{
+  background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  padding:14px;font-size:12px;color:var(--text-muted);line-height:1.7;
+  font-family:var(--mono);
+}
+
+/* about footer */
+.about-footer{
+  padding:14px 24px 18px;border-top:1px solid var(--border-light);
+  display:flex;align-items:center;
+}
+.about-copyright{font-size:11.5px;color:var(--text-subtle)}
+.about-close{
+  margin-left:auto;font-family:var(--font);font-size:13px;font-weight:500;
+  padding:6px 20px;border-radius:5px;border:1px solid var(--border);
+  background:#fff;color:var(--text);cursor:pointer;transition:.12s;
+}
+.about-close:hover{background:var(--bg)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- Tab bar -->
+<div class="page-tabs">
+  <button class="page-tab active" onclick="showScene('scene-toast',this)">🔔 Toast 通知</button>
+  <button class="page-tab" onclick="showScene('scene-confirm',this)">⚠ 確認 Dialog</button>
+  <button class="page-tab" onclick="showScene('scene-about',this)">ℹ About</button>
+  <span class="pg-label">WinSentryAI · 雜項 Dialog 原型</span>
+</div>
+
+<!-- ═══ SCENE 1: TOAST ════════════════════════════════════ -->
+<div class="scene active" id="scene-toast">
+
+  <div class="toast-controls" onclick="event.stopPropagation()">
+    <div>
+      <div class="tc-label">新增 Toast</div>
+      <div class="tc-row">
+        <button class="tc-btn" onclick="addToast('critical')">Critical 事件</button>
+        <button class="tc-btn" onclick="addToast('high')">High 事件</button>
+      </div>
+    </div>
+    <div>
+      <div class="tc-label" style="margin-bottom:6px">說明</div>
+      <div style="font-size:11.5px;color:rgba(255,255,255,.45);line-height:1.6">
+        · 右下角最多堆疊 3 則<br>
+        · 進度條倒數 6 秒後自動關閉<br>
+        · 點「查看詳情」開啟主視窗對應事件
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast stack (rendered by JS) -->
+  <div id="toast-stack" style="display:flex;flex-direction:column;gap:10px;position:relative;z-index:20"></div>
+
+</div>
+
+<!-- ═══ SCENE 2: CONFIRM ══════════════════════════════════ -->
+<div class="scene" id="scene-confirm" style="flex-direction:column">
+
+  <div class="confirm-tab-bar">
+    <button class="confirm-tab active" onclick="showConfirm('simple',this)">一般確認</button>
+    <button class="confirm-tab" onclick="showConfirm('danger',this)">危險操作（輸入確認）</button>
+  </div>
+
+  <div class="confirm-workspace">
+    <!-- blurred bg -->
+    <div class="confirm-bg-sim"><div class="bg-sim-win"></div></div>
+    <div class="confirm-overlay">
+
+      <!-- Pane: simple confirm -->
+      <div class="confirm-pane active" id="cpane-simple">
+        <div class="dlg">
+          <div class="dlg-top-stripe stripe-warn"></div>
+          <div class="dlg-body">
+            <div class="dlg-icon-row">
+              <div class="dlg-icon icon-warn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ca5010" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div class="dlg-text-wrap">
+                <div class="dlg-title">清除所有日誌檔案？</div>
+                <div class="dlg-desc">此操作將刪除 <code style="font-family:var(--mono);font-size:11.5px;background:#f0f0f0;padding:1px 5px;border-radius:3px;border:1px solid var(--border)">.\logs\</code> 目錄下的所有 <code style="font-family:var(--mono);font-size:11.5px;background:#f0f0f0;padding:1px 5px;border-radius:3px;border:1px solid var(--border)">.log</code> 檔案，無法復原。</div>
+              </div>
+            </div>
+
+            <div class="dlg-scope">
+              <div class="dlg-scope-label">將刪除</div>
+              <div class="dlg-scope-item">app-20260425.log（今日，2.1 MB）</div>
+              <div class="dlg-scope-item">app-20260424.log（1.8 MB）</div>
+              <div class="dlg-scope-item">app-20260423.log（1.4 MB）</div>
+              <div style="font-size:11.5px;color:var(--text-subtle);margin-top:6px">共 3 個檔案 · 5.3 MB</div>
+            </div>
+
+            <div class="dlg-actions">
+              <button class="btn btn-secondary" onclick="fakeCancel()">取消</button>
+              <button class="btn btn-danger" onclick="fakeConfirm('清除所有日誌')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                清除所有日誌
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pane: danger confirm with input -->
+      <div class="confirm-pane" id="cpane-danger">
+        <div class="dlg">
+          <div class="dlg-top-stripe stripe-danger"></div>
+          <div class="dlg-body">
+            <div class="dlg-icon-row">
+              <div class="dlg-icon icon-danger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#c42b1c" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </div>
+              <div class="dlg-text-wrap">
+                <div class="dlg-title">清除所有事件資料庫？</div>
+                <div class="dlg-desc">這將永久刪除 <strong>1,248 筆</strong>事件記錄與所有 AI 分析結果。此操作<strong>不可撤銷</strong>。</div>
+              </div>
+            </div>
+
+            <div class="dlg-scope">
+              <div class="dlg-scope-label">將永久清除</div>
+              <div class="dlg-scope-item">Events 表：1,248 筆事件記錄</div>
+              <div class="dlg-scope-item">AnalysisResults 表：382 筆 AI 分析結果</div>
+              <div class="dlg-scope-item">ContextLogs 表：4,591 筆上下文日誌</div>
+            </div>
+
+            <div class="dlg-confirm-input-wrap">
+              <div class="dlg-confirm-label">請在下方輸入 <code>CLEAR</code> 以確認您瞭解此操作不可復原：</div>
+              <input class="dlg-confirm-input" id="danger-input" type="text"
+                     placeholder="輸入 CLEAR 以確認" oninput="checkDangerInput(this)">
+            </div>
+
+            <div class="dlg-actions">
+              <button class="btn btn-secondary" onclick="fakeCancel()">取消</button>
+              <button class="btn btn-danger" id="danger-confirm-btn" disabled onclick="fakeConfirm('清除資料庫')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/></svg>
+                清除所有資料
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /overlay -->
+  </div><!-- /workspace -->
+</div>
+
+<!-- ═══ SCENE 3: ABOUT ════════════════════════════════════ -->
+<div class="scene" id="scene-about">
+  <div class="about-bg"></div>
+  <div class="about-overlay">
+    <div class="about-dlg">
+
+      <!-- Header -->
+      <div class="about-header">
+        <div class="about-app-icon">
+          <svg viewBox="0 0 16 16"><path d="M8 1L1 4v4c0 4 3.5 7 7 8 3.5-1 7-4 7-8V4L8 1z"/></svg>
+        </div>
+        <div>
+          <div class="about-app-name">WinSentryAI</div>
+          <span class="about-app-ver">v0.1.0</span>
+          <div class="about-app-tagline">AI-assisted Windows Event Log diagnostic tool for IT professionals</div>
+        </div>
+      </div>
+
+      <!-- Inner tabs -->
+      <div class="about-tabs">
+        <button class="about-tab active" onclick="showAboutTab('info',this)">版本資訊</button>
+        <button class="about-tab" onclick="showAboutTab('libs',this)">相依套件</button>
+        <button class="about-tab" onclick="showAboutTab('license',this)">授權條款</button>
+      </div>
+
+      <!-- Panel: Version info -->
+      <div class="about-panel active" id="atab-info">
+        <div class="info-row"><span class="info-key">版本</span><span class="info-val">v0.1.0 (MVP Release)</span></div>
+        <div class="info-row"><span class="info-key">建置日期</span><span class="info-val">2026-04-25</span></div>
+        <div class="info-row"><span class="info-key">執行環境</span><span class="info-val">.NET 8.0 (net8.0-windows)</span></div>
+        <div class="info-row"><span class="info-key">UI 框架</span><span class="info-val">WPF + HandyControl</span></div>
+        <div class="info-row"><span class="info-key">平台</span><span class="info-val">Windows 10 1607+ / Server 2016+  ·  x64 / x86 / ARM64</span></div>
+        <div class="info-row"><span class="info-key">設定檔</span><span class="info-val">.\settings.ini</span></div>
+        <div class="info-row"><span class="info-key">資料庫</span><span class="info-val">.\WinSentryAI.db</span></div>
+        <div class="info-row">
+          <span class="info-key">原始碼</span>
+          <span class="info-val">
+            <a href="https://github.com/placeholder/WinSentryAI" target="_blank">github.com/WinSentryAI ↗</a>
+          </span>
+        </div>
+        <div class="info-row"><span class="info-key">回報問題</span><span class="info-val"><a href="https://github.com/placeholder/WinSentryAI/issues" target="_blank">GitHub Issues ↗</a></span></div>
+      </div>
+
+      <!-- Panel: Libraries -->
+      <div class="about-panel" id="atab-libs">
+        <div class="lib-row">
+          <span class="lib-name">HandyControl</span>
+          <span class="lib-ver">3.5.1</span>
+          <span class="lib-badge">MIT</span>
+        </div>
+        <div class="lib-row">
+          <span class="lib-name">CommunityToolkit.Mvvm</span>
+          <span class="lib-ver">8.4.0</span>
+          <span class="lib-badge">MIT</span>
+        </div>
+        <div class="lib-row">
+          <span class="lib-name">Microsoft.Data.Sqlite</span>
+          <span class="lib-ver">10.0.0</span>
+          <span class="lib-badge">MIT</span>
+        </div>
+        <div class="lib-row">
+          <span class="lib-name">Serilog</span>
+          <span class="lib-ver">4.2.0</span>
+          <span class="lib-badge">Apache 2.0</span>
+        </div>
+        <div class="lib-row">
+          <span class="lib-name">Serilog.Sinks.File</span>
+          <span class="lib-ver">6.0.0</span>
+          <span class="lib-badge">Apache 2.0</span>
+        </div>
+        <div class="lib-row">
+          <span class="lib-name">Hardcodet.NotifyIcon.Wpf</span>
+          <span class="lib-ver">2.0.1</span>
+          <span class="lib-badge">CPOL</span>
+        </div>
+        <div class="lib-row">
+          <span class="lib-name">Microsoft.Extensions.Logging</span>
+          <span class="lib-ver">8.0.1</span>
+          <span class="lib-badge">MIT</span>
+        </div>
+      </div>
+
+      <!-- Panel: License -->
+      <div class="about-panel" id="atab-license">
+        <div class="license-block">MIT License<br><br>
+Copyright (c) 2026 WinSentryAI Contributors<br><br>
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:<br><br>
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.<br><br>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED.</div>
+      </div>
+
+      <!-- Footer -->
+      <div class="about-footer">
+        <span class="about-copyright">© 2026 WinSentryAI Contributors · MIT License</span>
+        <button class="about-close" onclick="alert('[模擬] 關閉 About 視窗')">關閉</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Scene switching ──
+function showScene(id, btn) {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Confirm tabs ──
+function showConfirm(pane, btn) {
+  document.querySelectorAll('.confirm-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.confirm-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('cpane-' + pane).classList.add('active');
+  btn.classList.add('active');
+  // Reset danger input
+  const inp = document.getElementById('danger-input');
+  if (inp) { inp.value = ''; inp.classList.remove('match'); }
+  const dbtn = document.getElementById('danger-confirm-btn');
+  if (dbtn) dbtn.disabled = true;
+}
+
+function checkDangerInput(el) {
+  const ok = el.value.trim() === 'CLEAR';
+  el.classList.toggle('match', ok);
+  document.getElementById('danger-confirm-btn').disabled = !ok;
+}
+
+function fakeCancel() { alert('[模擬] 取消 — 關閉 Dialog，不執行操作'); }
+function fakeConfirm(op) {
+  const inp = document.getElementById('danger-input');
+  if (inp) inp.value = '';
+  const dbtn = document.getElementById('danger-confirm-btn');
+  if (dbtn) dbtn.disabled = true;
+  alert(`[模擬] 確認執行：${op}`);
+}
+
+// ── About tabs ──
+function showAboutTab(tab, btn) {
+  document.querySelectorAll('.about-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.about-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('atab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Toast ──
+const TOAST_EVENTS = {
+  critical: {
+    severity: 'Critical', stripe: 'stripe-crit', sev_cls: 'sev-crit',
+    icon_bg: '#fde7e9', icon_color: '#c42b1c',
+    title: 'The system rebooted without cleanly shutting down first.',
+    msg: 'Event ID 41 · Kernel-Power · Source: System\n2026-04-25 09:14:33',
+    progress_color: '#c42b1c',
+  },
+  high: {
+    severity: 'High', stripe: 'stripe-high', sev_cls: 'sev-high',
+    icon_bg: '#fff3ec', icon_color: '#ca5010',
+    title: 'A critical error occurred in application WinSentryAI.exe',
+    msg: 'Event ID 1000 · Application Error · Source: Application\n2026-04-25 09:14:33',
+    progress_color: '#ca5010',
+  }
+};
+
+let toastCount = 0;
+
+function addToast(type) {
+  const stack = document.getElementById('toast-stack');
+  // max 3
+  if (stack.children.length >= 3) {
+    const oldest = stack.children[0];
+    dismissToast(oldest);
+  }
+
+  const ev = TOAST_EVENTS[type];
+  const id = 'toast-' + (++toastCount);
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.id = id;
+  t.innerHTML = `
+    <div class="toast-stripe ${ev.stripe}"></div>
+    <div class="toast-header">
+      <div class="toast-app-icon" style="background:${ev.icon_bg}">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="${ev.icon_color}"><path d="M8 1L1 4v4c0 4 3.5 7 7 8 3.5-1 7-4 7-8V4L8 1z"/></svg>
+      </div>
+      <span class="toast-app-name">WinSentryAI</span>
+      <span class="toast-time">${timeStr}</span>
+      <button class="toast-close" onclick="dismissToast(document.getElementById('${id}'))">✕</button>
+    </div>
+    <div class="toast-body">
+      <span class="toast-severity ${ev.sev_cls}">${ev.severity}</span>
+      <div class="toast-title">${ev.title}</div>
+      <div class="toast-msg">${ev.msg.replace(/\n/g,'<br>')}</div>
+    </div>
+    <div class="toast-footer">
+      <button class="toast-btn toast-btn-primary" onclick="fakeToastAction('${id}')">查看詳情</button>
+      <button class="toast-btn toast-btn-ghost" onclick="dismissToast(document.getElementById('${id}'))">關閉</button>
+    </div>
+    <div class="toast-progress">
+      <div class="toast-progress-bar" id="prog-${id}"
+           style="background:${ev.progress_color};width:100%"></div>
+    </div>
+  `;
+  stack.appendChild(t);
+
+  // countdown 6s
+  const bar = document.getElementById('prog-' + id);
+  bar.style.transition = 'width 6s linear';
+  requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.width = '0%'; }));
+
+  const timer = setTimeout(() => dismissToast(t), 6000);
+  t._timer = timer;
+}
+
+function dismissToast(el) {
+  if (!el || !el.parentNode) return;
+  clearTimeout(el._timer);
+  el.classList.add('dismissing');
+  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 220);
+}
+
+function fakeToastAction(id) {
+  dismissToast(document.getElementById(id));
+  alert('[模擬] 開啟主視窗並跳至對應事件');
+}
+</script>
+</body>
+</html>
