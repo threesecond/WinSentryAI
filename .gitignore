@@ -6,6 +6,7 @@ GEMINI.md
 .aider.conf.yml
 .mcp.json
 .git/
+.github/
 
 ## .ai dev notes (publish-guide.md is tracked)
 .ai/
