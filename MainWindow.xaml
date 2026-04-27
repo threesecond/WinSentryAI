@@ -8,6 +8,7 @@
         xmlns:viewmodels="clr-namespace:WinSentryAI.ViewModels"
         mc:Ignorable="d"
         Title="WinSentryAI" Height="750" Width="1300"
+        Icon="Resources/Icons/AppIcon.ico"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource RegionBrush}">
 
@@ -202,31 +203,63 @@
                 <RowDefinition Height="30"/>                                         <!-- Row 3: 底部狀態列 -->
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="#FFF4CE" BorderBrush="#F2C94C" BorderThickness="0,0,0,1" Padding="14,8">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsNonAdminMode}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <DockPanel>
-                    <Border Width="18" Height="18" CornerRadius="9" Background="#F2C94C" Margin="0,0,8,0">
-                        <TextBlock Text="&#xE7BA;" Style="{StaticResource Mdl2IconTextStyle}"
-                                   Foreground="#5C4100" FontSize="11"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <TextBlock Text="{DynamicResource NonAdmin_Banner_Text}"
-                               Foreground="#5C4100"
-                               FontSize="12"
-                               FontWeight="SemiBold"
-                               TextWrapping="Wrap"
-                               VerticalAlignment="Center"/>
-                </DockPanel>
-            </Border>
+            <!-- Row 0: banners (non-admin + remote mode) -->
+            <StackPanel Grid.Row="0">
+                <!-- Non-admin warning banner -->
+                <Border Background="#FFF4CE" BorderBrush="#F2C94C" BorderThickness="0,0,0,1" Padding="14,8">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsNonAdminMode}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <DockPanel>
+                        <Border Width="18" Height="18" CornerRadius="9" Background="#F2C94C" Margin="0,0,8,0">
+                            <TextBlock Text="&#xE7BA;" Style="{StaticResource Mdl2IconTextStyle}"
+                                       Foreground="#5C4100" FontSize="11"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="{DynamicResource NonAdmin_Banner_Text}"
+                                   Foreground="#5C4100" FontSize="12" FontWeight="SemiBold"
+                                   TextWrapping="Wrap" VerticalAlignment="Center"/>
+                    </DockPanel>
+                </Border>
+
+                <!-- Remote mode banner -->
+                <Border Background="#0078D4" Padding="14,8">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRemoteMode}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right"
+                                Command="{Binding DisconnectRemoteCommand}"
+                                Content="{DynamicResource Remote_Button_Disconnect}"
+                                Style="{StaticResource ButtonDefault}"
+                                Padding="10,3" FontSize="11"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                       Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Remote_Banner_ActiveMode}"
+                                       Foreground="White" FontSize="12" FontWeight="SemiBold"
+                                       VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding RemoteHost}"
+                                       Foreground="White" FontSize="12"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </StackPanel>
 
             <!-- Row 0: 主要內容區 -->
             <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}"/>
@@ -758,8 +791,29 @@
                     </StackPanel>
                 </StatusBarItem>
                 <StatusBarItem HorizontalAlignment="Right">
-                    <TextBlock Text="v0.1.0 MVP" FontSize="11" Margin="0,0,10,0"
-                               Foreground="#888888"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Connect to Remote button: hidden when already in remote mode -->
+                        <Button Command="{Binding ConnectRemoteCommand}"
+                                Padding="8,2" FontSize="11" Margin="0,0,10,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRemoteMode}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="11"
+                                           Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{DynamicResource Remote_Button_ConnectRemote}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Text="v0.1.0 MVP" FontSize="11" Margin="0,0,10,0"
+                                   Foreground="#888888" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </StatusBarItem>
             </StatusBar>
         </Grid>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WinSentryAI tray alert icon">
+  <path d="M32 5 53 14v18c0 13-8 23-21 28C19 55 11 45 11 32V14l21-9Z" fill="#C42B1C"/>
+  <path d="M32 12 47 18v14c0 9-5 16-15 21-10-5-15-12-15-21V18l15-6Z" fill="none" stroke="#FFE9E5" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="22" y="22" width="20" height="16" rx="3" fill="#FFFFFF"/>
+  <path d="M17 42h9l4-9 6 17 4-8h8" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

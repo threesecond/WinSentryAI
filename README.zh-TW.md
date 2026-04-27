@@ -43,6 +43,9 @@ WinSentryAI 適合日常 Windows 疑難排解流程：
   - 繁體中文
   - 简体中文
 - System tray 整合
+- App、視窗、taskbar、tray icon 資源
+- Single-instance 行為：重複啟動會叫回既有視窗
+- Remote Event Log 歷史查詢
 - 非管理員受限模式提示
 - Settings 頁提供 AI provider 設定與維護功能
 
@@ -58,6 +61,12 @@ WinSentryAI 採用 Bring Your Own Key 模式。
 | Ollama | 本機 | 使用本機 Ollama endpoint，不需要 API key |
 
 雲端 provider 的 API key 會以 Windows DPAPI 加密後存放於本機。
+
+各雲端 provider 的 API 金鑰取得方式：
+
+- **Gemini**：https://ai.google.dev/gemini-api/docs/api-key
+- **OpenAI**：https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key
+- **Claude**：https://platform.claude.com/docs/en/api/admin/api_keys/retrieve
 
 ## 隱私設計
 
@@ -139,27 +148,31 @@ v0.5 目前尚未提供正式 release package。
 
 ## 開發狀態
 
-v0.5 是可運作的開發里程碑。核心本機診斷與 AI 分析流程已可使用，但 UI polish 與正式 release package 尚未完成。
+v0.5 是可運作的開發里程碑。核心本機診斷、AI 分析、system tray、remote 歷史查詢與 single-instance 行為已可使用，但 UI polish 與正式 release package 尚未完成。
 
 近期已完成：
 
 - 多 AI provider 流程
 - follow-up chat
 - 系統資訊頁
-- onboarding wizard
+- onboarding wizard，含稍後設定 AI
 - privacy redaction
 - system tray 行為
+- 正式 app / tray icon 資源
+- remote Event Log 連線流程
+- remote event AI 分析修正
+- single-instance 啟動行為
 - 維護功能
 - 固定 build 輸出路徑
 
 已知待辦：
 
-- Onboarding 允許略過 AI 設定
-- 設計正式 app / tray icon
 - 改善 Settings UI 視覺品質
 - 整理 shell、side navigation、status bar 視覺
 - 優化 AI 分析面板排版
-- 若後續啟用遠端模式，需進一步整理 remote Event Log 流程
+- 在辦公室 / 真實網路環境測試 remote Event Log 模式
+- 改善 remote connection 常見錯誤訊息
+- API key / 模型可用後驗證 OpenAI、Claude、Ollama 端到端流程
 - 準備正式 release package
 
 ## 安全注意事項

@@ -35,9 +35,19 @@ namespace WinSentryAI.ViewModels
         [ObservableProperty]
         private string _statusText = string.Empty;
 
+        [ObservableProperty] private bool _isRemoteMode;
+        [ObservableProperty] private string _remoteHost = string.Empty;
+
         public bool IsNonAdminMode => !AppState.Instance.IsAdministrator;
 
         public IAsyncRelayCommand LoadEventsCommand { get; }
+        public IAsyncRelayCommand ConnectRemoteCommand { get; }
+        public IRelayCommand DisconnectRemoteCommand { get; }
+
+        // Injected from MainWindow code-behind to keep ViewModel free of View types
+        public Func<Task<(RemoteEventLogService? service, int queryHours)>>? ShowConnectDialogAsync { get; set; }
+
+        private readonly IEventLogService _localEventLogService;
 
         // Navigation-related properties
         [ObservableProperty]
@@ -58,6 +68,7 @@ namespace WinSentryAI.ViewModels
         {
             _settingsService = settingsService;
             _databaseService = databaseService;
+            _localEventLogService = AppState.Instance.EventLog;
 
             // Initialize sub-viewmodels
             _settingsViewModel = new SettingsViewModel(settingsService);
@@ -77,6 +88,8 @@ namespace WinSentryAI.ViewModels
             // Initialize commands
             LoadEventsCommand = new AsyncRelayCommand(async () => await InitializeAsync());
             NavigateCommand = new RelayCommand<string>(Navigate);
+            ConnectRemoteCommand = new AsyncRelayCommand(ConnectRemoteAsync);
+            DisconnectRemoteCommand = new RelayCommand(DisconnectRemote);
         }
 
         partial void OnSelectedEventChanged(EventRecord? value)
@@ -260,6 +273,99 @@ namespace WinSentryAI.ViewModels
                 evt.Source,
                 evt.EventId);
             AppState.Instance.Tray?.ShowBalloon(title, message);
+        }
+
+        private async Task ConnectRemoteAsync()
+        {
+            if (ShowConnectDialogAsync == null) return;
+            var (service, queryHours) = await ShowConnectDialogAsync();
+            if (service == null) return;
+
+            AppState.Instance.EventLog.StopWatching();
+            AppState.Instance.EventLog = service;
+            IsRemoteMode = true;
+            RemoteHost = service.Hostname;
+
+            await InitializeRemoteAsync(service, queryHours);
+        }
+
+        private void DisconnectRemote()
+        {
+            if (AppState.Instance.EventLog is RemoteEventLogService remote)
+                remote.Dispose();
+
+            AppState.Instance.EventLog = _localEventLogService;
+            IsRemoteMode = false;
+            RemoteHost = string.Empty;
+
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeRemoteAsync(RemoteEventLogService service, int queryHours)
+        {
+            StatusText = GetString("Shell_Status_Loading");
+            ClearLoadedEvents();
+
+            try
+            {
+                var since = DateTime.Now.AddHours(-queryHours);
+                var events = await service.GetRetrospectiveEventsAsync(since, 200);
+                var persistedEvents = new List<(EventRecord trigger, long dbId)>();
+
+                foreach (var evt in events)
+                {
+                    long id = await AppState.Instance.Database.SaveEventAsync(evt);
+                    if (id <= 0) continue;
+
+                    var withId = evt with { Id = (int)id };
+                    Events.Add(withId);
+                    persistedEvents.Add((withId, id));
+                }
+
+                int errorCount = Events.Count(e => e.Level <= EventLevel.Error);
+                StatusText = string.Format(GetString("Remote_Status_Loaded"), Events.Count, service.Hostname);
+                AppState.Instance.Tray?.SetAlert(errorCount > 0);
+
+                if (persistedEvents.Count > 0)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        foreach (var (trigger, dbId) in persistedEvents)
+                        {
+                            try
+                            {
+                                if (await AppState.Instance.Database.HasContextLogsAsync(dbId))
+                                    continue;
+
+                                var contextLogs = await service.GetContextEventsAsync(trigger.Timestamp);
+                                var related = contextLogs
+                                    .Where(e => !IsSameEvent(e, trigger))
+                                    .OrderBy(e => e.Timestamp)
+                                    .ToList();
+
+                                if (related.Count > 0)
+                                    await AppState.Instance.Database.SaveContextLogsAsync(related, dbId);
+                            }
+                            catch (Exception capEx)
+                            {
+                                Log.Warning(capEx, "Remote context log capture failed for {Id}", dbId);
+                            }
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to load remote events from {Host}", service.Hostname);
+                StatusText = GetString("Shell_Status_Error");
+            }
+        }
+
+        private static bool IsSameEvent(EventRecord candidate, EventRecord trigger)
+        {
+            if (candidate.EventId != trigger.EventId) return false;
+            if (!string.Equals(candidate.Source, trigger.Source, StringComparison.OrdinalIgnoreCase)) return false;
+            return Math.Abs((candidate.Timestamp - trigger.Timestamp).TotalMilliseconds) < 100;
         }
 
         private DateTime GetLastBootUpTime()

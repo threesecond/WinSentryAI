@@ -32,6 +32,10 @@ namespace WinSentryAI.ViewModels
         [ObservableProperty] private string _claudeModel = "claude-3-7-sonnet-latest";
         [ObservableProperty] private bool _enableRedaction = true;
         [ObservableProperty] private bool _needsRestart = false;
+        [ObservableProperty] private string _lastRemoteHost = string.Empty;
+        [ObservableProperty] private string _lastRemoteDomain = string.Empty;
+        [ObservableProperty] private string _lastRemoteUsername = string.Empty;
+        public bool HasLastRemoteHost => !string.IsNullOrWhiteSpace(LastRemoteHost);
 
         public ObservableCollection<string> GeminiModels { get; } = new();
         public ObservableCollection<string> OllamaModels { get; } = new();
@@ -134,6 +138,10 @@ namespace WinSentryAI.ViewModels
             MaxRetryCount = _settingsService.GetInt("ErrorHandling", "MaxRetryCount", 3);
             UiTheme = _settingsService.Get("UI", "Theme", "System");
             UiLanguage = _settingsService.Get("UI", "Language", "en");
+            LastRemoteHost = _settingsService.Get("Remote", "LastHost", string.Empty);
+            LastRemoteDomain = _settingsService.Get("Remote", "LastDomain", string.Empty);
+            LastRemoteUsername = _settingsService.Get("Remote", "LastUsername", string.Empty);
+            OnPropertyChanged(nameof(HasLastRemoteHost));
             NeedsRestart = false; // Reset after loading
         }
 
@@ -288,6 +296,15 @@ namespace WinSentryAI.ViewModels
 
         private void Restart()
         {
+            _settingsService.Set("AI", "Provider", AiProvider);
+            _settingsService.Save();
+
+            if (Application.Current is App app)
+            {
+                app.IsShuttingDown = true;
+                app.ReleaseSingleInstanceLock();
+            }
+
             Process.Start(Environment.ProcessPath!);
             Application.Current.Shutdown();
         }

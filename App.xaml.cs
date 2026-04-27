@@ -1,6 +1,8 @@
 using System.IO;
+using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
 using System.Windows;
 using Serilog;
 using WinSentryAI.Services;
@@ -12,6 +14,10 @@ namespace WinSentryAI
     public partial class App : Application
     {
         private const string AppId = "WinSentryAI.App";
+        private const string SingleInstanceMutexName = "Local\\WinSentryAI.SingleInstance";
+        private const string SingleInstancePipeName = "WinSentryAI.SingleInstance.ShowMainWindow";
+        private Mutex? _singleInstanceMutex;
+        private CancellationTokenSource? _singleInstancePipeCts;
         public bool ShowOnboarding { get; private set; }
         public bool IsShuttingDown { get; set; }
 
@@ -21,6 +27,15 @@ namespace WinSentryAI
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            _singleInstanceMutex = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out bool createdNew);
+            if (!createdNew)
+            {
+                NotifyExistingInstance();
+                Shutdown();
+                return;
+            }
+            StartSingleInstancePipeServer();
 
             // 1. 初始化 Serilog
             ConfigureLogging();
@@ -138,6 +153,7 @@ namespace WinSentryAI
             {
                 var mainVm = new MainViewModel(settingsService, dbService);
                 var mainWin = new MainWindow { DataContext = mainVm };
+                MainWindow = mainWin;
                 mainWin.Show();
                 ShutdownMode = ShutdownMode.OnMainWindowClose;
             }
@@ -160,6 +176,90 @@ namespace WinSentryAI
             {
                 return false;
             }
+        }
+
+        internal void ReleaseSingleInstanceLock()
+        {
+            _singleInstancePipeCts?.Cancel();
+            _singleInstancePipeCts?.Dispose();
+            _singleInstancePipeCts = null;
+
+            try
+            {
+                _singleInstanceMutex?.ReleaseMutex();
+            }
+            catch (ApplicationException)
+            {
+                // The mutex may already be released during a controlled restart.
+            }
+
+            _singleInstanceMutex?.Dispose();
+            _singleInstanceMutex = null;
+        }
+
+        private void StartSingleInstancePipeServer()
+        {
+            _singleInstancePipeCts = new CancellationTokenSource();
+            var token = _singleInstancePipeCts.Token;
+
+            _ = Task.Run(async () =>
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    try
+                    {
+                        using var pipe = new NamedPipeServerStream(
+                            SingleInstancePipeName,
+                            PipeDirection.In,
+                            maxNumberOfServerInstances: 1,
+                            PipeTransmissionMode.Byte,
+                            PipeOptions.Asynchronous);
+
+                        await pipe.WaitForConnectionAsync(token);
+                        await Dispatcher.InvokeAsync(ShowExistingWindow);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning(ex, "Single-instance pipe server failed.");
+                        await Task.Delay(500, token).ContinueWith(_ => { }, TaskScheduler.Default);
+                    }
+                }
+            }, token);
+        }
+
+        private static void NotifyExistingInstance()
+        {
+            try
+            {
+                using var pipe = new NamedPipeClientStream(".", SingleInstancePipeName, PipeDirection.Out);
+                pipe.Connect(800);
+                pipe.WriteByte(1);
+            }
+            catch
+            {
+                // If the existing instance is still starting up, the mutex still prevents a second instance.
+            }
+        }
+
+        private void ShowExistingWindow()
+        {
+            Window? window = MainWindow;
+            if (window == null || !window.IsLoaded)
+                window = Windows.OfType<Window>().FirstOrDefault(w => w.IsLoaded);
+            if (window == null) return;
+
+            window.Show();
+            if (window.WindowState == WindowState.Minimized)
+                window.WindowState = WindowState.Normal;
+
+            window.Activate();
+            window.Topmost = true;
+            window.Topmost = false;
+            window.Focus();
         }
 
         private void ConfigureLogging()
@@ -200,6 +300,7 @@ namespace WinSentryAI
         protected override void OnExit(ExitEventArgs e)
         {
             AppState.Instance.Tray?.Dispose();
+            ReleaseSingleInstanceLock();
             Log.CloseAndFlush();
             base.OnExit(e);
         }

@@ -43,6 +43,9 @@ WinSentryAI is built for hands-on Windows troubleshooting workflows:
   - Traditional Chinese
   - Simplified Chinese
 - System tray integration
+- App, window, taskbar, and tray icon resources
+- Single-instance behavior: launching again brings the existing window forward
+- Remote Event Log retrospective query
 - Non-admin limited-mode warning
 - Settings page with AI provider configuration and maintenance actions
 
@@ -58,6 +61,12 @@ WinSentryAI uses a Bring Your Own Key model.
 | Ollama | Local | Uses local Ollama endpoint, no API key required |
 
 Cloud provider API keys are stored locally using Windows DPAPI encryption.
+
+To obtain an API key for each cloud provider:
+
+- **Gemini**: https://ai.google.dev/gemini-api/docs/api-key
+- **OpenAI**: https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key
+- **Claude**: https://platform.claude.com/docs/en/api/admin/api_keys/retrieve
 
 ## Privacy Model
 
@@ -139,27 +148,31 @@ No official release package is published yet for v0.5.
 
 ## Development Status
 
-v0.5 is a functional development milestone. Core local diagnostics and AI analysis are working, but UI polish and release packaging are not final.
+v0.5 is a functional development milestone. Core local diagnostics, AI analysis, system tray behavior, remote retrospective querying, and single-instance behavior are working, but UI polish and official release packaging are not final.
 
 Recently completed:
 
 - multi-provider AI flow
 - follow-up chat
 - system info view
-- onboarding wizard
+- onboarding wizard with AI setup skip
 - privacy redaction
 - system tray behavior
+- official app/tray icon resources
+- remote Event Log connection flow
+- remote event AI analysis fix
+- single-instance launch behavior
 - maintenance actions
 - fixed build output layout
 
 Known pending work:
 
-- allow onboarding to skip AI setup
-- design official app and tray icons
 - improve Settings UI visual quality
 - refine shell, side navigation, and status bar styling
 - improve AI analysis panel layout
-- improve remote Event Log mode if enabled in future builds
+- test remote Event Log mode in real office/network environments
+- improve remote connection error messages
+- validate OpenAI, Claude, and Ollama end-to-end once keys/models are available
 - prepare official release packaging
 
 ## Security Notes

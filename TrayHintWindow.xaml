@@ -1,0 +1,40 @@
+<Window x:Class="WinSentryAI.TrayHintWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        Title="WinSentryAI"
+        Width="400" SizeToContent="Height"
+        Icon="Resources/Icons/AppIcon.ico"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="{DynamicResource RegionBrush}">
+
+    <Border Padding="24,20">
+        <StackPanel>
+            <!-- Icon + Title -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                <TextBlock Text="&#xE756;" FontFamily="Segoe MDL2 Assets" FontSize="24"
+                           Foreground="#0078D4" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource TrayHint_Title}" FontSize="14" FontWeight="SemiBold"
+                           VerticalAlignment="Center" TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <!-- Message -->
+            <TextBlock Text="{DynamicResource TrayHint_Message}"
+                       TextWrapping="Wrap" FontSize="12"
+                       Foreground="{DynamicResource SecondaryTextBrush}"
+                       Margin="0,0,0,20"/>
+
+            <!-- Don't show again checkbox -->
+            <CheckBox x:Name="DontShowCheck"
+                      Content="{DynamicResource TrayHint_DontShow}"
+                      FontSize="12" Margin="0,0,0,20"/>
+
+            <!-- OK button -->
+            <Button Content="{DynamicResource TrayHint_OK}"
+                    HorizontalAlignment="Right"
+                    Style="{StaticResource ButtonPrimary}"
+                    Width="88" Click="OK_Click"/>
+        </StackPanel>
+    </Border>
+</Window>

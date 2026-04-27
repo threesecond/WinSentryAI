@@ -1,6 +1,9 @@
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using WinSentryAI.Models;
+using WinSentryAI.Services;
 using WinSentryAI.ViewModels;
 
 namespace WinSentryAI
@@ -18,7 +21,20 @@ namespace WinSentryAI
         private void SubscribeToViewModel()
         {
             if (DataContext is MainViewModel vm)
+            {
                 vm.PropertyChanged += OnViewModelPropertyChanged;
+                vm.ShowConnectDialogAsync = ShowConnectDialog;
+            }
+        }
+
+        private Task<(RemoteEventLogService? service, int queryHours)> ShowConnectDialog()
+        {
+            var vm = new RemoteConnectionViewModel(AppState.Instance.Settings);
+            var dialog = new RemoteConnectionWindow { DataContext = vm, Owner = this };
+            bool? result = dialog.ShowDialog();
+            if (result == true && vm.ConnectedService != null)
+                return Task.FromResult<(RemoteEventLogService?, int)>((vm.ConnectedService, vm.QueryHours));
+            return Task.FromResult<(RemoteEventLogService?, int)>((null, 0));
         }
 
         private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -55,6 +71,19 @@ namespace WinSentryAI
                 return;
 
             e.Cancel = true;
+
+            var settings = AppState.Instance.Settings;
+            if (!settings.GetBool("UI", "TrayHintShown", false))
+            {
+                var hint = new TrayHintWindow { Owner = this };
+                hint.ShowDialog();
+                if (hint.DontShowAgain)
+                {
+                    settings.SetBool("UI", "TrayHintShown", true);
+                    settings.Save();
+                }
+            }
+
             Hide();
         }
     }

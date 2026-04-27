@@ -67,9 +67,9 @@
     <sys:String x:Key="EventDetail_SelectEventPrompt">从列表中选择一个事件以查看详情。</sys:String>
     <sys:String x:Key="EventDetail_AIFeatureComingSoon">AI 分析功能即将推出！</sys:String>
     <sys:String x:Key="AI_Section_Title">AI 分析</sys:String>
-    <sys:String x:Key="AI_Status_Idle">点击「AI 分析」可使用 Gemini 诊断此事件。</sys:String>
-    <sys:String x:Key="AI_Status_NoKey">尚未设置 Gemini API Key，请至「设置 → AI」输入密钥。</sys:String>
-    <sys:String x:Key="AI_Status_Loading">正在调用 Gemini…</sys:String>
+    <sys:String x:Key="AI_Status_Idle">点击「AI 分析」诊断此事件。</sys:String>
+    <sys:String x:Key="AI_Status_NoKey">尚未设置 AI，请前往「设置 → AI」进行设置。</sys:String>
+    <sys:String x:Key="AI_Status_Loading">正在调用 AI 服务…</sys:String>
     <sys:String x:Key="AI_Status_Failure">AI 分析失败：</sys:String>
     <sys:String x:Key="AI_Result_ModelLabel">模型:</sys:String>
     <sys:String x:Key="Settings_Section_GeminiKey">Gemini API 密钥</sys:String>
@@ -108,6 +108,7 @@
   <sys:String x:Key="Onboarding_Button_Back">上一步</sys:String>
   <sys:String x:Key="Onboarding_Button_Finish">开始使用</sys:String>
   <sys:String x:Key="Onboarding_Button_Test">测试连接</sys:String>
+  <sys:String x:Key="Onboarding_Button_Skip">稍后设置</sys:String>
   <sys:String x:Key="Onboarding_Test_Success">连接成功！</sys:String>
   <sys:String x:Key="Onboarding_Test_Failed">连接失败，请检查您的设置。</sys:String>
   <sys:String x:Key="Onboarding_Step4_Complete">设置完成！</sys:String>
@@ -152,6 +153,44 @@
   <sys:String x:Key="Settings_ClearLogs_Success">已清除已保存日志与分析结果。</sys:String>
   <sys:String x:Key="Settings_Label_About">关于</sys:String>
   <sys:String x:Key="Settings_Button_About">关于 WinSentryAI</sys:String>
+  <!-- Remote Connection -->
+  <sys:String x:Key="Remote_Dialog_Title">连接到远程事件日志</sys:String>
+  <sys:String x:Key="Remote_Label_Hostname">主机名称 / IP</sys:String>
+  <sys:String x:Key="Remote_Placeholder_Hostname">例如 SERVER01 或 192.168.1.100</sys:String>
+  <sys:String x:Key="Remote_Label_Credentials">验证方式</sys:String>
+  <sys:String x:Key="Remote_Radio_CurrentUser">使用当前 Windows 凭据</sys:String>
+  <sys:String x:Key="Remote_Radio_SpecifyUser">指定凭据</sys:String>
+  <sys:String x:Key="Remote_Label_Domain">域</sys:String>
+  <sys:String x:Key="Remote_Placeholder_Domain">选填</sys:String>
+  <sys:String x:Key="Remote_Label_Username">用户名</sys:String>
+  <sys:String x:Key="Remote_Label_Password">密码</sys:String>
+  <sys:String x:Key="Remote_Note_PasswordNotSaved">密码不会保存。</sys:String>
+  <sys:String x:Key="Remote_Note_NoRealtimeMonitoring">注意：远程连接仅支持历史日志查询，无法进行实时监控，这是 Windows EventLogSession 的限制。</sys:String>
+  <sys:String x:Key="Remote_Label_QueryRange">查询范围</sys:String>
+  <sys:String x:Key="Remote_Range_1h">最近 1 小时</sys:String>
+  <sys:String x:Key="Remote_Range_6h">最近 6 小时</sys:String>
+  <sys:String x:Key="Remote_Range_24h">最近 24 小时</sys:String>
+  <sys:String x:Key="Remote_Range_7d">最近 7 天</sys:String>
+  <sys:String x:Key="Remote_Button_Connect">连接</sys:String>
+  <sys:String x:Key="Remote_Button_Cancel">取消</sys:String>
+  <sys:String x:Key="Remote_Button_ConnectRemote">连接到远程</sys:String>
+  <sys:String x:Key="Remote_Button_Disconnect">断开连接</sys:String>
+  <sys:String x:Key="Remote_Status_Connecting">连接中…</sys:String>
+  <sys:String x:Key="Remote_Status_Success">连接成功</sys:String>
+  <sys:String x:Key="Remote_Status_Failed">连接失败</sys:String>
+  <sys:String x:Key="Remote_Banner_ActiveMode">远程模式：</sys:String>
+  <sys:String x:Key="Remote_Status_Loaded">已从 {1} 加载 {0} 条事件</sys:String>
+  <sys:String x:Key="Settings_Section_Remote">远程连接</sys:String>
+  <sys:String x:Key="Settings_Label_LastHost">上次主机</sys:String>
+  <sys:String x:Key="Settings_Label_LastDomain">上次域</sys:String>
+  <sys:String x:Key="Settings_Label_LastUsername">上次用户名</sys:String>
+  <sys:String x:Key="Settings_Remote_NotConfigured">暂无远程连接记录。</sys:String>
+  <sys:String x:Key="Settings_Link_GetApiKey">获取 API 密钥</sys:String>
+  <!-- Tray Hint -->
+  <sys:String x:Key="TrayHint_Title">WinSentryAI 仍在运行中</sys:String>
+  <sys:String x:Key="TrayHint_Message">窗口已隐藏，但 WinSentryAI 仍在后台持续监控。若要重新打开，请双击系统托盘图标，或右键选择选项。</sys:String>
+  <sys:String x:Key="TrayHint_DontShow">不再显示此提示</sys:String>
+  <sys:String x:Key="TrayHint_OK">知道了</sys:String>
   <sys:String x:Key="About_Title">关于 WinSentryAI</sys:String>
-  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.1.0&#x0D;&#x0A;&#x0D;&#x0A;使用 AI 辅助分析 Windows 事件日志。&#x0D;&#x0A;&#x0D;&#x0A;依赖项：&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;许可：MIT。</sys:String>
+  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.5.0&#x0D;&#x0A;&#x0D;&#x0A;使用 AI 辅助分析 Windows 事件日志。&#x0D;&#x0A;&#x0D;&#x0A;依赖项：&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;许可：MIT。</sys:String>
   </ResourceDictionary>

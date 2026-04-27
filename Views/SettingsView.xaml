@@ -214,7 +214,12 @@
                                     </hc:FlexPanel>
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_GeminiApiKey}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                        <PasswordBox x:Name="GeminiKeyPasswordBox" Width="320" Style="{StaticResource SettingsPasswordBoxStyle}"/>
+                                        <PasswordBox x:Name="GeminiKeyPasswordBox" Width="260" Style="{StaticResource SettingsPasswordBoxStyle}"/>
+                                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="12">
+                                            <Hyperlink NavigateUri="https://ai.google.dev/gemini-api/docs/api-key" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <Run Text="{DynamicResource Settings_Link_GetApiKey}"/>
+                                            </Hyperlink>
+                                        </TextBlock>
                                     </hc:FlexPanel>
                                     <StackPanel Orientation="Horizontal" Margin="196,0,0,12">
                                         <Button Style="{StaticResource SettingsPrimaryButtonStyle}" Click="SaveGeminiKey_Click" Margin="0,0,8,0">
@@ -262,7 +267,12 @@
                                     </hc:FlexPanel>
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_OpenAiApiKey}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                        <PasswordBox x:Name="OpenAiKeyPasswordBox" Width="320" Style="{StaticResource SettingsPasswordBoxStyle}"/>
+                                        <PasswordBox x:Name="OpenAiKeyPasswordBox" Width="260" Style="{StaticResource SettingsPasswordBoxStyle}"/>
+                                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="12">
+                                            <Hyperlink NavigateUri="https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <Run Text="{DynamicResource Settings_Link_GetApiKey}"/>
+                                            </Hyperlink>
+                                        </TextBlock>
                                     </hc:FlexPanel>
                                     <StackPanel Orientation="Horizontal" Margin="196,0,0,12">
                                         <Button Style="{StaticResource SettingsPrimaryButtonStyle}" Click="SaveOpenAiKey_Click" Margin="0,0,8,0">
@@ -303,7 +313,12 @@
                                     </hc:FlexPanel>
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_ClaudeApiKey}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                        <PasswordBox x:Name="ClaudeKeyPasswordBox" Width="320" Style="{StaticResource SettingsPasswordBoxStyle}"/>
+                                        <PasswordBox x:Name="ClaudeKeyPasswordBox" Width="260" Style="{StaticResource SettingsPasswordBoxStyle}"/>
+                                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="12">
+                                            <Hyperlink NavigateUri="https://platform.claude.com/docs/en/api/admin/api_keys/retrieve" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <Run Text="{DynamicResource Settings_Link_GetApiKey}"/>
+                                            </Hyperlink>
+                                        </TextBlock>
                                     </hc:FlexPanel>
                                     <StackPanel Orientation="Horizontal" Margin="196,0,0,12">
                                         <Button Style="{StaticResource SettingsPrimaryButtonStyle}" Click="SaveClaudeKey_Click" Margin="0,0,8,0">
@@ -438,6 +453,46 @@
                                         <TextBlock Text="{DynamicResource Settings_Button_About}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
+                            </hc:FlexPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Remote Connection Section -->
+                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.05"/>
+                    </Border.Effect>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                            <TextBlock Text="{DynamicResource Settings_Section_Remote}" Style="{StaticResource SettingsSectionHeaderTextStyle}"/>
+                        </Border>
+                        <StackPanel Grid.Row="1" Margin="16,12,16,12">
+                            <!-- "Not configured" message -->
+                            <TextBlock Text="{DynamicResource Settings_Remote_NotConfigured}"
+                                       FontSize="12" Foreground="#888888" Margin="0,0,0,4"
+                                       Visibility="{Binding HasLastRemoteHost, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                            <!-- Last Host -->
+                            <hc:FlexPanel Margin="0,0,0,8"
+                                          Visibility="{Binding HasLastRemoteHost, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{DynamicResource Settings_Label_LastHost}" Style="{StaticResource SettingsLabelTextStyle}"/>
+                                <TextBlock Text="{Binding LastRemoteHost}" FontSize="12" VerticalAlignment="Center" Foreground="#333333"/>
+                            </hc:FlexPanel>
+                            <!-- Last Domain -->
+                            <hc:FlexPanel Margin="0,0,0,8"
+                                          Visibility="{Binding HasLastRemoteHost, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{DynamicResource Settings_Label_LastDomain}" Style="{StaticResource SettingsLabelTextStyle}"/>
+                                <TextBlock Text="{Binding LastRemoteDomain}" FontSize="12" VerticalAlignment="Center" Foreground="#333333"/>
+                            </hc:FlexPanel>
+                            <!-- Last Username -->
+                            <hc:FlexPanel Margin="0,0,0,4"
+                                          Visibility="{Binding HasLastRemoteHost, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{DynamicResource Settings_Label_LastUsername}" Style="{StaticResource SettingsLabelTextStyle}"/>
+                                <TextBlock Text="{Binding LastRemoteUsername}" FontSize="12" VerticalAlignment="Center" Foreground="#333333"/>
                             </hc:FlexPanel>
                         </StackPanel>
                     </Grid>

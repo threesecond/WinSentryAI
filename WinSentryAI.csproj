@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Resources\Icons\AppIcon.ico</ApplicationIcon>
     <Version>0.5.0</Version>
     <AssemblyVersion>0.5.0.0</AssemblyVersion>
     <Platforms>x64</Platforms>
@@ -19,6 +20,12 @@
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Icons\AppIcon.ico" />
+    <Resource Include="Resources\Icons\TrayNormal.ico" />
+    <Resource Include="Resources\Icons\TrayAlert.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.7" />

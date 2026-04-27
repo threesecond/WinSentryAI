@@ -45,6 +45,7 @@ namespace WinSentryAI.ViewModels
         public IRelayCommand BackCommand { get; }
         public IAsyncRelayCommand TestAndSaveCommand { get; }
         public IRelayCommand FinishCommand { get; }
+        public IRelayCommand SkipCommand { get; }
 
         public OnboardingViewModel(IDatabaseService db, ISettingsService settings, IAIService ai)
         {
@@ -56,6 +57,7 @@ namespace WinSentryAI.ViewModels
             BackCommand = new RelayCommand(BackStep, () => CurrentStep > 1);
             TestAndSaveCommand = new AsyncRelayCommand(TestAndSaveAsync);
             FinishCommand = new RelayCommand(Finish);
+            SkipCommand = new RelayCommand(SkipAiSetup);
         }
 
         private bool CanNext()
@@ -265,6 +267,20 @@ namespace WinSentryAI.ViewModels
             catch (Exception ex)
             {
                 Log.Warning(ex, "Failed to parse Ollama model list");
+            }
+        }
+
+        private void SkipAiSetup()
+        {
+            _settingsService.Set("UI", "Language", SelectedLanguage);
+            _settingsService.Set("AI", "Provider", SelectedProvider);
+            _settingsService.Set("General", "HasCompletedOnboarding", "true");
+            _settingsService.Save();
+
+            if (Application.Current.Windows.OfType<OnboardingWindow>().FirstOrDefault() is Window win)
+            {
+                win.DialogResult = true;
+                win.Close();
             }
         }
 

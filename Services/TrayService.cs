@@ -1,5 +1,4 @@
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using Hardcodet.Wpf.TaskbarNotification;
@@ -14,15 +13,12 @@ namespace WinSentryAI.Services
         private Icon? _alertIcon;
         private bool _isAlert;
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool DestroyIcon(IntPtr hIcon);
-
         public void Initialize()
         {
             if (_icon != null) return;
 
-            _normalIcon = CreateIcon(Color.FromArgb(0x00, 0x63, 0xB1));
-            _alertIcon = CreateIcon(Color.FromArgb(0xC4, 0x2B, 0x1C));
+            _normalIcon = LoadIconResource("Resources/Icons/TrayNormal.ico");
+            _alertIcon = LoadIconResource("Resources/Icons/TrayAlert.ico");
 
             _icon = new TaskbarIcon
             {
@@ -91,30 +87,14 @@ namespace WinSentryAI.Services
             window.Activate();
         }
 
-        private static Icon CreateIcon(Color color)
+        private static Icon LoadIconResource(string relativePath)
         {
-            using var bitmap = new Bitmap(32, 32);
-            using (var graphics = Graphics.FromImage(bitmap))
-            {
-                graphics.Clear(Color.Transparent);
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                using var brush = new SolidBrush(color);
-                graphics.FillEllipse(brush, 2, 2, 28, 28);
-                using var font = new Font("Segoe UI", 16, System.Drawing.FontStyle.Bold, GraphicsUnit.Pixel);
-                using var textBrush = new SolidBrush(Color.White);
-                var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                graphics.DrawString("W", font, textBrush, new RectangleF(0, 0, 32, 31), format);
-            }
-
-            IntPtr handle = bitmap.GetHicon();
-            try
-            {
-                return (Icon)Icon.FromHandle(handle).Clone();
-            }
-            finally
-            {
-                DestroyIcon(handle);
-            }
+            var uri = new Uri($"pack://application:,,,/{relativePath}", UriKind.Absolute);
+            var resource = Application.GetResourceStream(uri)
+                ?? throw new InvalidOperationException($"Tray icon resource not found: {relativePath}");
+            using var stream = resource.Stream;
+            using var icon = new Icon(stream);
+            return (Icon)icon.Clone();
         }
 
         private static string GetString(string key) =>

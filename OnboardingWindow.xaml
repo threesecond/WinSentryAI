@@ -7,6 +7,7 @@
         xmlns:vm="clr-namespace:WinSentryAI.ViewModels"
         mc:Ignorable="d"
         Title="{DynamicResource Onboarding_Title}" Height="600" Width="500"
+        Icon="Resources/Icons/AppIcon.ico"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
         d:DataContext="{d:DesignInstance vm:OnboardingViewModel}"
         Background="{DynamicResource RegionBrush}">
@@ -248,35 +249,57 @@
             </Grid>
 
             <!-- Footer Buttons -->
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                <!-- Back Button: Hide on Step 1 -->
-                <Button Content="{DynamicResource Onboarding_Button_Back}" Command="{Binding BackCommand}" Margin="0,0,10,0">
+            <Grid Grid.Row="3" Margin="0,20,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Skip Button: Show only on Step 3, left-aligned -->
+                <Button Grid.Column="0" Content="{DynamicResource Onboarding_Button_Skip}" Command="{Binding SkipCommand}">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
-                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="1"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-
-                <!-- Next Button: Hide on Step 4 -->
-                <Button Content="{DynamicResource Onboarding_Button_Next}" Command="{Binding NextCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
-                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="4"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-
-                <!-- Finish Button: Show only on Step 4 -->
-                <Button Content="{DynamicResource Onboarding_Button_Finish}" Command="{Binding FinishCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource ButtonSuccess}">
                             <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="4"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentStep}" Value="3">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
                     </Button.Style>
                 </Button>
-            </StackPanel>
+
+                <!-- Right-side buttons: Back / Next / Finish -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <!-- Back Button: Hide on Step 1 -->
+                    <Button Content="{DynamicResource Onboarding_Button_Back}" Command="{Binding BackCommand}" Margin="0,0,10,0">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
+                                <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="1"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Next Button: Hide on Step 4 -->
+                    <Button Content="{DynamicResource Onboarding_Button_Next}" Command="{Binding NextCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
+                                <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="4"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Finish Button: Show only on Step 4 -->
+                    <Button Content="{DynamicResource Onboarding_Button_Finish}" Command="{Binding FinishCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ButtonSuccess}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers><DataTrigger Binding="{Binding CurrentStep}" Value="4"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Border>
 </Window>

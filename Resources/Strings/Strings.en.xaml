@@ -67,9 +67,9 @@
     <sys:String x:Key="EventDetail_SelectEventPrompt">Select an event from the list to view details.</sys:String>
     <sys:String x:Key="EventDetail_AIFeatureComingSoon">AI Analysis feature is coming soon!</sys:String>
     <sys:String x:Key="AI_Section_Title">AI Analysis</sys:String>
-    <sys:String x:Key="AI_Status_Idle">Click "AI Analyze" to diagnose this event with Gemini.</sys:String>
-    <sys:String x:Key="AI_Status_NoKey">Gemini API key not configured. Open Settings → AI to add your key.</sys:String>
-    <sys:String x:Key="AI_Status_Loading">Calling Gemini…</sys:String>
+    <sys:String x:Key="AI_Status_Idle">Click "AI Analyze" to diagnose this event.</sys:String>
+    <sys:String x:Key="AI_Status_NoKey">AI service not configured. Open Settings → AI to set up your provider.</sys:String>
+    <sys:String x:Key="AI_Status_Loading">Calling AI service…</sys:String>
     <sys:String x:Key="AI_Status_Failure">AI analysis failed:</sys:String>
     <sys:String x:Key="AI_Result_ModelLabel">Model:</sys:String>
     <sys:String x:Key="Settings_Section_GeminiKey">Gemini API Key</sys:String>
@@ -108,6 +108,7 @@
   <sys:String x:Key="Onboarding_Button_Back">Back</sys:String>
   <sys:String x:Key="Onboarding_Button_Finish">Finish</sys:String>
   <sys:String x:Key="Onboarding_Button_Test">Test Connection</sys:String>
+  <sys:String x:Key="Onboarding_Button_Skip">Skip for now</sys:String>
   <sys:String x:Key="Onboarding_Test_Success">Connection successful!</sys:String>
   <sys:String x:Key="Onboarding_Test_Failed">Connection failed. Please check your settings.</sys:String>
   <sys:String x:Key="Onboarding_Step4_Complete">Configuration Complete!</sys:String>
@@ -152,6 +153,44 @@
   <sys:String x:Key="Settings_ClearLogs_Success">Stored logs and analysis results were cleared.</sys:String>
   <sys:String x:Key="Settings_Label_About">About</sys:String>
   <sys:String x:Key="Settings_Button_About">About WinSentryAI</sys:String>
+  <!-- Remote Connection -->
+  <sys:String x:Key="Remote_Dialog_Title">Connect to Remote Event Log</sys:String>
+  <sys:String x:Key="Remote_Label_Hostname">Hostname / IP</sys:String>
+  <sys:String x:Key="Remote_Placeholder_Hostname">e.g. SERVER01 or 192.168.1.100</sys:String>
+  <sys:String x:Key="Remote_Label_Credentials">Credentials</sys:String>
+  <sys:String x:Key="Remote_Radio_CurrentUser">Use current Windows credentials</sys:String>
+  <sys:String x:Key="Remote_Radio_SpecifyUser">Specify credentials</sys:String>
+  <sys:String x:Key="Remote_Label_Domain">Domain</sys:String>
+  <sys:String x:Key="Remote_Placeholder_Domain">Optional</sys:String>
+  <sys:String x:Key="Remote_Label_Username">Username</sys:String>
+  <sys:String x:Key="Remote_Label_Password">Password</sys:String>
+  <sys:String x:Key="Remote_Note_PasswordNotSaved">Password is not saved.</sys:String>
+  <sys:String x:Key="Remote_Note_NoRealtimeMonitoring">Note: Remote connections support historical log queries only. Real-time monitoring is not available due to Windows EventLogSession limitations.</sys:String>
+  <sys:String x:Key="Remote_Label_QueryRange">Query range</sys:String>
+  <sys:String x:Key="Remote_Range_1h">Last 1 hour</sys:String>
+  <sys:String x:Key="Remote_Range_6h">Last 6 hours</sys:String>
+  <sys:String x:Key="Remote_Range_24h">Last 24 hours</sys:String>
+  <sys:String x:Key="Remote_Range_7d">Last 7 days</sys:String>
+  <sys:String x:Key="Remote_Button_Connect">Connect</sys:String>
+  <sys:String x:Key="Remote_Button_Cancel">Cancel</sys:String>
+  <sys:String x:Key="Remote_Button_ConnectRemote">Connect to Remote</sys:String>
+  <sys:String x:Key="Remote_Button_Disconnect">Disconnect</sys:String>
+  <sys:String x:Key="Remote_Status_Connecting">Connecting…</sys:String>
+  <sys:String x:Key="Remote_Status_Success">Connection successful</sys:String>
+  <sys:String x:Key="Remote_Status_Failed">Connection failed</sys:String>
+  <sys:String x:Key="Remote_Banner_ActiveMode">Remote Mode:</sys:String>
+  <sys:String x:Key="Remote_Status_Loaded">Loaded {0} events from {1}</sys:String>
+  <sys:String x:Key="Settings_Section_Remote">Remote Connection</sys:String>
+  <sys:String x:Key="Settings_Label_LastHost">Last Host</sys:String>
+  <sys:String x:Key="Settings_Label_LastDomain">Last Domain</sys:String>
+  <sys:String x:Key="Settings_Label_LastUsername">Last Username</sys:String>
+  <sys:String x:Key="Settings_Remote_NotConfigured">No recent remote connections.</sys:String>
+  <sys:String x:Key="Settings_Link_GetApiKey">Get API Key</sys:String>
+  <!-- Tray Hint -->
+  <sys:String x:Key="TrayHint_Title">WinSentryAI is still running</sys:String>
+  <sys:String x:Key="TrayHint_Message">The window has been hidden, but WinSentryAI continues monitoring in the background. To reopen it, double-click the tray icon or right-click for options.</sys:String>
+  <sys:String x:Key="TrayHint_DontShow">Don't show this again</sys:String>
+  <sys:String x:Key="TrayHint_OK">Got it</sys:String>
   <sys:String x:Key="About_Title">About WinSentryAI</sys:String>
-  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.1.0&#x0D;&#x0A;&#x0D;&#x0A;Windows Event Log diagnostics with AI-assisted analysis.&#x0D;&#x0A;&#x0D;&#x0A;Dependencies:&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;License: MIT.</sys:String>
+  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.5.0&#x0D;&#x0A;&#x0D;&#x0A;Windows Event Log diagnostics with AI-assisted analysis.&#x0D;&#x0A;&#x0D;&#x0A;Dependencies:&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;License: MIT.</sys:String>
   </ResourceDictionary>
