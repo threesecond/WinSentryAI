@@ -17,6 +17,7 @@ namespace WinSentryAI.Services
         Task<long> SaveEventAsync(EventRecord evt, CancellationToken ct = default);
         Task<IReadOnlyList<EventRecord>> GetRecentEventsAsync(int limit = 200, CancellationToken ct = default);
         Task MarkEventAnalyzedAsync(long eventId, CancellationToken ct = default);
+        Task ClearAllLogsAsync(CancellationToken ct = default);
         Task<IReadOnlyList<EventRecord>> GetContextLogsAsync(long triggerEventId, CancellationToken ct = default);
         Task SaveContextLogsAsync(IEnumerable<EventRecord> contextLogs, long triggerEventId, CancellationToken ct = default);
         Task<bool> HasContextLogsAsync(long triggerEventId, CancellationToken ct = default);

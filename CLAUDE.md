@@ -62,12 +62,27 @@ WinSentryAI 是一款 Windows 桌面應用程式（WPF / .NET 8），透過讀�
 
 WPF 支援標準 .NET CLI，不需要 MSBuild 特殊指令。
 
+### Build 輸出規範（所有 code agent 必須遵守）
+
+- 只支援 Windows x64：`<Platforms>x64</Platforms>`、`<RuntimeIdentifier>win-x64</RuntimeIdentifier>`。
+- 不產生 Linux、x86、ARM64 build。
+- 不使用臨時 `-o` 輸出路徑做一般 build。
+- 固定 build 指令：
+  ```powershell
+  dotnet build -c Debug -p:Platform=x64
+  ```
+- 固定 build 輸出資料夾：
+  ```text
+  bin\build\
+  ```
+- 若需要臨時驗證輸出，必須先確認不會留下額外 `bin/*` build 目錄；驗證後清理。
+
 ```powershell
 # Debug 建置
-dotnet build -c Debug
+dotnet build -c Debug -p:Platform=x64
 
 # Release 建置
-dotnet build -c Release
+dotnet build -c Release -p:Platform=x64
 
 # 發佈（Framework-dependent，需目標機器有 .NET 8 Runtime）
 dotnet publish -c Release -r win-x64 --self-contained false -o .\publish
@@ -92,7 +107,11 @@ dotnet publish -c Release -r win-x64 --self-contained true -o .\publish
   <ApplicationManifest>app.manifest</ApplicationManifest>
   <Version>0.1.0</Version>
   <AssemblyVersion>0.1.0.0</AssemblyVersion>
-  <Platforms>x86;x64;ARM64</Platforms>
+  <Platforms>x64</Platforms>
+  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  <OutputPath>bin\build\</OutputPath>
+  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 </PropertyGroup>
 
 <ItemGroup>
@@ -988,6 +1007,10 @@ _chatHistory.Add(new ChatMessage(ChatRole.Assistant, reply));
 | Toast 通知樣板 | ✅ 完成 | 第三階段 | `misc-dialogs-mockup.html`（Scene 1）：Critical/High 事件推送、6 秒倒數自動消失、Action Button「查看詳情」、最多 3 則堆疊 |
 | 確認 Dialog（通用） | ✅ 完成 | 各階段伴隨 | `misc-dialogs-mockup.html`（Scene 2）：一般確認（橙色警告）+ 危險操作需輸入「CLEAR」才可確認（防誤觸）|
 | About 對話框 | ✅ 完成 | 任意階段 | `misc-dialogs-mockup.html`（Scene 3）：v0.1.0、相依套件（HandyControl / CommunityToolkit.Mvvm / Microsoft.Data.Sqlite / Serilog / Hardcodet.NotifyIcon.Wpf）、MIT 授權條款 |
+| App Icon 設計 | 📝 待討論 | 視覺收尾 | 目前僅有程式化 Tray "W" 圓形圖示；需設計正式 SVG 候選，定案後轉 `.ico` 並套用到 exe、視窗、Tray、About、Release 視覺 |
+| Settings 頁視覺重構 | 📝 待討論 | UI Polish | 目前功能可用但仍偏 WPF 表單感；需對齊 `settings-mockup.html`，整理 section 密度、label/field 對齊、按鈕語意色與卡片層級 |
+| Shell / SideNav 視覺整理 | 📝 待討論 | UI Polish | 左側導覽與狀態列目前選取狀態與品牌感偏弱；需加入更清楚的 active state、圖示、間距與整體 dashboard 風格 |
+| AI 分析面板排版優化 | 📝 待討論 | UI Polish | 分析結果、redaction map、follow-up chat 已可用；需優化資訊層級、空白、聊天區視覺與長文字可讀性 |
 
 ### 功能規格
 
@@ -996,6 +1019,7 @@ _chatHistory.Add(new ChatMessage(ChatRole.Assistant, reply));
 | AI Prompt 規格 | ✅ 完成 | AI Core 階段 | System Prompt、User Message 組裝、多輪對話、截斷策略、各 Provider 傳送格式 |
 | i18n 語言包架構 | ✅ 完成 | MVP | XAML ResourceDictionary、三語對照、執行時期切換、`Strings.{lang}.xaml` |
 | 去識別化 Pattern | ✅ 完成 | 第四階段 | 規則已定義：只遮蔽高風險項目（使用者帳號、路徑中的帳號段、Email），中低風險項目（IP、電腦名稱、Domain、SID、MAC、GUID）保留明文 |
+| Onboarding Skip AI 設定 | 📝 待討論 | MVP UX | Onboarding 不應因沒有 API Key 或 Ollama 而阻擋進入主視窗；需加入「稍後設定 / Skip for now」，Skip 後進主視窗並在 AI 面板與 Settings 提供補設定流程 |
 
 ## 重要設定檔
 

@@ -30,6 +30,27 @@
 
 每一個階段都應該以「能在 Windows VM 裡實際跑起來、可操作、可驗證」為完成目標，而不是只完成資料模型或只完成 UI 外觀。
 
+## Build 輸出規範
+
+所有 code agent 必須使用同一個 build 指令與輸出路徑，避免 `bin/` 下留下多份不同平台或臨時輸出：
+
+```powershell
+dotnet build -c Debug -p:Platform=x64
+```
+
+固定輸出資料夾：
+
+```text
+bin\build\
+```
+
+限制：
+
+- 只支援 Windows x64 build。
+- 不產生 Linux、x86、ARM64 build。
+- 一般 build 不使用 `-o` 指向臨時資料夾。
+- 若因檔案鎖定需要臨時驗證輸出，完成後必須清理臨時目錄。
+
 ## 建議開發順序
 
 ### 第一階段：穩定本機 MVP Shell

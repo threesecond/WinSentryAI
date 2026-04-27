@@ -63,6 +63,15 @@
 
                         <hc:Divider Margin="0,15"/>
 
+                        <hc:FlexPanel Margin="0,5">
+                            <TextBlock Text="{DynamicResource Settings_Label_EnableRedaction}" Width="150" VerticalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EnableRedaction}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Settings_Redaction_Note}" Margin="10,0,0,0"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                        </hc:FlexPanel>
+
+                        <hc:Divider Margin="0,15"/>
+
                         <!-- Provider Panels -->
                         <Grid>
                             <!-- Gemini Panel -->
@@ -199,6 +208,24 @@
                         <hc:FlexPanel Margin="0,5">
                             <TextBlock Text="{DynamicResource Settings_Label_Language}" Width="150" VerticalAlignment="Center"/>
                             <ComboBox ItemsSource="{Binding UiLanguages}" SelectedItem="{Binding UiLanguage}" Width="200"/>
+                        </hc:FlexPanel>
+                    </StackPanel>
+                </hc:Card>
+
+                <!-- Maintenance -->
+                <hc:Card Header="{DynamicResource Settings_Section_Maintenance}" Margin="0,0,0,20">
+                    <StackPanel Margin="10">
+                        <hc:FlexPanel Margin="0,5">
+                            <TextBlock Text="{DynamicResource Settings_Label_ClearLogs}" Width="150" VerticalAlignment="Center"/>
+                            <Button Content="{DynamicResource Settings_Button_ClearLogs}"
+                                    Command="{Binding ClearAllLogsCommand}"
+                                    Style="{StaticResource ButtonDanger}"/>
+                        </hc:FlexPanel>
+                        <hc:FlexPanel Margin="0,5">
+                            <TextBlock Text="{DynamicResource Settings_Label_About}" Width="150" VerticalAlignment="Center"/>
+                            <Button Content="{DynamicResource Settings_Button_About}"
+                                    Command="{Binding ShowAboutCommand}"
+                                    Style="{StaticResource ButtonInfo}"/>
                         </hc:FlexPanel>
                     </StackPanel>
                 </hc:Card>

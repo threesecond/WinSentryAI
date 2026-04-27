@@ -5,7 +5,7 @@ namespace WinSentryAI.Services
 {
     /// <summary>
     /// 依 CLAUDE.md AI Prompt 規格組裝 system prompt 與 user message。
-    /// 暫不做去識別化（Privacy 階段才上線），目前直接送原始 message。
+    /// 雲端 provider 可傳入 SubstitutionContext，僅 redacts event message 欄位。
     /// </summary>
     internal static class PromptBuilder
     {
@@ -74,7 +74,8 @@ Response format (strictly follow this structure, use these exact English section
         public static string BuildUserMessage(
             EventRecord trigger,
             IReadOnlyList<EventRecord> contextLogs,
-            SystemSnapshot? snapshot)
+            SystemSnapshot? snapshot,
+            SubstitutionContext? redactionContext = null)
         {
             var sb = new StringBuilder();
             sb.AppendLine("=== SYSTEM ENVIRONMENT ===");
@@ -101,7 +102,7 @@ Response format (strictly follow this structure, use these exact English section
             sb.AppendLine($"Event ID  : {trigger.EventId}");
             sb.AppendLine($"Level     : {trigger.Level}");
             sb.AppendLine("Message   :");
-            sb.AppendLine(trigger.Message ?? "(empty)");
+            sb.AppendLine(Redact(trigger.Message ?? "(empty)", redactionContext));
             sb.AppendLine();
 
             sb.AppendLine("=== CONTEXT EVENTS (±1 min) ===");
@@ -115,7 +116,7 @@ Response format (strictly follow this structure, use these exact English section
                 foreach (var ev in truncated.OrderBy(e => e.Timestamp))
                 {
                     sb.AppendLine($"[{ev.Timestamp:HH:mm:ss}] [{ev.Level}] {ev.Source} EventID={ev.EventId}");
-                    sb.AppendLine(Truncate(ev.Message ?? string.Empty, MaxMessageChars));
+                    sb.AppendLine(Truncate(Redact(ev.Message ?? string.Empty, redactionContext), MaxMessageChars));
                     sb.AppendLine("---");
                 }
             }
@@ -149,6 +150,9 @@ Response format (strictly follow this structure, use these exact English section
             if (string.IsNullOrEmpty(s)) return s;
             return s.Length <= max ? s : s[..max] + "…";
         }
+
+        private static string Redact(string message, SubstitutionContext? context) =>
+            context == null ? message : RedactionService.RedactMessage(message, context);
 
         private static string MapLanguage(string lang) => lang switch
         {

@@ -11,6 +11,7 @@ namespace WinSentryAI
         {
             InitializeComponent();
             Loaded += MainWindow_Loaded;
+            Closing += MainWindow_Closing;
             DataContextChanged += (_, _) => SubscribeToViewModel();
         }
 
@@ -46,6 +47,15 @@ namespace WinSentryAI
         {
             if (DataContext is MainViewModel vm)
                 await vm.LoadEventsCommand.ExecuteAsync(null);
+        }
+
+        private void MainWindow_Closing(object? sender, CancelEventArgs e)
+        {
+            if (Application.Current is App { IsShuttingDown: true })
+                return;
+
+            e.Cancel = true;
+            Hide();
         }
     }
 }

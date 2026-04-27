@@ -192,6 +192,34 @@ namespace WinSentryAI.Services
             command.Parameters.AddWithValue("@id", eventId);
             await command.ExecuteNonQueryAsync(ct);
         }
+
+        public async Task ClearAllLogsAsync(CancellationToken ct = default)
+        {
+            using var connection = GetConnection();
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                foreach (string sql in new[]
+                {
+                    "DELETE FROM ContextLogs;",
+                    "DELETE FROM AnalysisResults;",
+                    "DELETE FROM Events;"
+                })
+                {
+                    using var command = connection.CreateCommand();
+                    command.Transaction = transaction;
+                    command.CommandText = sql;
+                    await command.ExecuteNonQueryAsync(ct);
+                }
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
         
         public async Task<IReadOnlyList<EventRecord>> GetContextLogsAsync(long triggerEventId, CancellationToken ct = default)
         {

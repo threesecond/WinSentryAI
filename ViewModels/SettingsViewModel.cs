@@ -30,6 +30,7 @@ namespace WinSentryAI.ViewModels
         [ObservableProperty] private string _geminiModel = "gemini-2.0-flash";
         [ObservableProperty] private string _openAiModel = "gpt-4o";
         [ObservableProperty] private string _claudeModel = "claude-3-7-sonnet-latest";
+        [ObservableProperty] private bool _enableRedaction = true;
         [ObservableProperty] private bool _needsRestart = false;
 
         public ObservableCollection<string> GeminiModels { get; } = new();
@@ -83,6 +84,8 @@ namespace WinSentryAI.ViewModels
         public IAsyncRelayCommand<string?> SaveClaudeKeyCommand { get; }
         public IAsyncRelayCommand ClearClaudeKeyCommand { get; }
         public IRelayCommand RestartCommand { get; }
+        public IAsyncRelayCommand ClearAllLogsCommand { get; }
+        public IRelayCommand ShowAboutCommand { get; }
 
         public SettingsViewModel(ISettingsService settingsService)
             : this(settingsService, AppState.Instance.Database) { }
@@ -103,6 +106,8 @@ namespace WinSentryAI.ViewModels
             SaveClaudeKeyCommand = new AsyncRelayCommand<string?>(SaveClaudeKeyAsync);
             ClearClaudeKeyCommand = new AsyncRelayCommand(ClearClaudeKeyAsync);
             RestartCommand = new RelayCommand(Restart);
+            ClearAllLogsCommand = new AsyncRelayCommand(ClearAllLogsAsync);
+            ShowAboutCommand = new RelayCommand(ShowAbout);
 
             LoadSettings();
             _ = RefreshAllKeyStatusAsync();
@@ -125,6 +130,7 @@ namespace WinSentryAI.ViewModels
             GeminiModel = _settingsService.Get("AI", "GeminiModel", "gemini-2.0-flash");
             OpenAiModel = _settingsService.Get("AI", "OpenAiModel", "gpt-4o");
             ClaudeModel = _settingsService.Get("AI", "ClaudeModel", "claude-3-7-sonnet-latest");
+            EnableRedaction = _settingsService.GetBool("AI", "EnableRedaction", true);
             MaxRetryCount = _settingsService.GetInt("ErrorHandling", "MaxRetryCount", 3);
             UiTheme = _settingsService.Get("UI", "Theme", "System");
             UiLanguage = _settingsService.Get("UI", "Language", "en");
@@ -141,6 +147,7 @@ namespace WinSentryAI.ViewModels
             _settingsService.Set("AI", "GeminiModel", string.IsNullOrWhiteSpace(GeminiModel) ? "gemini-2.0-flash" : GeminiModel.Trim());
             _settingsService.Set("AI", "OpenAiModel", string.IsNullOrWhiteSpace(OpenAiModel) ? "gpt-4o" : OpenAiModel.Trim());
             _settingsService.Set("AI", "ClaudeModel", string.IsNullOrWhiteSpace(ClaudeModel) ? "claude-3-7-sonnet-latest" : ClaudeModel.Trim());
+            _settingsService.SetBool("AI", "EnableRedaction", EnableRedaction);
             _settingsService.SetInt("ErrorHandling", "MaxRetryCount", MaxRetryCount);
             _settingsService.Set("UI", "Theme", UiTheme);
             _settingsService.Set("UI", "Language", UiLanguage);
@@ -283,6 +290,45 @@ namespace WinSentryAI.ViewModels
         {
             Process.Start(Environment.ProcessPath!);
             Application.Current.Shutdown();
+        }
+
+        private async Task ClearAllLogsAsync()
+        {
+            var result = MessageBox.Show(
+                GetString("Settings_ClearLogs_Confirm"),
+                GetString("Settings_Section_Maintenance"),
+                MessageBoxButton.OKCancel,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.OK) return;
+
+            try
+            {
+                await _databaseService.ClearAllLogsAsync();
+                if (Application.Current.MainWindow?.DataContext is MainViewModel mainVm)
+                    mainVm.ClearLoadedEvents();
+
+                MessageBox.Show(
+                    GetString("Settings_ClearLogs_Success"),
+                    GetString("Settings_Section_Maintenance"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Failed to clear logs.");
+                MessageBox.Show(ex.Message, GetString("Settings_Section_Maintenance"),
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ShowAbout()
+        {
+            MessageBox.Show(
+                GetString("About_Message"),
+                GetString("About_Title"),
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
 
         private async Task SaveOpenAiKeyAsync(string? apiKey)

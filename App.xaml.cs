@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Windows;
 using Serilog;
 using WinSentryAI.Services;
@@ -12,6 +13,7 @@ namespace WinSentryAI
     {
         private const string AppId = "WinSentryAI.App";
         public bool ShowOnboarding { get; private set; }
+        public bool IsShuttingDown { get; set; }
 
         [DllImport("shell32.dll", SetLastError = true)]
         private static extern void SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string AppID);
@@ -32,6 +34,17 @@ namespace WinSentryAI
             catch (Exception ex)
             {
                 Log.Warning(ex, "Failed to set AppUserModelID");
+            }
+
+            bool isAdministrator = IsCurrentUserAdministrator();
+            AppState.Instance.IsAdministrator = isAdministrator;
+            if (!isAdministrator)
+            {
+                MessageBox.Show(
+                    "WinSentryAI is not running as administrator. System and Application logs may still be readable, but Security log access and some diagnostics can be limited.",
+                    "WinSentryAI",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
 
             // 3. 檢查設定檔是否存在
@@ -79,6 +92,8 @@ namespace WinSentryAI
                 "claude" => new ClaudeAIService(dbService, settingsService),
                 _ => new GeminiAIService(dbService, settingsService)
             };
+            AppState.Instance.Tray = new TrayService();
+            AppState.Instance.Tray.Initialize();
             
             AppState.Instance.IsOnboarding = ShowOnboarding;
 
@@ -133,6 +148,20 @@ namespace WinSentryAI
             }
         }
 
+        private static bool IsCurrentUserAdministrator()
+        {
+            try
+            {
+                using var identity = WindowsIdentity.GetCurrent();
+                var principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private void ConfigureLogging()
         {
             string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "app-.log");
@@ -170,6 +199,7 @@ namespace WinSentryAI
 
         protected override void OnExit(ExitEventArgs e)
         {
+            AppState.Instance.Tray?.Dispose();
             Log.CloseAndFlush();
             base.OnExit(e);
         }

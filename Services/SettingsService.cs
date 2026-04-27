@@ -119,6 +119,7 @@ namespace WinSentryAI.Services
             AddDefault("AI", "Provider", "gemini");
             AddDefault("AI", "OllamaEndpoint", "http://localhost:11434");
             AddDefault("AI", "OllamaModel", "llama3");
+            AddDefault("AI", "EnableRedaction", "true");
 
             // [ErrorHandling]
             AddDefault("ErrorHandling", "MaxRetryCount", "3");

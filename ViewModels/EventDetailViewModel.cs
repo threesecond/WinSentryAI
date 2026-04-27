@@ -22,6 +22,7 @@ namespace WinSentryAI.ViewModels
         private readonly IDatabaseService _databaseService;
         private readonly IContextLogCaptureService _contextLogCapture;
         private readonly IAIService _aiService;
+        private string? _initialUserMessageForChat;
 
         [ObservableProperty]
         private EventRecord? _selectedEvent;
@@ -38,6 +39,7 @@ namespace WinSentryAI.ViewModels
         [NotifyPropertyChangedFor(nameof(IsAiLoading))]
         [NotifyPropertyChangedFor(nameof(IsAiSuccess))]
         [NotifyPropertyChangedFor(nameof(IsAiFailure))]
+        [NotifyPropertyChangedFor(nameof(HasInitialAnalysisContext))]
         private AiAnalysisStatus _aiStatus = AiAnalysisStatus.Idle;
 
         [ObservableProperty]
@@ -51,6 +53,13 @@ namespace WinSentryAI.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<ChatMessage> _chatHistory = new();
+
+        [ObservableProperty]
+        private ObservableCollection<ChatMessage> _visibleChatHistory = new();
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasRedactionEntries))]
+        private ObservableCollection<RedactionEntry> _redactionEntries = new();
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SendChatCommand))]
@@ -75,6 +84,8 @@ namespace WinSentryAI.ViewModels
         public bool IsAiLoading => AiStatus == AiAnalysisStatus.Loading;
         public bool IsAiSuccess => AiStatus == AiAnalysisStatus.Success;
         public bool IsAiFailure => AiStatus == AiAnalysisStatus.Failure;
+        public bool HasRedactionEntries => RedactionEntries.Count > 0;
+        public bool HasInitialAnalysisContext => IsAiSuccess && !string.IsNullOrWhiteSpace(_initialUserMessageForChat);
 
         public IAsyncRelayCommand LoadContextLogsCommand { get; }
         public IAsyncRelayCommand AnalyzeCommand { get; }
@@ -128,8 +139,13 @@ namespace WinSentryAI.ViewModels
             AiModelName = null;
             IsEventAnalyzed = false;
             ChatHistory.Clear();
+            VisibleChatHistory.Clear();
+            RedactionEntries.Clear();
+            OnPropertyChanged(nameof(HasRedactionEntries));
             ChatInput = string.Empty;
             SelectedTab = "Detail";
+            _initialUserMessageForChat = null;
+            OnPropertyChanged(nameof(HasInitialAnalysisContext));
         }
 
         private async Task LoadExistingAnalysisAsync(EventRecord trigger)
@@ -142,6 +158,8 @@ namespace WinSentryAI.ViewModels
                 if (!ReferenceEquals(SelectedEvent, trigger)) return;
 
                 AiModelName = existing.ModelName;
+                _initialUserMessageForChat = existing.Prompt;
+                OnPropertyChanged(nameof(HasInitialAnalysisContext));
                 if (existing.IsSuccess)
                 {
                     AiResponseText = existing.Response;
@@ -232,6 +250,15 @@ namespace WinSentryAI.ViewModels
                 if (!ReferenceEquals(SelectedEvent, trigger)) return;
 
                 AiModelName = response.ModelName;
+                _initialUserMessageForChat = response.UserMessage;
+                OnPropertyChanged(nameof(HasInitialAnalysisContext));
+                RedactionEntries.Clear();
+                foreach (var item in response.RedactionMap.OrderBy(kv => kv.Value))
+                {
+                    RedactionEntries.Add(new RedactionEntry(item.Key, item.Value));
+                }
+                OnPropertyChanged(nameof(HasRedactionEntries));
+
                 if (response.IsSuccess)
                 {
                     AiResponseText = response.Response;
@@ -273,14 +300,18 @@ namespace WinSentryAI.ViewModels
                 // 若為第一輪，先加入初始分析作為第一筆 Assistant 回應
                 if (ChatHistory.Count == 0 && !string.IsNullOrEmpty(AiResponseText))
                 {
-                    // 初始 User Message 包含事件詳細資料
-                    string initialUserMsg = PromptBuilder.BuildUserMessage(
-                        trigger, ContextLogs.ToList(), await _databaseService.GetLatestSnapshotAsync());
+                    string? initialUserMsg = _initialUserMessageForChat;
+                    if (string.IsNullOrWhiteSpace(initialUserMsg))
+                    {
+                        initialUserMsg = PromptBuilder.BuildUserMessage(
+                            trigger, ContextLogs.ToList(), await _databaseService.GetLatestSnapshotAsync());
+                    }
                     ChatHistory.Add(new ChatMessage(ChatRole.User, initialUserMsg));
                     ChatHistory.Add(new ChatMessage(ChatRole.Assistant, AiResponseText));
                 }
 
                 ChatHistory.Add(new ChatMessage(ChatRole.User, userInput));
+                VisibleChatHistory.Add(new ChatMessage(ChatRole.User, userInput));
 
                 // 3. 呼叫 AI
                 string reply = await _aiService.SendChatAsync(systemPrompt, ChatHistory.ToList());
@@ -289,13 +320,16 @@ namespace WinSentryAI.ViewModels
                 if (!ReferenceEquals(SelectedEvent, trigger)) return;
 
                 ChatHistory.Add(new ChatMessage(ChatRole.Assistant, reply));
+                VisibleChatHistory.Add(new ChatMessage(ChatRole.Assistant, reply));
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to send follow-up chat for event {EventId}", trigger.Id);
                 if (ReferenceEquals(SelectedEvent, trigger))
                 {
-                    ChatHistory.Add(new ChatMessage(ChatRole.Assistant, $"[Error] {ex.Message}"));
+                    var error = new ChatMessage(ChatRole.Assistant, $"[Error] {ex.Message}");
+                    ChatHistory.Add(error);
+                    VisibleChatHistory.Add(error);
                 }
             }
             finally

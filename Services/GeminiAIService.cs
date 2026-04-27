@@ -50,8 +50,9 @@ namespace WinSentryAI.Services
         public async Task<AIAnalysisResponse> AnalyzeEventAsync(AIAnalysisRequest request, CancellationToken ct = default)
         {
             string systemPrompt = PromptBuilder.BuildSystemPrompt(request.Language);
+            var redactionContext = ShouldRedact() ? new SubstitutionContext() : null;
             string userMessage = PromptBuilder.BuildUserMessage(
-                request.TriggerEvent, request.ContextLogs, request.SystemSnapshot);
+                request.TriggerEvent, request.ContextLogs, request.SystemSnapshot, redactionContext);
             string model = ModelName;
 
             // 讀 API key
@@ -79,7 +80,8 @@ namespace WinSentryAI.Services
             string url = BuildUrl(model, apiKey);
             int maxRetries = Math.Clamp(_settings.GetInt("ErrorHandling", "MaxRetryCount", 3), 1, 10);
 
-            return await ExecuteWithRetryAsync(systemPrompt, userMessage, model, url, payload, maxRetries, ct);
+            var result = await ExecuteWithRetryAsync(systemPrompt, userMessage, model, url, payload, maxRetries, ct);
+            return result with { RedactionMap = redactionContext?.Map ?? new Dictionary<string, string>() };
         }
 
         public async Task<string> SendChatAsync(string systemPrompt, IList<ChatMessage> chatHistory, CancellationToken ct = default)
@@ -364,6 +366,9 @@ namespace WinSentryAI.Services
 
         private static AIAnalysisResponse Failure(string sys, string usr, string model, string err) =>
             new(false, sys, usr, null, err, model);
+
+        private bool ShouldRedact() =>
+            _settings.GetBool("AI", "EnableRedaction", true);
 
         // 日誌用：去掉 key prefix 前的括號標籤（已無敏感資訊）
         private static string SanitizeSummary(string msg)

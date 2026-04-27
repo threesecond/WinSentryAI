@@ -75,7 +75,8 @@
     <sys:String x:Key="Settings_GeminiKey_Saved">Gemini API key saved.</sys:String>
     <sys:String x:Key="Settings_GeminiKey_Cleared">Gemini API key cleared.</sys:String>
     <sys:String x:Key="Settings_GeminiKey_EmptyWarning">Please enter an API key first.</sys:String>
-    <sys:String x:Key="AI_Chat_Placeholder">Ask AI a follow-up question…</sys:String>
+  <sys:String x:Key="AI_Chat_Placeholder">Ask AI a follow-up question…</sys:String>
+  <sys:String x:Key="AI_Chat_ContextProvided">Event details, system environment, and context logs have been provided to AI for this analysis.</sys:String>
   <sys:String x:Key="Settings_Button_FetchGeminiModels">Test &amp; Fetch Models</sys:String>
   <sys:String x:Key="Settings_GeminiKey_FetchFailed">Could not fetch model list. Check your API key is saved and your internet connection.</sys:String>
   <sys:String x:Key="SysInfo_Section_OS">Operating System</sys:String>
@@ -126,4 +127,23 @@
   <sys:String x:Key="Settings_ClaudeKey_Saved">Claude API key saved.</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_Cleared">Claude API key cleared.</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_EmptyWarning">Please enter an API key first.</sys:String>
+  <sys:String x:Key="Settings_Label_EnableRedaction">Privacy Redaction</sys:String>
+  <sys:String x:Key="Settings_Redaction_Note">Cloud AI only; Ollama always keeps local raw data.</sys:String>
+  <sys:String x:Key="AI_Redaction_MapTitle">Local redaction map</sys:String>
+  <sys:String x:Key="NonAdmin_Banner_Text">Limited mode: WinSentryAI is not running as administrator. Security log access may be unavailable.</sys:String>
+  <sys:String x:Key="Tray_Menu_Show">Show WinSentryAI</sys:String>
+  <sys:String x:Key="Tray_Menu_Exit">Exit</sys:String>
+  <sys:String x:Key="Tray_Tooltip_Normal">WinSentryAI monitoring</sys:String>
+  <sys:String x:Key="Tray_Tooltip_Alert">WinSentryAI alert</sys:String>
+  <sys:String x:Key="Tray_Balloon_Title">WinSentryAI detected an event</sys:String>
+  <sys:String x:Key="Tray_Balloon_Message">{0} in {1}, Event ID {2}</sys:String>
+  <sys:String x:Key="Settings_Section_Maintenance">Maintenance</sys:String>
+  <sys:String x:Key="Settings_Label_ClearLogs">Event Data</sys:String>
+  <sys:String x:Key="Settings_Button_ClearLogs">Clear All Logs</sys:String>
+  <sys:String x:Key="Settings_ClearLogs_Confirm">Clear all stored events, context logs, and AI analysis results? API keys and settings will be kept.</sys:String>
+  <sys:String x:Key="Settings_ClearLogs_Success">Stored logs and analysis results were cleared.</sys:String>
+  <sys:String x:Key="Settings_Label_About">About</sys:String>
+  <sys:String x:Key="Settings_Button_About">About WinSentryAI</sys:String>
+  <sys:String x:Key="About_Title">About WinSentryAI</sys:String>
+  <sys:String x:Key="About_Message">WinSentryAI v0.1.0&#x0a;&#x0a;Windows Event Log diagnostics with AI-assisted analysis.&#x0a;&#x0a;Dependencies: HandyControl, CommunityToolkit.Mvvm, Microsoft.Data.Sqlite, Serilog, Hardcodet.NotifyIcon.Wpf.&#x0a;&#x0a;License: MIT.</sys:String>
   </ResourceDictionary>

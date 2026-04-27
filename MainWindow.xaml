@@ -98,21 +98,36 @@
         <!-- 右側主要區域 -->
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>                                       <!-- Row 0: non-admin banner -->
                 <RowDefinition Height="*"/>                                          <!-- Row 0: 主要內容 -->
                 <RowDefinition x:Name="SplitterRow" Height="4"/>                    <!-- Row 1: 水平 GridSplitter -->
                 <RowDefinition x:Name="DetailRow" Height="300" MinHeight="150"/>    <!-- Row 2: 底部詳細面板 -->
                 <RowDefinition Height="30"/>                                         <!-- Row 3: 底部狀態列 -->
             </Grid.RowDefinitions>
 
+            <Border Grid.Row="0" Background="{DynamicResource WarningBrush}" Padding="10,6">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsNonAdminMode}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{DynamicResource NonAdmin_Banner_Text}" Foreground="White" TextWrapping="Wrap"/>
+            </Border>
+
             <!-- Row 0: 主要內容區 -->
-            <ContentControl Grid.Row="0" Content="{Binding CurrentViewModel}"/>
+            <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}"/>
 
             <!-- Row 1: 水平 GridSplitter -->
-            <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch"
+            <GridSplitter Grid.Row="2" Height="4" HorizontalAlignment="Stretch"
                           VerticalAlignment="Center" Background="{DynamicResource BorderBrush}" Opacity="0.4"/>
 
             <!-- Row 2: 底部詳細面板 -->
-            <Grid Grid.Row="2" DataContext="{Binding EventDetailViewModel}"
+            <Grid Grid.Row="3" DataContext="{Binding EventDetailViewModel}"
                   Background="{DynamicResource RegionBrush}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Tab header bar -->
@@ -338,9 +353,53 @@
                                              BorderThickness="0" Background="Transparent"
                                              VerticalScrollBarVisibility="Disabled"/>
 
+                                    <Expander Header="{DynamicResource AI_Redaction_MapTitle}" Margin="0,8,0,0">
+                                        <Expander.Style>
+                                            <Style TargetType="Expander">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasRedactionEntries}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Expander.Style>
+                                        <ItemsControl ItemsSource="{Binding RedactionEntries}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,2">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="180"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Placeholder}" FontWeight="SemiBold"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding Original}" TextWrapping="Wrap"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Expander>
+
                                     <!-- Chat history bubbles -->
                                     <hc:Divider Margin="0,8"/>
-                                    <ItemsControl ItemsSource="{Binding ChatHistory}" Margin="0,4">
+                                    <Border CornerRadius="4" Padding="8" Margin="0,4,0,6"
+                                            Background="{DynamicResource SecondaryRegionBrush}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasInitialAnalysisContext}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{DynamicResource AI_Chat_ContextProvided}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                                   TextWrapping="Wrap"/>
+                                    </Border>
+                                    <ItemsControl ItemsSource="{Binding VisibleChatHistory}" Margin="0,4">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Border CornerRadius="8" Padding="10" Margin="0,3" MaxWidth="600"
@@ -511,7 +570,7 @@
             </Grid>
 
             <!-- Row 3: 底部狀態列 -->
-            <StatusBar Grid.Row="3" Background="{DynamicResource SecondaryRegionBrush}"
+            <StatusBar Grid.Row="4" Background="{DynamicResource SecondaryRegionBrush}"
                        BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}">
                 <StatusBarItem>
                     <StackPanel Orientation="Horizontal">

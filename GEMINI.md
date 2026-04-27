@@ -11,6 +11,11 @@ Read `CLAUDE.md` in full before starting any task. It is the single source of tr
 - **Database**: SQLite (Microsoft.Data.Sqlite)
 - **Current Phase**: MVP — project skeleton exists, implementation not yet started
 - **Version**: v0.1.0
+- **Build**: `dotnet build -c Debug -p:Platform=x64`
+- **Build Output**: `bin\build\`
+- **Platforms**: Windows x64 only; do not create Linux, x86, or ARM64 builds.
+
+Do not use ad-hoc `-o` output folders for normal builds. If a temporary verification output is unavoidable, remove it before handing off.
 
 ## Current File Structure
 

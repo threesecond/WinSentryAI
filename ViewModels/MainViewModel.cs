@@ -32,6 +32,8 @@ namespace WinSentryAI.ViewModels
         [ObservableProperty]
         private string _statusText = string.Empty;
 
+        public bool IsNonAdminMode => !AppState.Instance.IsAdministrator;
+
         public IAsyncRelayCommand LoadEventsCommand { get; }
 
         // Navigation-related properties
@@ -125,6 +127,14 @@ namespace WinSentryAI.ViewModels
             }
         }
 
+        public void ClearLoadedEvents()
+        {
+            SelectedEvent = null;
+            Events.Clear();
+            FilteredEvents.Refresh();
+            UpdateStatus(0);
+        }
+
         private static string GetString(string key) =>
             Application.Current.FindResource(key) as string ?? key;
 
@@ -182,6 +192,7 @@ namespace WinSentryAI.ViewModels
                                 var withId = evt with { Id = (int)id };
                                 Events.Insert(0, withId);
                                 UpdateStatus(Events.Count(e => e.Level <= EventLevel.Error));
+                                NotifyIfHighSeverity(withId);
 
                                 // 排程延後 capture：等到 trigger.Timestamp + 60s 才查並重建，
                                 // 避免在後 1 分鐘窗口未成熟時寫入殘缺結果
@@ -228,6 +239,20 @@ namespace WinSentryAI.ViewModels
             StatusText = errorCount > 0
                 ? string.Format(GetString("Shell_Status_Alert_Count"), errorCount)
                 : GetString("Shell_Status_Normal");
+            AppState.Instance.Tray?.SetAlert(errorCount > 0);
+        }
+
+        private static void NotifyIfHighSeverity(EventRecord evt)
+        {
+            if (evt.Level > EventLevel.Error) return;
+
+            string title = GetString("Tray_Balloon_Title");
+            string message = string.Format(
+                GetString("Tray_Balloon_Message"),
+                evt.Level,
+                evt.Source,
+                evt.EventId);
+            AppState.Instance.Tray?.ShowBalloon(title, message);
         }
 
         private DateTime GetLastBootUpTime()

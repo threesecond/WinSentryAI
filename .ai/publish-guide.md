@@ -8,7 +8,7 @@
 | `.claude/` | Claude Code workspace 暫存 | ❌ 忽略 |
 | `.github/` | GitHub Actions CI/CD 設定 | ✅ 追蹤 |
 | `.vs/` | Visual Studio 本地暫存 | ❌ 忽略 |
-| `bin/` | 編譯輸出 | ❌ 忽略 |
+| `bin/` | 編譯與發佈輸出；一般 build 固定只使用 `bin/build/` | ❌ 忽略 |
 | `obj/` | 編譯中間產物 | ❌ 忽略 |
 | `Converters/` | WPF 型別轉換器 | ✅ 追蹤 |
 | `Models/` | 資料模型（EventRecord、ChatMessage…） | ✅ 追蹤 |
@@ -38,10 +38,32 @@
 
 ## 二、Portable 發佈版必要檔案
 
+### Build 輸出規範
+
+所有 code agent 的一般 build 必須使用：
+
+```powershell
+dotnet build -c Debug -p:Platform=x64
+```
+
+固定輸出位置：
+
+```text
+bin/build/
+```
+
+限制：
+
+- 只產生 Windows x64 build。
+- 不產生 Linux、x86、ARM64 build。
+- 不使用臨時 `-o` 輸出路徑；若因檔案鎖定臨時使用，完成後必須刪除。
+
+### Portable 發佈
+
 目標平台：Windows x64，.NET 8 需另行安裝（Framework-Dependent）。
 
-以 `dotnet publish -c Release -p:Platform=x64 --no-self-contained` 產出，
-輸出位置：`bin/x64/Release/net8.0-windows/publish/`
+以 `dotnet publish -c Release -p:Platform=x64 --no-self-contained -o .\bin\publish` 產出，
+輸出位置：`bin/publish/`
 
 ### 必須包含
 

@@ -76,6 +76,7 @@
     <sys:String x:Key="Settings_GeminiKey_Cleared">Gemini API 密钥已清除。</sys:String>
     <sys:String x:Key="Settings_GeminiKey_EmptyWarning">请先输入 API 密钥。</sys:String>
     <sys:String x:Key="AI_Chat_Placeholder">针对此事件继续询问 AI…</sys:String>
+    <sys:String x:Key="AI_Chat_ContextProvided">已提供事件数据、系统环境与上下文日志给 AI 作为本次分析依据。</sys:String>
   <sys:String x:Key="Settings_Button_FetchGeminiModels">测试并获取模型列表</sys:String>
   <sys:String x:Key="Settings_GeminiKey_FetchFailed">無法获取模型列表，请确认 API 密钥已保存且网络连接正常。</sys:String>
   <sys:String x:Key="SysInfo_Section_OS">操作系统</sys:String>
@@ -126,4 +127,23 @@
   <sys:String x:Key="Settings_ClaudeKey_Saved">Claude API 密钥已保存。</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_Cleared">Claude API 密钥已清除。</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_EmptyWarning">请先输入 API 密钥。</sys:String>
+  <sys:String x:Key="Settings_Label_EnableRedaction">隐私遮蔽</sys:String>
+  <sys:String x:Key="Settings_Redaction_Note">仅应用于云端 AI；Ollama 始终保留本地原始数据。</sys:String>
+  <sys:String x:Key="AI_Redaction_MapTitle">本地遮蔽对照表</sys:String>
+  <sys:String x:Key="NonAdmin_Banner_Text">受限模式：WinSentryAI 未以管理员身份运行，Security 日志可能无法读取。</sys:String>
+  <sys:String x:Key="Tray_Menu_Show">显示 WinSentryAI</sys:String>
+  <sys:String x:Key="Tray_Menu_Exit">退出</sys:String>
+  <sys:String x:Key="Tray_Tooltip_Normal">WinSentryAI 监控中</sys:String>
+  <sys:String x:Key="Tray_Tooltip_Alert">WinSentryAI 警示</sys:String>
+  <sys:String x:Key="Tray_Balloon_Title">WinSentryAI 检测到事件</sys:String>
+  <sys:String x:Key="Tray_Balloon_Message">{0} 于 {1}，Event ID {2}</sys:String>
+  <sys:String x:Key="Settings_Section_Maintenance">维护</sys:String>
+  <sys:String x:Key="Settings_Label_ClearLogs">事件数据</sys:String>
+  <sys:String x:Key="Settings_Button_ClearLogs">清除所有日志</sys:String>
+  <sys:String x:Key="Settings_ClearLogs_Confirm">确定要清除所有已保存事件、上下文日志与 AI 分析结果吗？API 密钥与设置会保留。</sys:String>
+  <sys:String x:Key="Settings_ClearLogs_Success">已清除已保存日志与分析结果。</sys:String>
+  <sys:String x:Key="Settings_Label_About">关于</sys:String>
+  <sys:String x:Key="Settings_Button_About">关于 WinSentryAI</sys:String>
+  <sys:String x:Key="About_Title">关于 WinSentryAI</sys:String>
+  <sys:String x:Key="About_Message">WinSentryAI v0.1.0&#x0a;&#x0a;使用 AI 辅助分析 Windows 事件日志。&#x0a;&#x0a;依赖项：HandyControl、CommunityToolkit.Mvvm、Microsoft.Data.Sqlite、Serilog、Hardcodet.NotifyIcon.Wpf。&#x0a;&#x0a;许可：MIT。</sys:String>
   </ResourceDictionary>

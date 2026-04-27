@@ -35,10 +35,13 @@ namespace WinSentryAI.Services
         public async Task<AIAnalysisResponse> AnalyzeEventAsync(AIAnalysisRequest request, CancellationToken ct = default)
         {
             string systemPrompt = PromptBuilder.BuildSystemPrompt(request.Language);
-            string userMessage = PromptBuilder.BuildUserMessage(request.TriggerEvent, request.ContextLogs, request.SystemSnapshot);
+            var redactionContext = ShouldRedact() ? new SubstitutionContext() : null;
+            string userMessage = PromptBuilder.BuildUserMessage(
+                request.TriggerEvent, request.ContextLogs, request.SystemSnapshot, redactionContext);
 
             var messages = new List<ClaudeMessage> { new() { Role = "user", Content = userMessage } };
-            return await ExecuteRequestAsync(systemPrompt, userMessage, messages, ct);
+            var result = await ExecuteRequestAsync(systemPrompt, userMessage, messages, ct);
+            return result with { RedactionMap = redactionContext?.Map ?? new Dictionary<string, string>() };
         }
 
         public async Task<string> SendChatAsync(string systemPrompt, IList<ChatMessage> chatHistory, CancellationToken ct = default)
@@ -88,6 +91,9 @@ namespace WinSentryAI.Services
                 return new(false, sys, usr, null, ex.Message, model);
             }
         }
+
+        private bool ShouldRedact() =>
+            _settings.GetBool("AI", "EnableRedaction", true);
 
         private class ClaudeRequest
         {

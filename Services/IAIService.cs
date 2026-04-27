@@ -40,5 +40,9 @@ namespace WinSentryAI.Services
         string? Response,
         string? ErrorMessage,
         string ModelName
-    );
+    )
+    {
+        public IReadOnlyDictionary<string, string> RedactionMap { get; init; } =
+            new Dictionary<string, string>();
+    }
 }

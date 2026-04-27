@@ -14,5 +14,7 @@ namespace WinSentryAI.Models
         public IContextLogCaptureService ContextLogCapture { get; set; } = null!;
         public IAIService AI { get; set; } = null!;
         public bool IsOnboarding { get; set; }
+        public bool IsAdministrator { get; set; }
+        public ITrayService? Tray { get; set; }
     }
 }
