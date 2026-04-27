@@ -30,6 +30,9 @@ namespace WinSentryAI.ViewModels
         private bool _isEventListActive = true;
 
         [ObservableProperty]
+        private string _currentPage = "EventList";
+
+        [ObservableProperty]
         private string _statusText = string.Empty;
 
         public bool IsNonAdminMode => !AppState.Instance.IsAdministrator;
@@ -110,19 +113,23 @@ namespace WinSentryAI.ViewModels
                 case "EventList":
                     CurrentViewModel = this;
                     IsEventListActive = true;
+                    CurrentPage = "EventList";
                     break;
                 case "SystemInfo":
                     CurrentViewModel = _systemInfoViewModel;
                     IsEventListActive = false;
+                    CurrentPage = "SystemInfo";
                     break;
                 case "Settings":
                     CurrentViewModel = _settingsViewModel;
                     IsEventListActive = false;
+                    CurrentPage = "Settings";
                     break;
                 // Add other cases for System Info, AI Report etc. later
                 default:
                     CurrentViewModel = this; // Fallback
                     IsEventListActive = true;
+                    CurrentPage = "EventList";
                     break;
             }
         }

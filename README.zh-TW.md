@@ -100,6 +100,8 @@ WinSentryAI 以可攜式 Windows 工具為設計方向。
 - 支援具 Desktop Experience 的 Windows Server
 - Framework-dependent build 需要 .NET 8 Desktop Runtime
 - 建議以系統管理員身分執行，才能完整讀取 Event Log
+- 最低實用螢幕 / 視窗尺寸：1280 x 720
+- 建議螢幕 / 視窗尺寸：1366 x 768 以上；1440 x 900 以上操作更舒適
 
 Server Core 與 Nano Server 不支援，因為 WinSentryAI 是 WPF 桌面應用程式。
 

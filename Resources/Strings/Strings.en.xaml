@@ -2,6 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="EventList_Column_Level">Level</sys:String>
+    <sys:String x:Key="EventList_Title">Event Log</sys:String>
+    <sys:String x:Key="EventList_Subtitle">Review monitored Windows events and select one for diagnostics</sys:String>
     <sys:String x:Key="EventList_Filter_All">All</sys:String>
     <sys:String x:Key="EventList_Filter_Critical">Critical</sys:String>
     <sys:String x:Key="EventList_Filter_Error">Error</sys:String>
@@ -11,13 +13,18 @@
     <sys:String x:Key="EventList_Column_Source">Source</sys:String>
     <sys:String x:Key="EventList_Column_EventId">Event ID</sys:String>
     <sys:String x:Key="EventList_Column_Message">Message</sys:String>
+    <sys:String x:Key="EventList_Column_AI">AI</sys:String>
+    <sys:String x:Key="EventList_AI_Analyzed">Analyzed</sys:String>
+    <sys:String x:Key="EventList_Button_Refresh">Refresh</sys:String>
     <sys:String x:Key="Nav_EventLog">Event Log</sys:String>
     <sys:String x:Key="Nav_SystemInfo">System Info</sys:String>
     <sys:String x:Key="Nav_AIReport">AI Report</sys:String>
     <sys:String x:Key="Nav_Settings">Settings</sys:String>
     <sys:String x:Key="AI_Button_Analyze">AI Analyze</sys:String>
     <sys:String x:Key="SysInfo_Title">System Info</sys:String>
+    <sys:String x:Key="SysInfo_Subtitle">Current machine snapshot used as diagnostic context</sys:String>
     <sys:String x:Key="Settings_Title">Settings</sys:String>
+    <sys:String x:Key="Settings_Subtitle">Application settings and preferences</sys:String>
     <sys:String x:Key="Settings_Section_General">General Settings</sys:String>
     <sys:String x:Key="Settings_Section_AI">AI Settings</sys:String>
     <sys:String x:Key="Settings_Section_ErrorHandling">Error Handling</sys:String>
@@ -76,6 +83,7 @@
     <sys:String x:Key="Settings_GeminiKey_Cleared">Gemini API key cleared.</sys:String>
     <sys:String x:Key="Settings_GeminiKey_EmptyWarning">Please enter an API key first.</sys:String>
   <sys:String x:Key="AI_Chat_Placeholder">Ask AI a follow-up question…</sys:String>
+  <sys:String x:Key="AI_Chat_Title">Follow-up chat</sys:String>
   <sys:String x:Key="AI_Chat_ContextProvided">Event details, system environment, and context logs have been provided to AI for this analysis.</sys:String>
   <sys:String x:Key="Settings_Button_FetchGeminiModels">Test &amp; Fetch Models</sys:String>
   <sys:String x:Key="Settings_GeminiKey_FetchFailed">Could not fetch model list. Check your API key is saved and your internet connection.</sys:String>
@@ -145,5 +153,5 @@
   <sys:String x:Key="Settings_Label_About">About</sys:String>
   <sys:String x:Key="Settings_Button_About">About WinSentryAI</sys:String>
   <sys:String x:Key="About_Title">About WinSentryAI</sys:String>
-  <sys:String x:Key="About_Message">WinSentryAI v0.1.0&#x0a;&#x0a;Windows Event Log diagnostics with AI-assisted analysis.&#x0a;&#x0a;Dependencies: HandyControl, CommunityToolkit.Mvvm, Microsoft.Data.Sqlite, Serilog, Hardcodet.NotifyIcon.Wpf.&#x0a;&#x0a;License: MIT.</sys:String>
+  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.1.0&#x0D;&#x0A;&#x0D;&#x0A;Windows Event Log diagnostics with AI-assisted analysis.&#x0D;&#x0A;&#x0D;&#x0A;Dependencies:&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;License: MIT.</sys:String>
   </ResourceDictionary>

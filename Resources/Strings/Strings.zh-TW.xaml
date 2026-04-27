@@ -2,6 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="EventList_Column_Level">等級</sys:String>
+    <sys:String x:Key="EventList_Title">事件日誌</sys:String>
+    <sys:String x:Key="EventList_Subtitle">檢視已監控的 Windows 事件，並選取事件進行診斷</sys:String>
     <sys:String x:Key="EventList_Filter_All">全部</sys:String>
     <sys:String x:Key="EventList_Filter_Critical">嚴重</sys:String>
     <sys:String x:Key="EventList_Filter_Error">錯誤</sys:String>
@@ -11,13 +13,18 @@
     <sys:String x:Key="EventList_Column_Source">來源</sys:String>
     <sys:String x:Key="EventList_Column_EventId">事件 ID</sys:String>
     <sys:String x:Key="EventList_Column_Message">訊息</sys:String>
+    <sys:String x:Key="EventList_Column_AI">AI</sys:String>
+    <sys:String x:Key="EventList_AI_Analyzed">已分析</sys:String>
+    <sys:String x:Key="EventList_Button_Refresh">重新整理</sys:String>
     <sys:String x:Key="Nav_EventLog">事件日誌</sys:String>
     <sys:String x:Key="Nav_SystemInfo">系統資訊</sys:String>
     <sys:String x:Key="Nav_AIReport">AI 報告</sys:String>
     <sys:String x:Key="Nav_Settings">設定</sys:String>
     <sys:String x:Key="AI_Button_Analyze">AI 分析</sys:String>
     <sys:String x:Key="SysInfo_Title">系統資訊</sys:String>
+    <sys:String x:Key="SysInfo_Subtitle">目前電腦快照，作為診斷時的環境背景</sys:String>
     <sys:String x:Key="Settings_Title">設定</sys:String>
+    <sys:String x:Key="Settings_Subtitle">應用程式設定與偏好選項</sys:String>
     <sys:String x:Key="Settings_Section_General">一般設定</sys:String>
     <sys:String x:Key="Settings_Section_AI">AI 設定</sys:String>
     <sys:String x:Key="Settings_Section_ErrorHandling">錯誤處理</sys:String>
@@ -76,6 +83,7 @@
     <sys:String x:Key="Settings_GeminiKey_Cleared">Gemini API 金鑰已清除。</sys:String>
     <sys:String x:Key="Settings_GeminiKey_EmptyWarning">請先輸入 API 金鑰。</sys:String>
   <sys:String x:Key="AI_Chat_Placeholder">針對此事件繼續詢問 AI…</sys:String>
+  <sys:String x:Key="AI_Chat_Title">後續追問</sys:String>
   <sys:String x:Key="AI_Chat_ContextProvided">已提供事件資料、系統環境與上下文日誌給 AI 作為本次分析依據。</sys:String>
   <sys:String x:Key="Settings_Button_FetchGeminiModels">測試並取得模型清單</sys:String>
   <sys:String x:Key="Settings_GeminiKey_FetchFailed">無法取得模型清單，請確認 API 金鑰已儲存且網路連線正常。</sys:String>
@@ -145,5 +153,5 @@
   <sys:String x:Key="Settings_Label_About">關於</sys:String>
   <sys:String x:Key="Settings_Button_About">關於 WinSentryAI</sys:String>
   <sys:String x:Key="About_Title">關於 WinSentryAI</sys:String>
-  <sys:String x:Key="About_Message">WinSentryAI v0.1.0&#x0a;&#x0a;使用 AI 輔助分析 Windows 事件日誌。&#x0a;&#x0a;相依套件：HandyControl、CommunityToolkit.Mvvm、Microsoft.Data.Sqlite、Serilog、Hardcodet.NotifyIcon.Wpf。&#x0a;&#x0a;授權：MIT。</sys:String>
+  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.1.0&#x0D;&#x0A;&#x0D;&#x0A;使用 AI 輔助分析 Windows 事件日誌。&#x0D;&#x0A;&#x0D;&#x0A;相依套件：&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;授權：MIT。</sys:String>
   </ResourceDictionary>

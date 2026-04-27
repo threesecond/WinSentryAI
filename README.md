@@ -100,6 +100,8 @@ Avoid placing it under `C:\Program Files\` during development or portable use be
 - Windows Server with Desktop Experience supported
 - .NET 8 Desktop Runtime for framework-dependent builds
 - Administrator privileges recommended for full Event Log access
+- Minimum practical screen/window size: 1280 x 720
+- Recommended screen/window size: 1366 x 768 or larger; 1440 x 900 or larger is more comfortable
 
 Server Core and Nano Server are not supported because WinSentryAI is a WPF desktop application.
 
