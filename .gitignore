@@ -5,9 +5,10 @@ CODEX.md
 GEMINI.md
 .aider.conf.yml
 .mcp.json
+.git/
 
 ## .ai dev notes (publish-guide.md is tracked)
-.ai/development-notes-*.md
+.ai/
 
 ## HTML mockup design files (AI-generated, not source code)
 *.html
