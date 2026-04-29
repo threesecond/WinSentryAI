@@ -13,9 +13,41 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
         d:DataContext="{d:DesignInstance vm:RemoteConnectionViewModel}"
-        Background="{DynamicResource RegionBrush}">
+        Background="{DynamicResource AppWindowBackgroundBrush}">
 
-    <Border Padding="24">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
+        </Style>
+
+        <Style TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{DynamicResource AppSecondaryTextBrush}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style TargetType="hc:TextBox">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource AppInputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource AppPrimaryTextBrush}"/>
+        </Style>
+
+        <Style TargetType="PasswordBox">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource AppInputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource AppPrimaryTextBrush}"/>
+            <Setter Property="SelectionBrush" Value="#0078D4"/>
+            <Setter Property="SelectionTextBrush" Value="White"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Padding="24" Background="{DynamicResource AppWindowBackgroundBrush}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -64,21 +96,23 @@
                                     </Style.Triggers>
                                 </Style>
                             </StackPanel.Style>
-                            <hc:TextBox Text="{Binding Domain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        hc:InfoElement.Title="{DynamicResource Remote_Label_Domain}"
-                                        hc:InfoElement.Placeholder="{DynamicResource Remote_Placeholder_Domain}"
-                                        Margin="0,0,0,8"/>
-                            <hc:TextBox Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        hc:InfoElement.Title="{DynamicResource Remote_Label_Username}"
-                                        Margin="0,0,0,8"/>
+                            <StackPanel Margin="0,0,0,8">
+                                <TextBlock Text="{DynamicResource Remote_Label_Domain}"
+                                           FontSize="11" FontWeight="Medium" Margin="0,0,0,4"/>
+                                <hc:TextBox Text="{Binding Domain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            hc:InfoElement.Placeholder="{DynamicResource Remote_Placeholder_Domain}"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,0,8">
+                                <TextBlock Text="{DynamicResource Remote_Label_Username}"
+                                           FontSize="11" FontWeight="Medium" Margin="0,0,0,4"/>
+                                <hc:TextBox Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
                             <StackPanel Margin="0,0,0,4">
                                 <TextBlock Text="{DynamicResource Remote_Label_Password}"
                                            FontSize="11" FontWeight="Medium" Margin="0,0,0,4"/>
-                                <PasswordBox x:Name="PasswordInput"
-                                             Padding="8,4" BorderBrush="#D1D1D1" BorderThickness="1"
-                                             Margin="0,0,0,4"/>
+                                <PasswordBox x:Name="PasswordInput" Margin="0,0,0,4"/>
                                 <TextBlock Text="{DynamicResource Remote_Note_PasswordNotSaved}"
-                                           FontSize="11" Foreground="#888888"/>
+                                           FontSize="11" Foreground="{DynamicResource AppMutedTextBrush}"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -100,13 +134,13 @@
                     </StackPanel>
 
                     <!-- Limitation Note -->
-                    <Border Grid.Row="3" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1"
+                    <Border Grid.Row="3" Background="{DynamicResource AppInfoBrush}" BorderBrush="{DynamicResource AppInfoBorderBrush}" BorderThickness="1"
                             CornerRadius="4" Padding="12,10" Margin="0,0,0,16">
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Left" Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                        Foreground="#1D4ED8" Margin="0,0,8,0" VerticalAlignment="Top"/>
                             <TextBlock Text="{DynamicResource Remote_Note_NoRealtimeMonitoring}"
-                                       TextWrapping="Wrap" FontSize="11" Foreground="#1E40AF"/>
+                                       TextWrapping="Wrap" FontSize="11" Foreground="#0078D4"/>
                         </DockPanel>
                     </Border>
 

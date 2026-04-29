@@ -7,27 +7,27 @@
              xmlns:viewmodels="clr-namespace:WinSentryAI.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewmodels:SettingsViewModel}"
-             Background="#F5F6F8"
+             Background="{DynamicResource AppWindowBackgroundBrush}"
              FontFamily="Segoe UI">
     <UserControl.Resources>
         <Style x:Key="SettingsSectionHeaderTextStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
         </Style>
 
         <Style x:Key="SettingsLabelTextStyle" TargetType="TextBlock">
             <Setter Property="Width" Value="210"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppSecondaryTextBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,16,0"/>
         </Style>
 
         <Style x:Key="SettingsUnitTextStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Foreground" Value="#666666"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="8,0,0,0"/>
         </Style>
@@ -40,23 +40,66 @@
         <Style x:Key="SettingsInputStyle" TargetType="hc:TextBox">
             <Setter Property="Height" Value="30"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="#C8C8C8"/>
             <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="CaretBrush" Value="#1F2937"/>
+        </Style>
+
+        <Style x:Key="SettingsPlainTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="BorderBrush" Value="#C8C8C8"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="CaretBrush" Value="#1F2937"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
 
         <Style x:Key="SettingsPasswordBoxStyle" TargetType="PasswordBox">
             <Setter Property="Height" Value="30"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="#C8C8C8"/>
             <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="CaretBrush" Value="#1F2937"/>
+            <Setter Property="SelectionBrush" Value="#0078D4"/>
+            <Setter Property="SelectionTextBrush" Value="White"/>
             <Setter Property="Padding" Value="8,3"/>
+        </Style>
+
+        <Style x:Key="SettingsNumericUpDownStyle" TargetType="hc:NumericUpDown">
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderBrush" Value="#C8C8C8"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="BorderBrush" Value="#C8C8C8"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#EAF4FD"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#DDEFFD"/>
+                    <Setter Property="Foreground" Value="#1F2937"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="SettingsComboBoxStyle" TargetType="ComboBox">
             <Setter Property="Height" Value="30"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="#C8C8C8"/>
             <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
         </Style>
 
         <Style x:Key="SettingsSecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
@@ -65,9 +108,40 @@
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
             <Setter Property="Foreground" Value="#1F2937"/>
             <Setter Property="hc:BorderElement.CornerRadius" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#F3F4F6"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#C8C8C8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#E5E7EB"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#9CA3AF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Root" Property="Background" Value="#F3F4F6"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#E5E7EB"/>
+                                <Setter Property="Foreground" Value="#9CA3AF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="SettingsPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
@@ -91,9 +165,9 @@
         </Style>
 
         <Style x:Key="SettingsCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
             <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="BorderBrush" Value="#D8DEE8"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Margin" Value="0,0,0,16"/>
             <Setter Property="Effect">
@@ -105,14 +179,14 @@
 
         <Style x:Key="SettingsCardHeaderStyle" TargetType="Border">
             <Setter Property="Padding" Value="18,12"/>
-            <Setter Property="Background" Value="#FBFCFD"/>
-            <Setter Property="BorderBrush" Value="#E5EAF0"/>
+            <Setter Property="Background" Value="{DynamicResource AppSubtleSurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
         </Style>
 
         <Style x:Key="SettingsInfoBannerStyle" TargetType="Border">
-            <Setter Property="Background" Value="#EFF6FF"/>
-            <Setter Property="BorderBrush" Value="#BFDBFE"/>
+            <Setter Property="Background" Value="{DynamicResource AppInfoBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppInfoBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="10"/>
@@ -128,16 +202,16 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Padding="28,18,28,16" Background="White" BorderThickness="0,0,0,1" BorderBrush="#E5EAF0">
+        <Border Padding="28,18,28,16" Background="{DynamicResource AppSurfaceBrush}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource AppBorderBrush}">
             <StackPanel>
                 <TextBlock Text="{DynamicResource Settings_Title}"
                            FontWeight="SemiBold"
                            FontSize="22"
-                           Foreground="#111827"
+                           Foreground="{DynamicResource AppPrimaryTextBrush}"
                            LineHeight="28"/>
                 <TextBlock Text="{DynamicResource Settings_Subtitle}"
                            FontSize="12"
-                           Foreground="#6B7280"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
                            Margin="0,2,0,0"/>
             </StackPanel>
         </Border>
@@ -158,14 +232,14 @@
                         <StackPanel Grid.Row="1" Margin="18,14,18,4">
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_LogRetentionDays}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                <hc:NumericUpDown Value="{Binding LogRetentionDays}" Minimum="1" Maximum="365"
-                                                  Width="120" Height="28" FontSize="12"/>
+                                <TextBox Text="{Binding LogRetentionDays, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SettingsPlainTextBoxStyle}"/>
                                 <TextBlock Text="{DynamicResource Settings_Unit_Days}" Style="{StaticResource SettingsUnitTextStyle}"/>
                             </hc:FlexPanel>
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_MaxRetroQueryCount}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                <hc:NumericUpDown Value="{Binding MaxRetroQueryCount}" Minimum="10" Maximum="500"
-                                                  Width="120" Height="28" FontSize="12"/>
+                                <TextBox Text="{Binding MaxRetroQueryCount, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SettingsPlainTextBoxStyle}"/>
                                 <TextBlock Text="{DynamicResource Settings_Unit_Events}" Style="{StaticResource SettingsUnitTextStyle}"/>
                             </hc:FlexPanel>
                         </StackPanel>
@@ -209,7 +283,7 @@
                                 <TextBlock Text="{DynamicResource Settings_Redaction_Note}"
                                            Margin="10,0,0,0"
                                            FontSize="12"
-                                           Foreground="#555555"
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
                                            VerticalAlignment="Center"/>
                             </hc:FlexPanel>
 
@@ -232,7 +306,7 @@
                             </Border>
 
                             <!-- Provider Panels -->
-                            <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="14,14,14,4" Margin="0,2,0,10">
+                            <Border Background="{DynamicResource AppSubtleSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="14,14,14,4" Margin="0,2,0,10">
                             <Grid>
                                 <!-- Gemini Panel -->
                                 <StackPanel>
@@ -248,7 +322,7 @@
                                     </StackPanel.Style>
 
                                     <Border Style="{StaticResource SettingsInfoBannerStyle}">
-                                        <TextBlock Text="{Binding GeminiKeyStatusText}" FontSize="11" Foreground="#0078D4" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding GeminiKeyStatusText}" FontSize="11" Foreground="{DynamicResource InfoBrush}" TextWrapping="Wrap"/>
                                     </Border>
 
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
@@ -259,7 +333,8 @@
                                     </hc:FlexPanel>
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_GeminiApiKey}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                        <PasswordBox x:Name="GeminiKeyPasswordBox" Width="260" Style="{StaticResource SettingsPasswordBoxStyle}"/>
+                                        <PasswordBox x:Name="GeminiKeyPasswordBox" Width="260" Style="{StaticResource SettingsPasswordBoxStyle}"
+                                                     GotKeyboardFocus="ApiKeyPasswordBox_GotKeyboardFocus"/>
                                         <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="12">
                                             <Hyperlink NavigateUri="https://ai.google.dev/gemini-api/docs/api-key" RequestNavigate="Hyperlink_RequestNavigate">
                                                 <Run Text="{DynamicResource Settings_Link_GetApiKey}"/>
@@ -303,7 +378,7 @@
                                     </StackPanel.Style>
 
                                     <Border Style="{StaticResource SettingsInfoBannerStyle}">
-                                        <TextBlock Text="{Binding OpenAiKeyStatusText}" FontSize="11" Foreground="#0078D4" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding OpenAiKeyStatusText}" FontSize="11" Foreground="{DynamicResource InfoBrush}" TextWrapping="Wrap"/>
                                     </Border>
 
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
@@ -314,7 +389,8 @@
                                     </hc:FlexPanel>
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_OpenAiApiKey}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                        <PasswordBox x:Name="OpenAiKeyPasswordBox" Width="260" Style="{StaticResource SettingsPasswordBoxStyle}"/>
+                                        <PasswordBox x:Name="OpenAiKeyPasswordBox" Width="260" Style="{StaticResource SettingsPasswordBoxStyle}"
+                                                     GotKeyboardFocus="ApiKeyPasswordBox_GotKeyboardFocus"/>
                                         <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="12">
                                             <Hyperlink NavigateUri="https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key" RequestNavigate="Hyperlink_RequestNavigate">
                                                 <Run Text="{DynamicResource Settings_Link_GetApiKey}"/>
@@ -358,7 +434,7 @@
                                     </StackPanel.Style>
 
                                     <Border Style="{StaticResource SettingsInfoBannerStyle}">
-                                        <TextBlock Text="{Binding ClaudeKeyStatusText}" FontSize="11" Foreground="#0078D4" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding ClaudeKeyStatusText}" FontSize="11" Foreground="{DynamicResource InfoBrush}" TextWrapping="Wrap"/>
                                     </Border>
 
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
@@ -369,7 +445,8 @@
                                     </hc:FlexPanel>
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_ClaudeApiKey}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                        <PasswordBox x:Name="ClaudeKeyPasswordBox" Width="260" Style="{StaticResource SettingsPasswordBoxStyle}"/>
+                                        <PasswordBox x:Name="ClaudeKeyPasswordBox" Width="260" Style="{StaticResource SettingsPasswordBoxStyle}"
+                                                     GotKeyboardFocus="ApiKeyPasswordBox_GotKeyboardFocus"/>
                                         <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" FontSize="12">
                                             <Hyperlink NavigateUri="https://platform.claude.com/docs/en/api/admin/api_keys/retrieve" RequestNavigate="Hyperlink_RequestNavigate">
                                                 <Run Text="{DynamicResource Settings_Link_GetApiKey}"/>
@@ -447,8 +524,8 @@
                         <StackPanel Grid.Row="1" Margin="18,14,18,4">
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_MaxRetryCount}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                <hc:NumericUpDown Value="{Binding MaxRetryCount}" Minimum="1" Maximum="10"
-                                                  Width="120" Height="28" FontSize="12"/>
+                                <TextBox Text="{Binding MaxRetryCount, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource SettingsPlainTextBoxStyle}"/>
                                 <TextBlock Text="{DynamicResource Settings_Unit_Times}" Style="{StaticResource SettingsUnitTextStyle}"/>
                             </hc:FlexPanel>
                         </StackPanel>
@@ -468,11 +545,11 @@
                         <StackPanel Grid.Row="1" Margin="18,14,18,4">
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_Theme}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                <ComboBox ItemsSource="{Binding UiThemes}" SelectedItem="{Binding UiTheme}" Width="200" IsEnabled="False" Style="{StaticResource SettingsComboBoxStyle}"/>
+                                <ComboBox ItemsSource="{Binding UiThemes}" SelectedItem="{Binding UiTheme}" Width="200" Style="{StaticResource SettingsComboBoxStyle}"/>
                                 <TextBlock Text="{DynamicResource Settings_Theme_NotImplemented}"
                                            Margin="10,0,0,0"
                                            FontSize="12"
-                                           Foreground="#6B7280"
+                                           Foreground="{DynamicResource AppMutedTextBrush}"
                                            VerticalAlignment="Center"/>
                             </hc:FlexPanel>
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
@@ -531,25 +608,25 @@
                         <StackPanel Grid.Row="1" Margin="18,14,18,14">
                             <!-- "Not configured" message -->
                             <TextBlock Text="{DynamicResource Settings_Remote_NotConfigured}"
-                                       FontSize="12" Foreground="#6B7280" Margin="0,0,0,4"
+                                       FontSize="12" Foreground="{DynamicResource AppMutedTextBrush}" Margin="0,0,0,4"
                                        Visibility="{Binding HasLastRemoteHost, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
                             <!-- Last Host -->
                             <hc:FlexPanel Margin="0,0,0,8"
                                           Visibility="{Binding HasLastRemoteHost, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="{DynamicResource Settings_Label_LastHost}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                <TextBlock Text="{Binding LastRemoteHost}" FontSize="12" VerticalAlignment="Center" Foreground="#333333"/>
+                                <TextBlock Text="{Binding LastRemoteHost}" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                             </hc:FlexPanel>
                             <!-- Last Domain -->
                             <hc:FlexPanel Margin="0,0,0,8"
                                           Visibility="{Binding HasLastRemoteHost, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="{DynamicResource Settings_Label_LastDomain}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                <TextBlock Text="{Binding LastRemoteDomain}" FontSize="12" VerticalAlignment="Center" Foreground="#333333"/>
+                                <TextBlock Text="{Binding LastRemoteDomain}" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                             </hc:FlexPanel>
                             <!-- Last Username -->
                             <hc:FlexPanel Margin="0,0,0,4"
                                           Visibility="{Binding HasLastRemoteHost, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="{DynamicResource Settings_Label_LastUsername}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                <TextBlock Text="{Binding LastRemoteUsername}" FontSize="12" VerticalAlignment="Center" Foreground="#333333"/>
+                                <TextBlock Text="{Binding LastRemoteUsername}" FontSize="12" VerticalAlignment="Center" Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                             </hc:FlexPanel>
                         </StackPanel>
                     </Grid>
@@ -558,7 +635,7 @@
         </ScrollViewer>
 
         <!-- Footer Buttons -->
-        <Border Grid.Row="2" Padding="28,12" Background="White" BorderThickness="0,1,0,0" BorderBrush="#E5EAF0">
+        <Border Grid.Row="2" Padding="28,12" Background="{DynamicResource AppSurfaceBrush}" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource AppBorderBrush}">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Command="{Binding LoadSettingsCommand}" Style="{StaticResource SettingsSecondaryButtonStyle}" Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">

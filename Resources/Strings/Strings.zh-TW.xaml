@@ -58,7 +58,7 @@
     <sys:String x:Key="Settings_Label_MaxRetryCount">最大重試次數</sys:String>
     <sys:String x:Key="Settings_Unit_Times">次</sys:String>
     <sys:String x:Key="Settings_Label_Theme">佈景主題</sys:String>
-    <sys:String x:Key="Settings_Theme_NotImplemented">佈景主題切換尚未實作。</sys:String>
+    <sys:String x:Key="Settings_Theme_NotImplemented">儲存後立即套用。</sys:String>
     <sys:String x:Key="Settings_Label_Language">語言</sys:String>
     <sys:String x:Key="Settings_Button_Load">載入目前值</sys:String>
     <sys:String x:Key="Settings_Button_Save">儲存設定</sys:String>

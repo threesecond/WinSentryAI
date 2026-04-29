@@ -70,6 +70,7 @@ namespace WinSentryAI
             var settingsService = new SettingsService();
             string lang = settingsService.Get("UI", "Language", "en");
             ApplyLanguage(lang);
+            ApplyTheme(settingsService.Get("UI", "Theme", "System"));
 
             // 5. 初始化資料庫（含資料清理）
             var retentionDays = settingsService.GetInt("General", "LogRetentionDays", 7);
@@ -294,6 +295,20 @@ namespace WinSentryAI
             catch
             {
                 if (lang != "en") ApplyLanguage("en");
+            }
+        }
+
+        internal void ApplyTheme(string theme)
+        {
+            try
+            {
+                ThemeService.Apply(this, theme);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to apply theme: {Theme}", theme);
+                if (!string.Equals(theme, "Light", StringComparison.OrdinalIgnoreCase))
+                    ThemeService.Apply(this, "Light");
             }
         }
 

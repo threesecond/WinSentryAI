@@ -182,6 +182,8 @@ namespace WinSentryAI.ViewModels
 
             // Apply language immediately
             ApplyLanguage(UiLanguage);
+            if (Application.Current is App app)
+                app.ApplyTheme(UiTheme);
 
             MessageBox.Show(GetString("Settings_SaveSuccess"),
                             GetString("Settings_Title"),

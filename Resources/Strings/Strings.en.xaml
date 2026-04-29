@@ -58,7 +58,7 @@
     <sys:String x:Key="Settings_Label_MaxRetryCount">Max Retry Count</sys:String>
     <sys:String x:Key="Settings_Unit_Times">Times</sys:String>
     <sys:String x:Key="Settings_Label_Theme">Theme</sys:String>
-    <sys:String x:Key="Settings_Theme_NotImplemented">Theme switching is not implemented yet.</sys:String>
+    <sys:String x:Key="Settings_Theme_NotImplemented">Applied after saving.</sys:String>
     <sys:String x:Key="Settings_Label_Language">Language</sys:String>
     <sys:String x:Key="Settings_Button_Load">Load Current</sys:String>
     <sys:String x:Key="Settings_Button_Save">Save Settings</sys:String>

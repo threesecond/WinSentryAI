@@ -7,7 +7,7 @@
              xmlns:hc="https://handyorg.github.io/handycontrol"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
-             Background="#F3F3F3"
+             Background="{DynamicResource AppWindowBackgroundBrush}"
              FontFamily="Segoe UI">
     <UserControl.Resources>
         <Style x:Key="FilterChipStyle" TargetType="RadioButton">
@@ -15,21 +15,21 @@
             <Setter Property="Margin" Value="0,0,6,0"/>
             <Setter Property="Padding" Value="12,5"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppSecondaryTextBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Border x:Name="border"
                                 CornerRadius="12"
                                 Padding="{TemplateBinding Padding}"
-                                Background="White"
-                                BorderBrush="#D1D1D1"
+                                Background="{DynamicResource AppSurfaceBrush}"
+                                BorderBrush="{DynamicResource AppBorderBrush}"
                                 BorderThickness="1">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#F5F5F5"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource AppHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="border" Property="Background" Value="#0078D4"/>
@@ -47,24 +47,24 @@
             <Setter Property="Padding" Value="12,5"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D1D1D1"/>
-            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
             <Setter Property="hc:BorderElement.CornerRadius" Value="4"/>
         </Style>
 
         <Style x:Key="EventListItemStyle" TargetType="ListViewItem">
             <Setter Property="Padding" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="BorderBrush" Value="#F0F0F0"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F7FBFF"/>
+                    <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#EBF3FB"/>
+                    <Setter Property="Background" Value="{DynamicResource AppActiveBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -78,16 +78,16 @@
         </Grid.RowDefinitions>
 
         <!-- Page header -->
-        <Border Grid.Row="0" Padding="24,16,24,14" Background="#FAFAFA" BorderThickness="0,0,0,1" BorderBrush="#E5E5E5">
+        <Border Grid.Row="0" Padding="24,16,24,14" Background="{DynamicResource AppSurfaceBrush}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource AppBorderBrush}">
             <StackPanel>
                 <TextBlock Text="{DynamicResource EventList_Title}"
                            FontWeight="SemiBold"
                            FontSize="20"
-                           Foreground="#1A1A1A"
+                           Foreground="{DynamicResource AppPrimaryTextBrush}"
                            LineHeight="26"/>
                 <TextBlock Text="{DynamicResource EventList_Subtitle}"
                            FontSize="12"
-                           Foreground="#888888"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
                            Margin="0,2,0,0"/>
             </StackPanel>
         </Border>
@@ -96,9 +96,9 @@
         <Border Grid.Row="1"
                 Margin="20,20,20,10"
                 Padding="12"
-                Background="White"
+                Background="{DynamicResource AppSurfaceBrush}"
                 CornerRadius="6"
-                BorderBrush="#E5E5E5"
+                BorderBrush="{DynamicResource AppBorderBrush}"
                 BorderThickness="1">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.04"/>
@@ -150,12 +150,13 @@
                              FontSize="12"
                              Padding="28,4,8,4"
                              VerticalContentAlignment="Center"
-                             BorderBrush="#D1D1D1"
-                             Background="White"/>
+                             BorderBrush="{DynamicResource AppBorderBrush}"
+                             Background="{DynamicResource AppInputBackgroundBrush}"
+                             Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                     <TextBlock Text="&#xE721;"
                                Style="{StaticResource Mdl2IconTextStyle}"
                                FontSize="13"
-                               Foreground="#777777"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Center"
                                Margin="9,0,0,0"
@@ -164,7 +165,7 @@
                                Padding="30,4,10,4"
                                VerticalAlignment="Center"
                                FontSize="12"
-                               Foreground="#999999"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
                                Text="{DynamicResource EventList_Search_Placeholder}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
@@ -196,9 +197,9 @@
         <!-- Event list -->
         <Border Grid.Row="2"
                 Margin="20,0,20,20"
-                Background="White"
+                Background="{DynamicResource AppSurfaceBrush}"
                 CornerRadius="6"
-                BorderBrush="#E5E5E5"
+                BorderBrush="{DynamicResource AppBorderBrush}"
                 BorderThickness="1"
                 ClipToBounds="True">
             <Border.Effect>
@@ -207,11 +208,21 @@
             <ListView ItemsSource="{Binding FilteredEvents}"
                       SelectedItem="{Binding SelectedEvent}"
                       BorderThickness="0"
-                      Background="White"
+                      Background="{DynamicResource AppSurfaceBrush}"
                       Padding="0"
                       ItemContainerStyle="{StaticResource EventListItemStyle}">
                 <ListView.View>
                     <GridView>
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="GridViewColumnHeader">
+                                <Setter Property="Background" Value="{DynamicResource AppSubtleSurfaceBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AppSecondaryTextBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="FontSize" Value="12"/>
+                                <Setter Property="Padding" Value="8,4"/>
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
                         <GridViewColumn Header="{DynamicResource EventList_Column_Level}" Width="108">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate DataType="{x:Type models:EventRecord}">
@@ -296,7 +307,7 @@
                                                TextTrimming="CharacterEllipsis"
                                                MaxHeight="22"
                                                FontSize="12"
-                                               Foreground="#333333"
+                                               Foreground="{DynamicResource AppPrimaryTextBrush}"
                                                VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>

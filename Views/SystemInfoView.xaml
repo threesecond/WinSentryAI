@@ -6,13 +6,13 @@
              xmlns:viewmodels="clr-namespace:WinSentryAI.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewmodels:SystemInfoViewModel}"
-             Background="#F3F3F3"
+             Background="{DynamicResource AppWindowBackgroundBrush}"
              FontFamily="Segoe UI">
     <UserControl.Resources>
         <Style x:Key="SystemInfoSectionHeaderTextStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
@@ -20,14 +20,14 @@
             <Setter Property="Width" Value="180"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
             <Setter Property="Margin" Value="0,0,16,0"/>
             <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
 
         <Style x:Key="SystemInfoValueTextStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppSecondaryTextBrush}"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
@@ -45,16 +45,16 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Padding="24,16,24,14" Background="#FAFAFA" BorderThickness="0,0,0,1" BorderBrush="#E5E5E5">
+        <Border Padding="24,16,24,14" Background="{DynamicResource AppSurfaceBrush}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource AppBorderBrush}">
             <StackPanel>
                 <TextBlock Text="{DynamicResource SysInfo_Title}"
                            FontWeight="SemiBold"
                            FontSize="20"
-                           Foreground="#1A1A1A"
+                           Foreground="{DynamicResource AppPrimaryTextBrush}"
                            LineHeight="26"/>
                 <TextBlock Text="{DynamicResource SysInfo_Subtitle}"
                            FontSize="12"
-                           Foreground="#888888"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
                            Margin="0,2,0,0"/>
             </StackPanel>
         </Border>
@@ -63,7 +63,7 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="20">
                 <!-- Operating System -->
-                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
+                <Border Background="{DynamicResource AppSurfaceBrush}" CornerRadius="6" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Margin="0,0,0,14">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.04"/>
                     </Border.Effect>
@@ -72,7 +72,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                        <Border Padding="16,9" Background="{DynamicResource AppSubtleSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,0,0,1">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE977;" Style="{StaticResource Mdl2InlineIconTextStyle}" Foreground="#0078D4"/>
                                 <TextBlock Text="{DynamicResource SysInfo_Section_OS}" Style="{StaticResource SystemInfoSectionHeaderTextStyle}"/>
@@ -100,7 +100,7 @@
                 </Border>
 
                 <!-- Hardware -->
-                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
+                <Border Background="{DynamicResource AppSurfaceBrush}" CornerRadius="6" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Margin="0,0,0,14">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.04"/>
                     </Border.Effect>
@@ -109,7 +109,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                        <Border Padding="16,9" Background="{DynamicResource AppSubtleSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,0,0,1">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE950;" Style="{StaticResource Mdl2InlineIconTextStyle}" Foreground="#0078D4"/>
                                 <TextBlock Text="{DynamicResource SysInfo_Section_Hardware}" Style="{StaticResource SystemInfoSectionHeaderTextStyle}"/>
@@ -129,16 +129,14 @@
                             </StackPanel>
                             <StackPanel Style="{StaticResource SystemInfoRowStyle}">
                                 <TextBlock Text="{DynamicResource SysInfo_Label_GpuInfo}" Style="{StaticResource SystemInfoLabelTextStyle}"/>
-                                <Border Background="#FAFAFA" BorderBrush="#EAEAEA" BorderThickness="1" CornerRadius="4" Padding="10" MinWidth="360">
-                                    <TextBlock Text="{Binding GpuInfo}" Style="{StaticResource SystemInfoValueTextStyle}"/>
-                                </Border>
+                                <TextBlock Text="{Binding GpuInfo}" MinWidth="360" Style="{StaticResource SystemInfoValueTextStyle}"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- Network -->
-                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
+                <Border Background="{DynamicResource AppSurfaceBrush}" CornerRadius="6" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Margin="0,0,0,14">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.04"/>
                     </Border.Effect>
@@ -147,7 +145,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                        <Border Padding="16,9" Background="{DynamicResource AppSubtleSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,0,0,1">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE701;" Style="{StaticResource Mdl2InlineIconTextStyle}" Foreground="#0078D4"/>
                                 <TextBlock Text="{DynamicResource SysInfo_Section_Network}" Style="{StaticResource SystemInfoSectionHeaderTextStyle}"/>
@@ -156,9 +154,7 @@
                         <StackPanel Grid.Row="1" Margin="16,12,16,0">
                             <StackPanel Style="{StaticResource SystemInfoRowStyle}">
                                 <TextBlock Text="{DynamicResource SysInfo_Label_IpAddresses}" Style="{StaticResource SystemInfoLabelTextStyle}"/>
-                                <Border Background="#FAFAFA" BorderBrush="#EAEAEA" BorderThickness="1" CornerRadius="4" Padding="10" MinWidth="360">
-                                    <TextBlock Text="{Binding IpAddresses}" Style="{StaticResource SystemInfoValueTextStyle}"/>
-                                </Border>
+                                <TextBlock Text="{Binding IpAddresses}" MinWidth="360" Style="{StaticResource SystemInfoValueTextStyle}"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>

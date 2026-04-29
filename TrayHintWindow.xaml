@@ -7,27 +7,29 @@
         Icon="Resources/Icons/AppIcon.ico"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Background="{DynamicResource RegionBrush}">
+        Background="{DynamicResource AppWindowBackgroundBrush}">
 
-    <Border Padding="24,20">
+    <Border Padding="24,20" Background="{DynamicResource AppWindowBackgroundBrush}">
         <StackPanel>
             <!-- Icon + Title -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                 <TextBlock Text="&#xE756;" FontFamily="Segoe MDL2 Assets" FontSize="24"
                            Foreground="#0078D4" Margin="0,0,12,0" VerticalAlignment="Center"/>
                 <TextBlock Text="{DynamicResource TrayHint_Title}" FontSize="14" FontWeight="SemiBold"
-                           VerticalAlignment="Center" TextWrapping="Wrap"/>
+                           VerticalAlignment="Center" TextWrapping="Wrap"
+                           Foreground="{DynamicResource AppPrimaryTextBrush}"/>
             </StackPanel>
 
             <!-- Message -->
             <TextBlock Text="{DynamicResource TrayHint_Message}"
                        TextWrapping="Wrap" FontSize="12"
-                       Foreground="{DynamicResource SecondaryTextBrush}"
+                       Foreground="{DynamicResource AppSecondaryTextBrush}"
                        Margin="0,0,0,20"/>
 
             <!-- Don't show again checkbox -->
             <CheckBox x:Name="DontShowCheck"
                       Content="{DynamicResource TrayHint_DontShow}"
+                      Foreground="{DynamicResource AppPrimaryTextBrush}"
                       FontSize="12" Margin="0,0,0,20"/>
 
             <!-- OK button -->

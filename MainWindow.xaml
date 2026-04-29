@@ -32,7 +32,7 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="14,7"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppSecondaryTextBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
@@ -43,7 +43,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SecondaryRegionBrush}"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource AppHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#0078D4"/>
@@ -65,11 +65,51 @@
             <Setter Property="hc:BorderElement.CornerRadius" Value="4"/>
         </Style>
 
+        <Style x:Key="RemoteBannerButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="10,3"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#F3F4F6"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#C8C8C8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#E5E7EB"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#9CA3AF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Root" Property="Background" Value="#F3F4F6"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#E5E7EB"/>
+                                <Setter Property="Foreground" Value="#9CA3AF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ShellStatusPillStyle" TargetType="Border">
             <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Padding" Value="8,2"/>
-            <Setter Property="Background" Value="#F3F4F6"/>
-            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="Background" Value="{DynamicResource AppStatusPillBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppStatusPillBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
@@ -81,7 +121,7 @@
             <Setter Property="Padding" Value="14,0"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppSecondaryTextBrush}"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="3,0,0,0"/>
@@ -99,10 +139,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#ECEFF3"/>
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource AppHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#EAF4FD"/>
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource AppActiveBrush}"/>
                                 <Setter TargetName="Root" Property="BorderBrush" Value="#0078D4"/>
                                 <Setter Property="Foreground" Value="#0078D4"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -112,7 +152,7 @@
                                     <Condition Property="IsChecked" Value="True"/>
                                     <Condition Property="IsMouseOver" Value="True"/>
                                 </MultiTrigger.Conditions>
-                                <Setter TargetName="Root" Property="Background" Value="#DDEFFD"/>
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource AppActiveHoverBrush}"/>
                             </MultiTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -129,10 +169,10 @@
         </Grid.ColumnDefinitions>
 
         <!-- 左側導覽區 -->
-        <Border Grid.Column="0" Background="#F7F8FA" BorderBrush="#D9DEE7" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" Background="{DynamicResource AppSidebarBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,0,1,0">
             <DockPanel LastChildFill="True">
                 <!-- App header -->
-                <Border DockPanel.Dock="Top" Padding="16,18,14,14" Background="White" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1">
+                <Border DockPanel.Dock="Top" Padding="16,18,14,14" Background="{DynamicResource AppSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,0,0,1">
                     <StackPanel Orientation="Horizontal">
                         <Border Width="32" Height="32" CornerRadius="8" Background="#0078D4">
                             <TextBlock Text="&#xE83D;" Style="{StaticResource Mdl2IconTextStyle}"
@@ -140,15 +180,15 @@
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="WinSentryAI" FontSize="13" FontWeight="SemiBold" Foreground="#1A1A1A" LineHeight="16"/>
-                            <TextBlock Text="v0.5.0 dev" FontSize="10" Foreground="#7A8699" Margin="0,1,0,0"/>
+                            <TextBlock Text="WinSentryAI" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AppPrimaryTextBrush}" LineHeight="16"/>
+                            <TextBlock Text="v0.5.0 dev" FontSize="10" Foreground="{DynamicResource AppMutedTextBrush}" Margin="0,1,0,0"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
                 <!-- Sidebar footer -->
-                <Border DockPanel.Dock="Bottom" Padding="10" BorderBrush="#E5E7EB" BorderThickness="0,1,0,0">
-                    <Border Style="{StaticResource ShellStatusPillStyle}" Background="White">
+                <Border DockPanel.Dock="Bottom" Padding="10" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,1,0,0">
+                    <Border Style="{StaticResource ShellStatusPillStyle}">
                         <DockPanel LastChildFill="True">
                             <TextBlock DockPanel.Dock="Left"
                                        Text="&#xE10B;"
@@ -159,7 +199,7 @@
                                        Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding StatusText}"
                                        FontSize="11"
-                                       Foreground="#4B5563"
+                                       Foreground="{DynamicResource AppSecondaryTextBrush}"
                                        TextTrimming="CharacterEllipsis"
                                        VerticalAlignment="Center"/>
                         </DockPanel>
@@ -218,7 +258,7 @@
 
         <!-- 垂直 GridSplitter（可拖拉調整側邊欄寬度） -->
         <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch" Background="#D9DEE7" Opacity="0.55"/>
+                      VerticalAlignment="Stretch" Background="{DynamicResource AppBorderBrush}" Opacity="0.55"/>
 
         <!-- 右側主要區域 -->
         <Grid Grid.Column="2">
@@ -272,18 +312,19 @@
                         <Button DockPanel.Dock="Right"
                                 Command="{Binding DisconnectRemoteCommand}"
                                 Content="{DynamicResource Remote_Button_Disconnect}"
-                                Style="{StaticResource ButtonDefault}"
-                                Padding="10,3" FontSize="11"
-                                Margin="12,0,0,0"
-                                Background="White"
-                                BorderBrush="#D9EAF7"/>
+                                Style="{StaticResource RemoteBannerButtonStyle}"
+                                Margin="12,0,0,0"/>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                         Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
                             <TextBlock Text="{DynamicResource Remote_Banner_ActiveMode}"
                                         Foreground="White" FontSize="12" FontWeight="SemiBold"
                                         VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <Border CornerRadius="4" Background="#FFFFFF22" Padding="7,2">
+                            <Border CornerRadius="4"
+                                    Background="#0F3A5F"
+                                    BorderBrush="#57A6E6"
+                                    BorderThickness="1"
+                                    Padding="7,2">
                                 <TextBlock Text="{Binding RemoteHost}"
                                            Foreground="White" FontSize="12" FontWeight="SemiBold"
                                            VerticalAlignment="Center"/>
@@ -298,19 +339,19 @@
 
             <!-- Row 1: 水平 GridSplitter -->
             <GridSplitter Grid.Row="2" Height="4" HorizontalAlignment="Stretch"
-                          VerticalAlignment="Center" Background="{DynamicResource BorderBrush}" Opacity="0.4"/>
+                          VerticalAlignment="Center" Background="{DynamicResource AppBorderBrush}" Opacity="0.4"/>
 
             <!-- Row 2: 底部詳細面板 -->
             <Grid Grid.Row="3" DataContext="{Binding EventDetailViewModel}"
-                  Background="White">
+                  Background="{DynamicResource AppSurfaceBrush}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Tab header bar -->
                     <RowDefinition Height="*"/>    <!-- Tab content -->
                 </Grid.RowDefinitions>
 
                 <!-- Tab header bar -->
-                <Border Grid.Row="0" Background="#FAFAFA"
-                        BorderBrush="#E0E0E0" BorderThickness="0,1,0,1"
+                <Border Grid.Row="0" Background="{DynamicResource AppSubtleSurfaceBrush}"
+                        BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,1,0,1"
                         Padding="8,0">
                     <DockPanel LastChildFill="True">
                         <!-- AI Analyze button (right) -->
@@ -419,6 +460,11 @@
 
                             <!-- Event fields (2-column layout) -->
                             <Grid>
+                                <Grid.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
+                                    </Style>
+                                </Grid.Resources>
                                 <Grid.Style>
                                     <Style TargetType="Grid">
                                         <Setter Property="Visibility" Value="Visible"/>
@@ -484,11 +530,11 @@
                         </Grid.RowDefinitions>
 
                         <!-- Scrollable AI content -->
-                        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Background="#F8F8F8">
+                        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Background="{DynamicResource AppPanelBackgroundBrush}">
                             <StackPanel Margin="16,12">
 
                                 <!-- Idle hint -->
-                                <Border CornerRadius="6" Padding="14" Background="White" BorderBrush="#E5E5E5" BorderThickness="1">
+                                <Border CornerRadius="6" Padding="14" Background="{DynamicResource AppSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1">
                                     <Border.Effect>
                                         <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.04"/>
                                     </Border.Effect>
@@ -503,7 +549,7 @@
                                         </Style>
                                     </Border.Style>
                                     <StackPanel Orientation="Horizontal">
-                                        <Border Width="28" Height="28" CornerRadius="14" Background="#EBF3FB" Margin="0,0,10,0">
+                                        <Border Width="28" Height="28" CornerRadius="14" Background="{DynamicResource AppInfoBrush}" Margin="0,0,10,0">
                                             <TextBlock Text="&#xE73E;" Style="{StaticResource Mdl2IconTextStyle}"
                                                        FontSize="14" Foreground="#0078D4"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -511,7 +557,7 @@
                                         <TextBlock Text="{DynamicResource AI_Status_Idle}"
                                                    TextWrapping="Wrap"
                                                    FontSize="12"
-                                                   Foreground="#555555"
+                                                   Foreground="{DynamicResource AppSecondaryTextBrush}"
                                                    VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
@@ -535,7 +581,7 @@
                                 </Border>
 
                                 <!-- Loading -->
-                                <Border CornerRadius="6" Padding="14" Background="White" BorderBrush="#E5E5E5" BorderThickness="1">
+                                <Border CornerRadius="6" Padding="14" Background="{DynamicResource AppSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -553,7 +599,7 @@
                                                    VerticalAlignment="Center"
                                                    Margin="10,0,0,0"
                                                    FontSize="12"
-                                                   Foreground="#333333"/>
+                                                   Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                                     </StackPanel>
                                 </Border>
 
@@ -591,19 +637,19 @@
                                         </Style>
                                     </StackPanel.Style>
 
-                                    <Border CornerRadius="6" Background="White" BorderBrush="#E5E5E5" BorderThickness="1" Padding="14" Margin="0,0,0,10">
+                                    <Border CornerRadius="6" Background="{DynamicResource AppSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Padding="14" Margin="0,0,0,10">
                                         <Border.Effect>
                                             <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.04"/>
                                         </Border.Effect>
                                         <StackPanel>
                                             <DockPanel Margin="0,0,0,8">
-                                                <Border DockPanel.Dock="Right" CornerRadius="4" Background="#F3F3F3" Padding="8,3">
-                                                    <TextBlock Text="{Binding AiModelName}" FontSize="11" Foreground="#666666"/>
+                                                <Border DockPanel.Dock="Right" CornerRadius="4" Background="{DynamicResource AppStatusPillBrush}" BorderBrush="{DynamicResource AppStatusPillBorderBrush}" BorderThickness="1" Padding="8,3">
+                                                    <TextBlock Text="{Binding AiModelName}" FontSize="11" Foreground="{DynamicResource AppMutedTextBrush}"/>
                                                 </Border>
                                                 <TextBlock Text="{DynamicResource AI_Section_Title}"
                                                            FontSize="13"
                                                            FontWeight="SemiBold"
-                                                           Foreground="#1A1A1A"/>
+                                                           Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                                             </DockPanel>
 
                                             <ItemsControl ItemsSource="{Binding AiResponseSections}">
@@ -620,8 +666,8 @@
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <Border CornerRadius="6"
-                                                                Background="#F8FAFC"
-                                                                BorderBrush="#E2E8F0"
+                                                                Background="{DynamicResource AppSubtleSurfaceBrush}"
+                                                                BorderBrush="{DynamicResource AppBorderBrush}"
                                                                 BorderThickness="1"
                                                                 Padding="12"
                                                                 Margin="0,0,0,8">
@@ -630,7 +676,7 @@
                                                                     <Border DockPanel.Dock="Right"
                                                                             CornerRadius="4"
                                                                             Padding="8,2"
-                                                                            Background="#F3F4F6">
+                                                                            Background="{DynamicResource AppStatusPillBrush}">
                                                                         <Border.Style>
                                                                             <Style TargetType="Border">
                                                                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -682,11 +728,11 @@
                                                                     <TextBlock Text="{Binding DisplayTitle}"
                                                                                FontSize="13"
                                                                                FontWeight="SemiBold"
-                                                                               Foreground="#1F2937"/>
+                                                                               Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                                                                 </DockPanel>
                                                                 <TextBlock Text="{Binding DisplayContent}"
                                                                            FontSize="12"
-                                                                           Foreground="#333333"
+                                                                           Foreground="{DynamicResource AppSecondaryTextBrush}"
                                                                            TextWrapping="Wrap"
                                                                            LineHeight="18"/>
                                                             </StackPanel>
@@ -701,7 +747,7 @@
                                                      BorderThickness="0"
                                                      Background="Transparent"
                                                      FontSize="12"
-                                                     Foreground="#333333"
+                                                     Foreground="{DynamicResource AppSecondaryTextBrush}"
                                                      VerticalScrollBarVisibility="Disabled">
                                                 <TextBox.Style>
                                                     <Style TargetType="TextBox">
@@ -717,7 +763,10 @@
                                         </StackPanel>
                                     </Border>
 
-                                    <Expander Header="{DynamicResource AI_Redaction_MapTitle}" Margin="0,0,0,10" Background="White" BorderBrush="#E5E5E5">
+                                    <Expander Header="{DynamicResource AI_Redaction_MapTitle}" Margin="0,0,0,10"
+                                              Background="{DynamicResource AppSurfaceBrush}"
+                                              BorderBrush="{DynamicResource AppBorderBrush}"
+                                              Foreground="{DynamicResource AppPrimaryTextBrush}">
                                         <Expander.Style>
                                             <Style TargetType="Expander">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -737,7 +786,7 @@
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Text="{Binding Placeholder}" FontSize="11" FontWeight="SemiBold" Foreground="#0078D4"/>
-                                                        <TextBlock Grid.Column="1" Text="{Binding Original}" FontSize="11" TextWrapping="Wrap" Foreground="#555555"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding Original}" FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource AppSecondaryTextBrush}"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
@@ -748,10 +797,10 @@
                                     <TextBlock Text="{DynamicResource AI_Chat_Title}"
                                                FontSize="12"
                                                FontWeight="SemiBold"
-                                               Foreground="#333333"
+                                               Foreground="{DynamicResource AppPrimaryTextBrush}"
                                                Margin="0,2,0,6"/>
                                     <Border CornerRadius="6" Padding="10" Margin="0,0,0,8"
-                                            Background="#EBF3FB" BorderBrush="#D4E7F7" BorderThickness="1">
+                                            Background="{DynamicResource AppInfoBrush}" BorderBrush="{DynamicResource AppInfoBorderBrush}" BorderThickness="1">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -779,8 +828,8 @@
                                                                     <Setter Property="Background" Value="#0078D4"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Role}" Value="Assistant">
-                                                                    <Setter Property="Background" Value="White"/>
-                                                                    <Setter Property="BorderBrush" Value="#E5E5E5"/>
+                                                                    <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+                                                                    <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
                                                                     <Setter Property="BorderThickness" Value="1"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
@@ -789,7 +838,7 @@
                                                     <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontSize="12">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="#333333"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Role}" Value="User">
                                                                         <Setter Property="Foreground" Value="White"/>
@@ -824,7 +873,8 @@
 
                         <!-- Pinned: Disclaimer + Chat input (OUTSIDE ScrollViewer) -->
                         <Border Grid.Row="1" Padding="16,8"
-                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+                                Background="{DynamicResource AppSurfaceBrush}"
+                                BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,1,0,0">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -842,7 +892,7 @@
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0" Text="{DynamicResource AI_Disclaimer_Text}"
                                            FontSize="10" TextWrapping="Wrap"
-                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,6"/>
+                                           Foreground="{DynamicResource AppMutedTextBrush}" Margin="0,0,0,6"/>
                                 <Grid Grid.Row="1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -899,19 +949,49 @@
                             </hc:LoadingCircle.Style>
                         </hc:LoadingCircle>
 
-                        <Grid Grid.Row="1">
+                        <Grid Grid.Row="1" Background="{DynamicResource AppPanelBackgroundBrush}">
                             <hc:Empty Description="{DynamicResource EventDetail_NoContextLogs}"
                                       Visibility="{Binding ContextLogs.Count, Converter={StaticResource ZeroToVisibilityConverter}, FallbackValue=Collapsed}"/>
                             <ListView ItemsSource="{Binding ContextLogs}" Margin="8,4">
                                 <ListView.Style>
                                     <Style TargetType="ListView">
                                         <Setter Property="BorderThickness" Value="0"/>
-                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Background" Value="{DynamicResource AppPanelBackgroundBrush}"/>
                                         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
                                         <Setter Property="ItemContainerStyle">
                                             <Setter.Value>
-                                                <Style TargetType="ListViewItem" BasedOn="{StaticResource ListViewItemBaseStyle}">
-                                                    <Setter Property="Padding" Value="2"/>
+                                                <Style TargetType="ListViewItem">
+                                                    <Setter Property="Padding" Value="0"/>
+                                                    <Setter Property="Margin" Value="0,0,0,4"/>
+                                                    <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+                                                    <Setter Property="BorderThickness" Value="1"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
+                                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="ListViewItem">
+                                                                <Border x:Name="Row"
+                                                                        Background="{TemplateBinding Background}"
+                                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                                        CornerRadius="4"
+                                                                        Padding="6,5">
+                                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter TargetName="Row" Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+                                                                    </Trigger>
+                                                                    <Trigger Property="IsSelected" Value="True">
+                                                                        <Setter TargetName="Row" Property="Background" Value="{DynamicResource AppActiveBrush}"/>
+                                                                        <Setter TargetName="Row" Property="BorderBrush" Value="#0078D4"/>
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
                                                 </Style>
                                             </Setter.Value>
                                         </Setter>
@@ -925,11 +1005,14 @@
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" ToolTip="{Binding Message}">
-                                            <TextBlock Text="{Binding Timestamp, StringFormat='HH:mm:ss '}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Timestamp, StringFormat='HH:mm:ss '}" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                                             <TextBlock Text="{Binding Level, StringFormat='{}{0}: '}" FontWeight="SemiBold"
                                                        Foreground="{Binding Level, Converter={StaticResource EventLevelToColorConverter}}"/>
-                                            <TextBlock Text="{Binding Source, StringFormat='{}{0} '}" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding EventId, StringFormat='(ID:{0})'}" FontStyle="Italic"/>
+                                            <TextBlock Text="{Binding Source, StringFormat='{}{0} '}" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource AppPrimaryTextBrush}"/>
+                                            <TextBlock Text="{Binding EventId, StringFormat='(ID:{0})'}" FontStyle="Italic"
+                                                       Foreground="{DynamicResource AppSecondaryTextBrush}"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
@@ -941,8 +1024,8 @@
             </Grid>
 
             <!-- Row 3: 底部狀態列 -->
-            <StatusBar Grid.Row="4" Background="#FAFAFA"
-                       BorderThickness="0,1,0,0" BorderBrush="#E0E0E0" Padding="8,0">
+            <StatusBar Grid.Row="4" Background="{DynamicResource AppStatusBarBrush}"
+                       BorderThickness="0,1,0,0" BorderBrush="{DynamicResource AppBorderBrush}" Padding="8,0">
                 <StatusBarItem>
                     <DockPanel LastChildFill="True" MinWidth="260">
                         <TextBlock DockPanel.Dock="Left"
@@ -955,7 +1038,7 @@
                         <TextBlock Text="{Binding StatusText}"
                                    VerticalAlignment="Center"
                                    FontSize="11"
-                                   Foreground="#555555"
+                                   Foreground="{DynamicResource AppSecondaryTextBrush}"
                                    TextTrimming="CharacterEllipsis"/>
                     </DockPanel>
                 </StatusBarItem>
@@ -965,8 +1048,8 @@
                             <Border.Style>
                                 <Style TargetType="Border" BasedOn="{StaticResource ShellStatusPillStyle}">
                                     <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Setter Property="Background" Value="#EAF4FD"/>
-                                    <Setter Property="BorderBrush" Value="#C7E0F4"/>
+                                    <Setter Property="Background" Value="#0F3A5F"/>
+                                    <Setter Property="BorderBrush" Value="#57A6E6"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsRemoteMode}" Value="True">
                                             <Setter Property="Visibility" Value="Visible"/>
@@ -978,7 +1061,7 @@
                                 <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="11"
                                            Foreground="#0078D4" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding RemoteHost}" FontSize="11" FontWeight="SemiBold"
-                                           Foreground="#005A9E" VerticalAlignment="Center"/>
+                                           Foreground="White" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Border>
                         <!-- Connect to Remote button: hidden when already in remote mode -->
@@ -986,8 +1069,9 @@
                                 Padding="9,2" FontSize="11" Margin="0,0,8,0">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
-                                    <Setter Property="BorderBrush" Value="#D1D5DB"/>
-                                    <Setter Property="Background" Value="White"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+                                    <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsRemoteMode}" Value="True">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -1003,7 +1087,7 @@
                             </StackPanel>
                         </Button>
                         <TextBlock Text="v0.5.0 dev" FontSize="11"
-                                    Foreground="#888888" VerticalAlignment="Center"/>
+                                   Foreground="{DynamicResource AppMutedTextBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StatusBarItem>
             </StatusBar>

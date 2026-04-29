@@ -6,25 +6,25 @@
              xmlns:viewmodels="clr-namespace:WinSentryAI.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewmodels:AIReportViewModel}"
-             Background="#F3F3F3"
+             Background="{DynamicResource AppWindowBackgroundBrush}"
              FontFamily="Segoe UI">
     <UserControl.Resources>
         <Style x:Key="ReportMetricLabelStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Foreground" Value="#6B7280"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}"/>
         </Style>
 
         <Style x:Key="ReportMetricValueStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="22"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
             <Setter Property="Margin" Value="0,4,0,0"/>
         </Style>
 
         <Style x:Key="SeverityBadgeBorderStyle" TargetType="Border">
             <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Padding" Value="7,2"/>
-            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Background" Value="{DynamicResource AppStatusPillBrush}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Severity}" Value="Low">
                     <Setter Property="Background" Value="#DCFCE7"/>
@@ -71,16 +71,16 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Root" Background="Transparent" BorderBrush="#EEF0F3" BorderThickness="0,0,0,1">
+                        <Border x:Name="Root" Background="Transparent" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,0,0,1">
                             <ContentPresenter/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#F8FAFC"/>
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource AppHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#EAF4FD"/>
-                                <Setter TargetName="Root" Property="BorderBrush" Value="#C7E0F4"/>
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource AppActiveBrush}"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource AppInfoBorderBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -95,7 +95,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Padding="24,16,24,14" Background="#FAFAFA" BorderThickness="0,0,0,1" BorderBrush="#E5E5E5">
+        <Border Padding="24,16,24,14" Background="{DynamicResource AppSurfaceBrush}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource AppBorderBrush}">
             <DockPanel LastChildFill="True">
                 <Button DockPanel.Dock="Right"
                         Command="{Binding RefreshCommand}"
@@ -111,11 +111,11 @@
                     <TextBlock Text="{DynamicResource AIReport_Title}"
                                FontWeight="SemiBold"
                                FontSize="20"
-                               Foreground="#1A1A1A"
+                               Foreground="{DynamicResource AppPrimaryTextBrush}"
                                LineHeight="26"/>
                     <TextBlock Text="{DynamicResource AIReport_Subtitle}"
                                FontSize="12"
-                               Foreground="#888888"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
                                Margin="0,2,0,0"/>
                 </StackPanel>
             </DockPanel>
@@ -131,28 +131,28 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Background="White" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,10,0">
+                    <Border Grid.Column="0" Background="{DynamicResource AppSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,10,0">
                         <StackPanel>
                             <TextBlock Text="{DynamicResource AIReport_Metric_Total}" Style="{StaticResource ReportMetricLabelStyle}"/>
                             <TextBlock Text="{Binding TotalAnalyses}" Style="{StaticResource ReportMetricValueStyle}"/>
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="1" Background="White" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,10,0">
+                    <Border Grid.Column="1" Background="{DynamicResource AppSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,10,0">
                         <StackPanel>
                             <TextBlock Text="{DynamicResource AIReport_Metric_Success}" Style="{StaticResource ReportMetricLabelStyle}"/>
                             <TextBlock Text="{Binding SuccessfulAnalyses}" Style="{StaticResource ReportMetricValueStyle}" Foreground="#166534"/>
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="2" Background="White" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,10,0">
+                    <Border Grid.Column="2" Background="{DynamicResource AppSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,10,0">
                         <StackPanel>
                             <TextBlock Text="{DynamicResource AIReport_Metric_HighSeverity}" Style="{StaticResource ReportMetricLabelStyle}"/>
                             <TextBlock Text="{Binding HighSeverityAnalyses}" Style="{StaticResource ReportMetricValueStyle}" Foreground="#991B1B"/>
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="3" Background="White" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="6" Padding="12">
+                    <Border Grid.Column="3" Background="{DynamicResource AppSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="12">
                         <StackPanel>
                             <TextBlock Text="{DynamicResource AIReport_Metric_Failed}" Style="{StaticResource ReportMetricLabelStyle}"/>
-                            <TextBlock Text="{Binding FailedAnalyses}" Style="{StaticResource ReportMetricValueStyle}" Foreground="#4B5563"/>
+                            <TextBlock Text="{Binding FailedAnalyses}" Style="{StaticResource ReportMetricValueStyle}" Foreground="{DynamicResource AppSecondaryTextBrush}"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -164,23 +164,23 @@
                         <ColumnDefinition Width="*" MinWidth="320"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1">
+                    <Border Grid.Column="0" Background="{DynamicResource AppSurfaceBrush}" CornerRadius="6" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                            <Border Padding="16,9" Background="{DynamicResource AppSubtleSurfaceBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="0,0,0,1">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE9D2;" Style="{StaticResource Mdl2InlineIconTextStyle}" Foreground="#0078D4"/>
-                                    <TextBlock Text="{DynamicResource AIReport_Section_Recent}" FontSize="12" FontWeight="SemiBold" Foreground="#333333"/>
+                                    <TextBlock Text="{DynamicResource AIReport_Section_Recent}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                                 </StackPanel>
                             </Border>
 
                             <Grid Grid.Row="1">
                             <TextBlock Text="{DynamicResource AIReport_Empty}"
-                                       Foreground="#777777"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
                                        FontSize="13"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center">
@@ -225,7 +225,7 @@
                                                 <TextBlock Grid.Column="0"
                                                            Text="{Binding AnalysisCreatedAt, StringFormat='MM-dd HH:mm'}"
                                                            FontSize="12"
-                                                           Foreground="#4B5563"
+                                                           Foreground="{DynamicResource AppSecondaryTextBrush}"
                                                            VerticalAlignment="Center"/>
 
                                                 <Border Grid.Column="1" Style="{StaticResource SeverityBadgeBorderStyle}"
@@ -237,11 +237,11 @@
                                                     <TextBlock Text="{Binding Summary}"
                                                                FontSize="13"
                                                                FontWeight="SemiBold"
-                                                               Foreground="#1F2937"
+                                                               Foreground="{DynamicResource AppPrimaryTextBrush}"
                                                                TextTrimming="CharacterEllipsis"/>
                                                     <TextBlock Text="{Binding EventPreview}"
                                                                FontSize="11"
-                                                               Foreground="#6B7280"
+                                                               Foreground="{DynamicResource AppMutedTextBrush}"
                                                                TextTrimming="CharacterEllipsis"
                                                                Margin="0,4,0,0"/>
                                                 </StackPanel>
@@ -249,11 +249,11 @@
                                                 <StackPanel Grid.Column="3" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Source}"
                                                                FontSize="11"
-                                                               Foreground="#374151"
+                                                               Foreground="{DynamicResource AppSecondaryTextBrush}"
                                                                TextTrimming="CharacterEllipsis"/>
                                                     <TextBlock Text="{Binding ModelDisplay}"
                                                                FontSize="11"
-                                                               Foreground="#6B7280"
+                                                               Foreground="{DynamicResource AppMutedTextBrush}"
                                                                TextTrimming="CharacterEllipsis"
                                                                Margin="0,4,0,0"/>
                                                 </StackPanel>
@@ -272,7 +272,7 @@
                                   Background="Transparent"
                                   ShowsPreview="True"/>
 
-                    <Border Grid.Column="2" Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Padding="16">
+                    <Border Grid.Column="2" Background="{DynamicResource AppSurfaceBrush}" CornerRadius="6" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Padding="16">
                         <Grid>
                             <Grid.Style>
                                 <Style TargetType="Grid">
@@ -299,14 +299,14 @@
                                 <TextBlock Text="{DynamicResource AIReport_Detail_Title}"
                                            FontSize="13"
                                            FontWeight="SemiBold"
-                                           Foreground="#1F2937"/>
+                                           Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                             </DockPanel>
 
                             <StackPanel Grid.Row="1" Margin="0,14,0,14" DataContext="{Binding SelectedItem}">
                                 <TextBlock Text="{Binding AnalysisCreatedAt, StringFormat='yyyy-MM-dd HH:mm'}"
-                                           FontSize="12" Foreground="#4B5563"/>
-                                <TextBlock Text="{Binding Host}" FontSize="12" Foreground="#4B5563" Margin="0,4,0,0"/>
-                                <TextBlock Text="{Binding ModelDisplay}" FontSize="12" Foreground="#4B5563" Margin="0,4,0,0"/>
+                                           FontSize="12" Foreground="{DynamicResource AppSecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding Host}" FontSize="12" Foreground="{DynamicResource AppSecondaryTextBrush}" Margin="0,4,0,0"/>
+                                <TextBlock Text="{Binding ModelDisplay}" FontSize="12" Foreground="{DynamicResource AppSecondaryTextBrush}" Margin="0,4,0,0"/>
                             </StackPanel>
 
                             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" DataContext="{Binding SelectedItem}">
@@ -314,21 +314,21 @@
                                     <TextBlock Text="{DynamicResource AIReport_Detail_Summary}"
                                                FontSize="11"
                                                FontWeight="SemiBold"
-                                               Foreground="#6B7280"
+                                               Foreground="{DynamicResource AppMutedTextBrush}"
                                                Margin="0,0,0,4"/>
                                     <TextBlock Text="{Binding DetailText}"
                                                FontSize="12"
-                                               Foreground="#1F2937"
+                                               Foreground="{DynamicResource AppPrimaryTextBrush}"
                                                TextWrapping="Wrap"
                                                LineHeight="18"/>
                                     <TextBlock Text="{DynamicResource AIReport_Detail_Event}"
                                                FontSize="11"
                                                FontWeight="SemiBold"
-                                               Foreground="#6B7280"
+                                               Foreground="{DynamicResource AppMutedTextBrush}"
                                                Margin="0,18,0,4"/>
                                     <TextBlock Text="{Binding EventTitle}"
                                                FontSize="12"
-                                               Foreground="#374151"
+                                               Foreground="{DynamicResource AppSecondaryTextBrush}"
                                                TextWrapping="Wrap"
                                                LineHeight="18"/>
                                 </StackPanel>

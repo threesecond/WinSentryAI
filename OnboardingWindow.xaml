@@ -10,9 +10,9 @@
         Icon="Resources/Icons/AppIcon.ico"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
         d:DataContext="{d:DesignInstance vm:OnboardingViewModel}"
-        Background="{DynamicResource RegionBrush}">
+        Background="{DynamicResource AppWindowBackgroundBrush}">
 
-    <Border CornerRadius="0" Background="{DynamicResource RegionBrush}">
+    <Border CornerRadius="0" Background="{DynamicResource AppWindowBackgroundBrush}">
         <Grid Margin="30">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Header -->
@@ -21,9 +21,24 @@
                 <RowDefinition Height="Auto"/> <!-- Footer -->
             </Grid.RowDefinitions>
 
+            <Grid.Resources>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource AppHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource AppActiveBrush}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Resources>
+
             <!-- Header Title -->
             <StackPanel Margin="0,0,0,20">
-                <TextBlock x:Name="StepTitle" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}">
+                <TextBlock x:Name="StepTitle" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource AppPrimaryTextBrush}">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Text" Value="{DynamicResource Onboarding_Step1_Title}"/>
@@ -57,7 +72,7 @@
                         </Style>
                     </hc:Card.Style>
                     <StackPanel Margin="15">
-                        <TextBlock Text="Welcome! Please select your preferred display language." Margin="0,0,0,15" TextWrapping="Wrap"/>
+                        <TextBlock Text="Welcome! Please select your preferred display language." Margin="0,0,0,15" TextWrapping="Wrap" Foreground="{DynamicResource AppSecondaryTextBrush}"/>
                         <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" hc:InfoElement.Placeholder="Select Language">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -88,7 +103,7 @@
                         </Style>
                     </hc:Card.Style>
                     <StackPanel Margin="15">
-                        <TextBlock Text="Choose an AI Provider for system diagnosis. You can change this later in settings." Margin="0,0,0,15" TextWrapping="Wrap"/>
+                        <TextBlock Text="Choose an AI Provider for system diagnosis. You can change this later in settings." Margin="0,0,0,15" TextWrapping="Wrap" Foreground="{DynamicResource AppSecondaryTextBrush}"/>
                         <ComboBox ItemsSource="{Binding Providers}" SelectedItem="{Binding SelectedProvider}" hc:InfoElement.Placeholder="Select Provider">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -128,7 +143,7 @@
                                     <Style.Triggers><DataTrigger Binding="{Binding SelectedProvider}" Value="ollama"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>
                                 </Style>
                             </StackPanel.Style>
-                            <TextBlock Text="Enter your API Key. It will be encrypted with Windows DPAPI." Margin="0,0,0,10"/>
+                            <TextBlock Text="Enter your API Key. It will be encrypted with Windows DPAPI." Margin="0,0,0,10" Foreground="{DynamicResource AppSecondaryTextBrush}"/>
                             <hc:TextBox hc:InfoElement.Title="API Key" 
                                         hc:InfoElement.Placeholder="Enter API Key"
                                         Text="{Binding ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
@@ -143,7 +158,7 @@
                                     <Style.Triggers><DataTrigger Binding="{Binding SelectedProvider}" Value="ollama"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers>
                                 </Style>
                             </StackPanel.Style>
-                            <TextBlock Text="Enter Ollama server endpoint (usually localhost)." Margin="0,0,0,10"/>
+                            <TextBlock Text="Enter Ollama server endpoint (usually localhost)." Margin="0,0,0,10" Foreground="{DynamicResource AppSecondaryTextBrush}"/>
                             <hc:TextBox Text="{Binding OllamaEndpoint}" hc:InfoElement.Placeholder="http://localhost:11434" hc:InfoElement.Title="Endpoint" Margin="0,0,0,10"/>
                         </StackPanel>
 
@@ -178,7 +193,7 @@
                                 </Style>
                             </StackPanel.Style>
                             <hc:LoadingCircle Width="18" Height="18" Margin="0,0,8,0"/>
-                            <TextBlock Text="Fetching available models…" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            <TextBlock Text="Fetching available models…" VerticalAlignment="Center" Foreground="{DynamicResource AppMutedTextBrush}"/>
                         </StackPanel>
 
                         <!-- Model Dropdown (Gemini / Ollama — HasAvailableModels=True) -->
@@ -193,7 +208,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </StackPanel.Style>
-                            <TextBlock Text="Select Model" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <TextBlock Text="Select Model" FontWeight="SemiBold" Margin="0,0,0,6" Foreground="{DynamicResource AppPrimaryTextBrush}"/>
                             <ComboBox ItemsSource="{Binding AvailableModels}"
                                       SelectedItem="{Binding SelectedModel, Mode=TwoWay}"/>
                         </StackPanel>
@@ -243,7 +258,7 @@
                         </hc:Row>
 
                         <TextBlock Text="{DynamicResource Onboarding_Step4_Desc}" 
-                                   Margin="0,20,0,0" TextWrapping="Wrap" Opacity="0.7"/>
+                                   Margin="0,20,0,0" TextWrapping="Wrap" Foreground="{DynamicResource AppSecondaryTextBrush}"/>
                     </StackPanel>
                 </hc:Card>
             </Grid>
