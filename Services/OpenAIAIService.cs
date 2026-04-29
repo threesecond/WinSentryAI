@@ -33,6 +33,82 @@ namespace WinSentryAI.Services
             return !string.IsNullOrWhiteSpace(key);
         }
 
+        public async Task<IReadOnlyList<string>> FetchModelsAsync(CancellationToken ct = default)
+        {
+            string? apiKey = await _db.GetSecretAsync(SecretKey);
+            if (string.IsNullOrWhiteSpace(apiKey))
+                return Array.Empty<string>();
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.openai.com/v1/models");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+            using var resp = await _http.SendAsync(request, ct);
+            string body = await resp.Content.ReadAsStringAsync(ct);
+            resp.EnsureSuccessStatusCode();
+
+            using var doc = JsonDocument.Parse(body);
+            if (!doc.RootElement.TryGetProperty("data", out var data))
+                return Array.Empty<string>();
+
+            var allModelIds = data.EnumerateArray()
+                .Select(m => m.TryGetProperty("id", out var id) ? id.GetString() : null)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id!)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var chatModelIds = allModelIds
+                .Where(IsLikelyChatModel)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(ModelSortRank)
+                .ThenBy(id => id, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            Log.Information("OpenAI models fetched ({Count}): {Models}", allModelIds.Count, string.Join(", ", allModelIds));
+            Log.Information("OpenAI chat model candidates ({Count}): {Models}", chatModelIds.Count, string.Join(", ", chatModelIds));
+
+            return chatModelIds;
+        }
+
+        private static bool IsLikelyChatModel(string id)
+        {
+            if (id.Contains("instruct", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("realtime", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("audio", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("transcribe", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("tts", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("image", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("embedding", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("moderation", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("codex", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("search", StringComparison.OrdinalIgnoreCase)
+                || id.Contains("pro", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return id.EndsWith("-chat-latest", StringComparison.OrdinalIgnoreCase)
+                || id.StartsWith("gpt-4.1", StringComparison.OrdinalIgnoreCase)
+                || id.StartsWith("gpt-4o", StringComparison.OrdinalIgnoreCase)
+                || id.StartsWith("gpt-4-turbo", StringComparison.OrdinalIgnoreCase)
+                || id.Equals("gpt-4", StringComparison.OrdinalIgnoreCase)
+                || id.StartsWith("gpt-4-", StringComparison.OrdinalIgnoreCase)
+                || id.StartsWith("gpt-3.5-turbo", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static int ModelSortRank(string id)
+        {
+            if (id.StartsWith("gpt-5.3", StringComparison.OrdinalIgnoreCase)) return 8;
+            if (id.StartsWith("gpt-5.2", StringComparison.OrdinalIgnoreCase)) return 7;
+            if (id.StartsWith("gpt-5.1", StringComparison.OrdinalIgnoreCase)) return 6;
+            if (id.StartsWith("gpt-5", StringComparison.OrdinalIgnoreCase)) return 5;
+            if (id.StartsWith("gpt-4.1", StringComparison.OrdinalIgnoreCase)) return 4;
+            if (id.StartsWith("gpt-4o", StringComparison.OrdinalIgnoreCase)) return 3;
+            if (id.StartsWith("gpt-4-turbo", StringComparison.OrdinalIgnoreCase)) return 2;
+            return 1;
+        }
+
         public async Task<AIAnalysisResponse> AnalyzeEventAsync(AIAnalysisRequest request, CancellationToken ct = default)
         {
             string systemPrompt = PromptBuilder.BuildSystemPrompt(request.Language);

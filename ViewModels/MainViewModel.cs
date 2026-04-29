@@ -56,6 +56,7 @@ namespace WinSentryAI.ViewModels
         // Sub-viewmodels
         private readonly SettingsViewModel _settingsViewModel;
         private readonly SystemInfoViewModel _systemInfoViewModel;
+        private readonly AIReportViewModel _aiReportViewModel;
         [ObservableProperty]
         private EventDetailViewModel _eventDetailViewModel;
 
@@ -73,6 +74,7 @@ namespace WinSentryAI.ViewModels
             // Initialize sub-viewmodels
             _settingsViewModel = new SettingsViewModel(settingsService);
             _systemInfoViewModel = new SystemInfoViewModel(databaseService);
+            _aiReportViewModel = new AIReportViewModel(databaseService);
             _eventDetailViewModel = new EventDetailViewModel(
                 databaseService,
                 AppState.Instance.ContextLogCapture,
@@ -133,12 +135,17 @@ namespace WinSentryAI.ViewModels
                     IsEventListActive = false;
                     CurrentPage = "SystemInfo";
                     break;
+                case "AIReport":
+                    CurrentViewModel = _aiReportViewModel;
+                    IsEventListActive = false;
+                    CurrentPage = "AIReport";
+                    _ = _aiReportViewModel.LoadAsync();
+                    break;
                 case "Settings":
                     CurrentViewModel = _settingsViewModel;
                     IsEventListActive = false;
                     CurrentPage = "Settings";
                     break;
-                // Add other cases for System Info, AI Report etc. later
                 default:
                     CurrentViewModel = this; // Fallback
                     IsEventListActive = true;
@@ -153,6 +160,17 @@ namespace WinSentryAI.ViewModels
             Events.Clear();
             FilteredEvents.Refresh();
             UpdateStatus(0);
+        }
+
+        public void RefreshLocalizedText()
+        {
+            if (IsRemoteMode && !string.IsNullOrWhiteSpace(RemoteHost))
+            {
+                StatusText = string.Format(GetString("Remote_Status_Loaded"), Events.Count, RemoteHost);
+                return;
+            }
+
+            UpdateStatus(Events.Count(e => e.Level <= EventLevel.Error));
         }
 
         private static string GetString(string key) =>

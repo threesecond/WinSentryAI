@@ -8,6 +8,77 @@ using Serilog;
 
 namespace WinSentryAI.ViewModels
 {
+    public record AiResponseSection(string Title, string Content)
+    {
+        public string DisplayTitle => CleanMarkdownText(Title);
+
+        public string SeverityBadgeText => IsSeveritySection ? ExtractSeverityLevel(Content) : string.Empty;
+
+        public string DisplayContent => IsSeveritySection ? ExtractSeverityDescription(Content) : CleanMarkdownText(Content);
+
+        private bool IsSeveritySection => string.Equals(Title, "Severity", StringComparison.OrdinalIgnoreCase);
+
+        private static string ExtractSeverityLevel(string content)
+        {
+            var text = CleanMarkdownText(content);
+            var firstLine = text.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault()?.Trim() ?? string.Empty;
+
+            foreach (var level in new[] { "Critical", "High", "Medium", "Low" })
+            {
+                if (firstLine.StartsWith(level, StringComparison.OrdinalIgnoreCase))
+                {
+                    return level;
+                }
+            }
+
+            return firstLine.Split(new[] { ' ', '-', '—', ':', '：' }, StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault() ?? text;
+        }
+
+        private static string ExtractSeverityDescription(string content)
+        {
+            var text = CleanMarkdownText(content);
+            var level = ExtractSeverityLevel(content);
+            if (string.IsNullOrWhiteSpace(level))
+            {
+                return text;
+            }
+
+            var description = text;
+            if (description.StartsWith(level, StringComparison.OrdinalIgnoreCase))
+            {
+                description = description[level.Length..].TrimStart();
+            }
+
+            return description.TrimStart('-', '—', ':', '：', ' ').Trim();
+        }
+
+        private static string CleanMarkdownText(string content)
+        {
+            var inCodeBlock = false;
+            var lines = content.Replace("\r\n", "\n")
+                .Split('\n')
+                .Select(line => line.Trim())
+                .Where(line =>
+                {
+                    if (line.StartsWith("```", StringComparison.Ordinal))
+                    {
+                        inCodeBlock = !inCodeBlock;
+                        return false;
+                    }
+
+                    return !inCodeBlock && line != "---" && line != "***";
+                })
+                .Select(line => line.Replace("\t", "    "));
+
+            return string.Join(Environment.NewLine, lines)
+                .Replace("**", string.Empty)
+                .Replace("__", string.Empty)
+                .Trim();
+        }
+    }
+
     public enum AiAnalysisStatus
     {
         Idle,
@@ -44,6 +115,9 @@ namespace WinSentryAI.ViewModels
 
         [ObservableProperty]
         private string? _aiResponseText;
+
+        [ObservableProperty]
+        private ObservableCollection<AiResponseSection> _aiResponseSections = new();
 
         [ObservableProperty]
         private string? _aiErrorMessage;
@@ -84,6 +158,7 @@ namespace WinSentryAI.ViewModels
         public bool IsAiLoading => AiStatus == AiAnalysisStatus.Loading;
         public bool IsAiSuccess => AiStatus == AiAnalysisStatus.Success;
         public bool IsAiFailure => AiStatus == AiAnalysisStatus.Failure;
+        public bool HasAiResponseSections => AiResponseSections.Count > 0;
         public bool HasRedactionEntries => RedactionEntries.Count > 0;
         public bool HasInitialAnalysisContext => IsAiSuccess && !string.IsNullOrWhiteSpace(_initialUserMessageForChat);
 
@@ -135,6 +210,8 @@ namespace WinSentryAI.ViewModels
         {
             AiStatus = AiAnalysisStatus.Idle;
             AiResponseText = null;
+            AiResponseSections.Clear();
+            OnPropertyChanged(nameof(HasAiResponseSections));
             AiErrorMessage = null;
             AiModelName = null;
             IsEventAnalyzed = false;
@@ -163,6 +240,7 @@ namespace WinSentryAI.ViewModels
                 if (existing.IsSuccess)
                 {
                     AiResponseText = existing.Response;
+                    UpdateAiResponseSections(existing.Response);
                     AiStatus = AiAnalysisStatus.Success;
                     IsEventAnalyzed = true;
                     SelectedTab = "AI";
@@ -183,6 +261,9 @@ namespace WinSentryAI.ViewModels
         {
             var trigger = SelectedEvent;
             if (trigger == null || trigger.Id == 0) return;
+
+            SelectedTab = "AI";
+            AiModelName = _aiService.ModelName;
 
             // Pre-flight: API key check
             try
@@ -262,6 +343,7 @@ namespace WinSentryAI.ViewModels
                 if (response.IsSuccess)
                 {
                     AiResponseText = response.Response;
+                    UpdateAiResponseSections(response.Response);
                     AiStatus = AiAnalysisStatus.Success;
                     IsEventAnalyzed = true;
                     SelectedTab = "AI";
@@ -278,6 +360,67 @@ namespace WinSentryAI.ViewModels
                 if (!ReferenceEquals(SelectedEvent, trigger)) return;
                 AiErrorMessage = ex.Message;
                 AiStatus = AiAnalysisStatus.Failure;
+            }
+        }
+
+        private void UpdateAiResponseSections(string? response)
+        {
+            AiResponseSections.Clear();
+
+            if (string.IsNullOrWhiteSpace(response))
+            {
+                OnPropertyChanged(nameof(HasAiResponseSections));
+                return;
+            }
+
+            var sections = ParseMarkdownSections(response);
+            foreach (var section in sections)
+            {
+                AiResponseSections.Add(section);
+            }
+
+            OnPropertyChanged(nameof(HasAiResponseSections));
+        }
+
+        private static IReadOnlyList<AiResponseSection> ParseMarkdownSections(string response)
+        {
+            var sections = new List<AiResponseSection>();
+            string? currentTitle = null;
+            var currentContent = new List<string>();
+
+            foreach (var rawLine in response.Replace("\r\n", "\n").Split('\n'))
+            {
+                string line = rawLine.TrimEnd();
+                if (line.StartsWith("## ", StringComparison.Ordinal))
+                {
+                    AddSection();
+                    currentTitle = line[3..].Trim();
+                    continue;
+                }
+
+                currentContent.Add(line);
+            }
+
+            AddSection();
+
+            if (sections.Count == 0)
+            {
+                sections.Add(new AiResponseSection("Analysis", response.Trim()));
+            }
+
+            return sections;
+
+            void AddSection()
+            {
+                if (string.IsNullOrWhiteSpace(currentTitle)) return;
+
+                string content = string.Join(Environment.NewLine, currentContent).Trim();
+                if (!string.IsNullOrWhiteSpace(content))
+                {
+                    sections.Add(new AiResponseSection(currentTitle, content));
+                }
+
+                currentContent.Clear();
             }
         }
 

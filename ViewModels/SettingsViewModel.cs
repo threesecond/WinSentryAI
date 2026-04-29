@@ -7,6 +7,7 @@ using System.Windows;
 using System.Net.Http;
 using System.Text.Json;
 using System.Diagnostics;
+using WinSentryAI.Views;
 
 namespace WinSentryAI.ViewModels
 {
@@ -39,6 +40,8 @@ namespace WinSentryAI.ViewModels
 
         public ObservableCollection<string> GeminiModels { get; } = new();
         public ObservableCollection<string> OllamaModels { get; } = new();
+        public ObservableCollection<string> OpenAiModels { get; } = new();
+        public ObservableCollection<string> ClaudeModels { get; } = new();
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsFetchGeminiModelsRunning))]
@@ -48,6 +51,18 @@ namespace WinSentryAI.ViewModels
 
         [ObservableProperty]
         private bool _isFetchingOllamaModels = false;
+
+        [ObservableProperty]
+        private bool _isFetchingOpenAiModels = false;
+
+        [ObservableProperty]
+        private bool _isFetchingClaudeModels = false;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasModelFetchStatus))]
+        private string _modelFetchStatusText = string.Empty;
+
+        public bool HasModelFetchStatus => !string.IsNullOrWhiteSpace(ModelFetchStatusText);
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(GeminiKeyStatusText))]
@@ -83,6 +98,8 @@ namespace WinSentryAI.ViewModels
         public IAsyncRelayCommand ClearGeminiKeyCommand { get; }
         public IAsyncRelayCommand FetchGeminiModelsCommand { get; }
         public IAsyncRelayCommand FetchOllamaModelsCommand { get; }
+        public IAsyncRelayCommand FetchOpenAiModelsCommand { get; }
+        public IAsyncRelayCommand FetchClaudeModelsCommand { get; }
         public IAsyncRelayCommand<string?> SaveOpenAiKeyCommand { get; }
         public IAsyncRelayCommand ClearOpenAiKeyCommand { get; }
         public IAsyncRelayCommand<string?> SaveClaudeKeyCommand { get; }
@@ -105,6 +122,8 @@ namespace WinSentryAI.ViewModels
             ClearGeminiKeyCommand = new AsyncRelayCommand(ClearGeminiKeyAsync);
             FetchGeminiModelsCommand = new AsyncRelayCommand(FetchGeminiModelsAsync);
             FetchOllamaModelsCommand = new AsyncRelayCommand(FetchOllamaModelsAsync);
+            FetchOpenAiModelsCommand = new AsyncRelayCommand(FetchOpenAiModelsAsync);
+            FetchClaudeModelsCommand = new AsyncRelayCommand(FetchClaudeModelsAsync);
             SaveOpenAiKeyCommand = new AsyncRelayCommand<string?>(SaveOpenAiKeyAsync);
             ClearOpenAiKeyCommand = new AsyncRelayCommand(ClearOpenAiKeyAsync);
             SaveClaudeKeyCommand = new AsyncRelayCommand<string?>(SaveClaudeKeyAsync);
@@ -223,6 +242,7 @@ namespace WinSentryAI.ViewModels
             }
 
             IsFetchingGeminiModels = true;
+            ModelFetchStatusText = string.Empty;
             try
             {
                 var models = await geminiService.FetchModelsAsync();
@@ -239,6 +259,8 @@ namespace WinSentryAI.ViewModels
 
                 if (!GeminiModels.Contains(GeminiModel))
                     GeminiModel = GeminiModels[0];
+
+                ModelFetchStatusText = string.Format(GetString("Settings_ModelFetch_Success"), models.Count);
             }
             catch (Exception ex)
             {
@@ -255,6 +277,7 @@ namespace WinSentryAI.ViewModels
         private async Task FetchOllamaModelsAsync()
         {
             IsFetchingOllamaModels = true;
+            ModelFetchStatusText = string.Empty;
             try
             {
                 using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
@@ -280,6 +303,8 @@ namespace WinSentryAI.ViewModels
                             OllamaModels.Add(nameEl.GetString() ?? string.Empty);
                         }
                     }
+
+                    ModelFetchStatusText = string.Format(GetString("Settings_ModelFetch_Success"), OllamaModels.Count);
                 }
             }
             catch (Exception ex)
@@ -291,6 +316,80 @@ namespace WinSentryAI.ViewModels
             finally
             {
                 IsFetchingOllamaModels = false;
+            }
+        }
+
+        private async Task FetchOpenAiModelsAsync()
+        {
+            IsFetchingOpenAiModels = true;
+            ModelFetchStatusText = string.Empty;
+            try
+            {
+                var service = new OpenAIAIService(_databaseService, _settingsService);
+                var models = await service.FetchModelsAsync();
+                if (models.Count == 0)
+                {
+                    MessageBox.Show(GetString("Settings_OpenAiKey_FetchFailed"),
+                                    GetString("Settings_Title"),
+                                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                OpenAiModels.Clear();
+                foreach (var model in models)
+                    OpenAiModels.Add(model);
+
+                if (!OpenAiModels.Contains(OpenAiModel))
+                    OpenAiModel = OpenAiModels[0];
+
+                ModelFetchStatusText = string.Format(GetString("Settings_ModelFetch_Success"), models.Count);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Failed to fetch OpenAI models.");
+                MessageBox.Show(ex.Message, GetString("Settings_Title"),
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsFetchingOpenAiModels = false;
+            }
+        }
+
+        private async Task FetchClaudeModelsAsync()
+        {
+            IsFetchingClaudeModels = true;
+            ModelFetchStatusText = string.Empty;
+            try
+            {
+                var service = new ClaudeAIService(_databaseService, _settingsService);
+                var models = await service.FetchModelsAsync();
+                if (models.Count == 0)
+                {
+                    MessageBox.Show(GetString("Settings_ClaudeKey_FetchFailed"),
+                                    GetString("Settings_Title"),
+                                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                ClaudeModels.Clear();
+                foreach (var model in models)
+                    ClaudeModels.Add(model);
+
+                if (!ClaudeModels.Contains(ClaudeModel))
+                    ClaudeModel = ClaudeModels[0];
+
+                ModelFetchStatusText = string.Format(GetString("Settings_ModelFetch_Success"), models.Count);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Failed to fetch Claude models.");
+                MessageBox.Show(ex.Message, GetString("Settings_Title"),
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsFetchingClaudeModels = false;
             }
         }
 
@@ -491,6 +590,15 @@ namespace WinSentryAI.ViewModels
             OnPropertyChanged(nameof(GeminiKeyStatusText));
             OnPropertyChanged(nameof(OpenAiKeyStatusText));
             OnPropertyChanged(nameof(ClaudeKeyStatusText));
+
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is MainWindow { DataContext: MainViewModel mainViewModel })
+                {
+                    mainViewModel.RefreshLocalizedText();
+                    break;
+                }
+            }
         }
 
         private static string GetString(string key) =>

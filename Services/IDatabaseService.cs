@@ -26,6 +26,7 @@ namespace WinSentryAI.Services
         // 分析結果相關
         Task<long> SaveAnalysisResultAsync(AnalysisResult result, CancellationToken ct = default);
         Task<AnalysisResult?> GetLatestAnalysisAsync(long eventId, CancellationToken ct = default);
+        Task<IReadOnlyList<AnalysisReportItem>> GetAnalysisReportItemsAsync(int limit = 100, CancellationToken ct = default);
 
         // 系統快照相關
         Task SaveSystemSnapshotAsync(SystemSnapshot snapshot, CancellationToken ct = default);

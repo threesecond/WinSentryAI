@@ -14,6 +14,9 @@ GEMINI.md
 ## HTML mockup design files (AI-generated, not source code)
 *.html
 
+## Release artifacts (uploaded to GitHub Releases, not source code)
+WinSentryAI-v*-win-x64-portable.zip
+
 ## Runtime-generated files (created on first launch)
 settings.ini
 *.db

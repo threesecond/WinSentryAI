@@ -71,6 +71,49 @@ namespace WinSentryAI.Services
             }, ct);
         }
 
+        public async Task TestConnectionAsync(CancellationToken ct = default)
+        {
+            await Task.Run(() =>
+            {
+                Exception? firstFailure = null;
+                bool hasAccessibleLog = false;
+                string isoTime = DateTime.UtcNow.AddMinutes(-5).ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+                string filter = $"*[System[TimeCreated[@SystemTime >= '{isoTime}']]]";
+
+                foreach (var logName in _logNames)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        var query = new EventLogQuery(logName, PathType.LogName, filter)
+                        {
+                            Session = _session,
+                            ReverseDirection = true
+                        };
+                        using var reader = new EventLogReader(query);
+                        _ = reader.ReadEvent();
+                        hasAccessibleLog = true;
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        firstFailure ??= ex;
+                        Log.Warning("Remote: access denied while testing {LogName} on {Host}.", logName, _hostname);
+                    }
+                    catch (Exception ex)
+                    {
+                        firstFailure ??= ex;
+                        Log.Warning(ex, "Remote: connection test failed while querying {LogName} on {Host}.", logName, _hostname);
+                    }
+                }
+
+                if (!hasAccessibleLog)
+                {
+                    throw firstFailure ?? new InvalidOperationException("No accessible remote event logs were found.");
+                }
+            }, ct);
+        }
+
         public async Task<IReadOnlyList<AppEventRecord>> GetContextEventsAsync(
             DateTime triggerTimestamp, CancellationToken ct = default)
         {

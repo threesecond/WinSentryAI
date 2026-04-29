@@ -57,14 +57,23 @@ namespace WinSentryAI.ViewModels
 
             try
             {
+                if (string.IsNullOrWhiteSpace(Hostname))
+                {
+                    throw new ArgumentException("Hostname is required.");
+                }
+
+                if (CredentialMode == "Specify" && string.IsNullOrWhiteSpace(Username))
+                {
+                    throw new ArgumentException("Username is required when using specified credentials.");
+                }
+
                 SecureString? pass = CredentialMode == "Specify" ? Password : null;
                 string? domain = CredentialMode == "Specify" && !string.IsNullOrWhiteSpace(Domain) ? Domain : null;
                 string? user = CredentialMode == "Specify" && !string.IsNullOrWhiteSpace(Username) ? Username : null;
 
                 var service = new RemoteEventLogService(Hostname.Trim(), domain, user, pass);
 
-                // Connection test: query last 1 minute, expect no exception = success
-                await service.GetRetrospectiveEventsAsync(DateTime.Now.AddMinutes(-1), 1);
+                await service.TestConnectionAsync();
 
                 ConnectedService = service;
 
@@ -82,7 +91,7 @@ namespace WinSentryAI.ViewModels
             catch (Exception ex)
             {
                 Log.Warning(ex, "Remote connection failed to {Host}", Hostname);
-                StatusMessage = $"{GetString("Remote_Status_Failed")}: {ex.Message}";
+                StatusMessage = $"{GetString("Remote_Status_Failed")}: {RemoteConnectionErrorFormatter.Format(ex)}";
                 StatusIsSuccess = false;
                 ConnectedService = null;
             }

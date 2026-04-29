@@ -7,20 +7,20 @@
              xmlns:viewmodels="clr-namespace:WinSentryAI.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewmodels:SettingsViewModel}"
-             Background="#F3F3F3"
+             Background="#F5F6F8"
              FontFamily="Segoe UI">
     <UserControl.Resources>
         <Style x:Key="SettingsSectionHeaderTextStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
         </Style>
 
         <Style x:Key="SettingsLabelTextStyle" TargetType="TextBlock">
-            <Setter Property="Width" Value="180"/>
+            <Setter Property="Width" Value="210"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Foreground" Value="#374151"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,16,0"/>
         </Style>
@@ -33,44 +33,46 @@
         </Style>
 
         <Style x:Key="SettingsRowStyle" TargetType="hc:FlexPanel">
-            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
         <Style x:Key="SettingsInputStyle" TargetType="hc:TextBox">
-            <Setter Property="Height" Value="28"/>
+            <Setter Property="Height" Value="30"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="BorderBrush" Value="#D1D1D1"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
             <Setter Property="Background" Value="White"/>
         </Style>
 
         <Style x:Key="SettingsPasswordBoxStyle" TargetType="PasswordBox">
-            <Setter Property="Height" Value="28"/>
+            <Setter Property="Height" Value="30"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="BorderBrush" Value="#D1D1D1"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="Padding" Value="8,3"/>
         </Style>
 
         <Style x:Key="SettingsComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Height" Value="28"/>
+            <Setter Property="Height" Value="30"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="BorderBrush" Value="#D1D1D1"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
             <Setter Property="Background" Value="White"/>
         </Style>
 
         <Style x:Key="SettingsSecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
-            <Setter Property="Padding" Value="14,4"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="14,5"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D1D1D1"/>
-            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
             <Setter Property="hc:BorderElement.CornerRadius" Value="4"/>
         </Style>
 
         <Style x:Key="SettingsPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
-            <Setter Property="Padding" Value="14,4"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="14,5"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Background" Value="#0078D4"/>
@@ -79,12 +81,42 @@
         </Style>
 
         <Style x:Key="SettingsDangerButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonDanger}">
-            <Setter Property="Padding" Value="14,4"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="14,5"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Background" Value="#C42B1C"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="hc:BorderElement.CornerRadius" Value="4"/>
+        </Style>
+
+        <Style x:Key="SettingsCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="BorderBrush" Value="#D8DEE8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.06"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SettingsCardHeaderStyle" TargetType="Border">
+            <Setter Property="Padding" Value="18,12"/>
+            <Setter Property="Background" Value="#FBFCFD"/>
+            <Setter Property="BorderBrush" Value="#E5EAF0"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
+
+        <Style x:Key="SettingsInfoBannerStyle" TargetType="Border">
+            <Setter Property="Background" Value="#EFF6FF"/>
+            <Setter Property="BorderBrush" Value="#BFDBFE"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
     </UserControl.Resources>
 
@@ -96,37 +128,34 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Padding="24,16,24,14" Background="#FAFAFA" BorderThickness="0,0,0,1" BorderBrush="#E5E5E5">
+        <Border Padding="28,18,28,16" Background="White" BorderThickness="0,0,0,1" BorderBrush="#E5EAF0">
             <StackPanel>
                 <TextBlock Text="{DynamicResource Settings_Title}"
                            FontWeight="SemiBold"
-                           FontSize="20"
-                           Foreground="#1A1A1A"
-                           LineHeight="26"/>
+                           FontSize="22"
+                           Foreground="#111827"
+                           LineHeight="28"/>
                 <TextBlock Text="{DynamicResource Settings_Subtitle}"
                            FontSize="12"
-                           Foreground="#888888"
+                           Foreground="#6B7280"
                            Margin="0,2,0,0"/>
             </StackPanel>
         </Border>
 
         <!-- Settings Content -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="20">
+            <StackPanel Margin="24" MaxWidth="1040" HorizontalAlignment="Left">
                 <!-- General Settings -->
-                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.05"/>
-                    </Border.Effect>
+                <Border Style="{StaticResource SettingsCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                        <Border Style="{StaticResource SettingsCardHeaderStyle}">
                             <TextBlock Text="{DynamicResource Settings_Section_General}" Style="{StaticResource SettingsSectionHeaderTextStyle}"/>
                         </Border>
-                        <StackPanel Grid.Row="1" Margin="16,12,16,0">
+                        <StackPanel Grid.Row="1" Margin="18,14,18,4">
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_LogRetentionDays}" Style="{StaticResource SettingsLabelTextStyle}"/>
                                 <hc:NumericUpDown Value="{Binding LogRetentionDays}" Minimum="1" Maximum="365"
@@ -144,25 +173,22 @@
                 </Border>
 
                 <!-- AI Configuration -->
-                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.05"/>
-                    </Border.Effect>
+                <Border Style="{StaticResource SettingsCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                        <Border Style="{StaticResource SettingsCardHeaderStyle}">
                             <TextBlock Text="{DynamicResource Settings_Section_AI}" Style="{StaticResource SettingsSectionHeaderTextStyle}"/>
                         </Border>
-                        <StackPanel Grid.Row="1" Margin="16,12,16,0">
+                        <StackPanel Grid.Row="1" Margin="18,14,18,4">
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_AIProvider}" Style="{StaticResource SettingsLabelTextStyle}"/>
                                 <ComboBox ItemsSource="{Binding AiProviders}" SelectedItem="{Binding AiProvider}" Width="180" Style="{StaticResource SettingsComboBoxStyle}"/>
                             </hc:FlexPanel>
 
-                            <Border Background="#FFF4CE" BorderBrush="#F2C94C" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,12"
+                            <Border Background="#FFFBEB" BorderBrush="#FBBF24" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,12"
                                     Visibility="{Binding NeedsRestart, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <hc:FlexPanel>
                                     <TextBlock Text="{DynamicResource Settings_Restart_Notice}" Foreground="#5C4100" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
@@ -187,7 +213,26 @@
                                            VerticalAlignment="Center"/>
                             </hc:FlexPanel>
 
+                            <Border Background="#ECFDF5" BorderBrush="#BBF7D0" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,12">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasModelFetchStatus}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding ModelFetchStatusText}"
+                                           FontSize="12"
+                                           Foreground="#047857"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"/>
+                            </Border>
+
                             <!-- Provider Panels -->
+                            <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="14,14,14,4" Margin="0,2,0,10">
                             <Grid>
                                 <!-- Gemini Panel -->
                                 <StackPanel>
@@ -202,7 +247,7 @@
                                         </Style>
                                     </StackPanel.Style>
 
-                                    <Border Background="#EBF3FB" BorderBrush="#D4E7F7" BorderThickness="1" CornerRadius="4" Padding="8,10" Margin="0,0,0,12">
+                                    <Border Style="{StaticResource SettingsInfoBannerStyle}">
                                         <TextBlock Text="{Binding GeminiKeyStatusText}" FontSize="11" Foreground="#0078D4" TextWrapping="Wrap"/>
                                     </Border>
 
@@ -221,7 +266,7 @@
                                             </Hyperlink>
                                         </TextBlock>
                                     </hc:FlexPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="196,0,0,12">
+                                    <StackPanel Orientation="Horizontal" Margin="226,0,0,12">
                                         <Button Style="{StaticResource SettingsPrimaryButtonStyle}" Click="SaveGeminiKey_Click" Margin="0,0,8,0">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="&#xE74E;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
@@ -257,13 +302,15 @@
                                         </Style>
                                     </StackPanel.Style>
 
-                                    <Border Background="#EBF3FB" BorderBrush="#D4E7F7" BorderThickness="1" CornerRadius="4" Padding="8,10" Margin="0,0,0,12">
+                                    <Border Style="{StaticResource SettingsInfoBannerStyle}">
                                         <TextBlock Text="{Binding OpenAiKeyStatusText}" FontSize="11" Foreground="#0078D4" TextWrapping="Wrap"/>
                                     </Border>
 
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_OpenAiModel}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                        <hc:TextBox Text="{Binding OpenAiModel, UpdateSourceTrigger=PropertyChanged}" Width="280" hc:InfoElement.Placeholder="gpt-4o" Style="{StaticResource SettingsInputStyle}"/>
+                                        <ComboBox IsEditable="True" ItemsSource="{Binding OpenAiModels}"
+                                                  Text="{Binding OpenAiModel, UpdateSourceTrigger=PropertyChanged}"
+                                                  Width="280" Style="{StaticResource SettingsComboBoxStyle}"/>
                                     </hc:FlexPanel>
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_OpenAiApiKey}" Style="{StaticResource SettingsLabelTextStyle}"/>
@@ -274,17 +321,24 @@
                                             </Hyperlink>
                                         </TextBlock>
                                     </hc:FlexPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="196,0,0,12">
+                                    <StackPanel Orientation="Horizontal" Margin="226,0,0,12">
                                         <Button Style="{StaticResource SettingsPrimaryButtonStyle}" Click="SaveOpenAiKey_Click" Margin="0,0,8,0">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="&#xE74E;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
                                                 <TextBlock Text="{DynamicResource Settings_Button_SaveOpenAiKey}" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
-                                        <Button Style="{StaticResource SettingsSecondaryButtonStyle}" Click="ClearOpenAiKey_Click">
+                                        <Button Style="{StaticResource SettingsSecondaryButtonStyle}" Click="ClearOpenAiKey_Click" Margin="0,0,8,0">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="&#xE74D;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
                                                 <TextBlock Text="{DynamicResource Settings_Button_ClearOpenAiKey}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Command="{Binding FetchOpenAiModelsCommand}"
+                                                IsEnabled="{Binding IsOpenAiKeySet}" Style="{StaticResource SettingsSecondaryButtonStyle}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#xE72C;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
+                                                <TextBlock Text="{DynamicResource Settings_Button_FetchGeminiModels}" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
@@ -303,13 +357,15 @@
                                         </Style>
                                     </StackPanel.Style>
 
-                                    <Border Background="#EBF3FB" BorderBrush="#D4E7F7" BorderThickness="1" CornerRadius="4" Padding="8,10" Margin="0,0,0,12">
+                                    <Border Style="{StaticResource SettingsInfoBannerStyle}">
                                         <TextBlock Text="{Binding ClaudeKeyStatusText}" FontSize="11" Foreground="#0078D4" TextWrapping="Wrap"/>
                                     </Border>
 
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_ClaudeModel}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                        <hc:TextBox Text="{Binding ClaudeModel, UpdateSourceTrigger=PropertyChanged}" Width="280" hc:InfoElement.Placeholder="claude-3-7-sonnet-latest" Style="{StaticResource SettingsInputStyle}"/>
+                                        <ComboBox IsEditable="True" ItemsSource="{Binding ClaudeModels}"
+                                                  Text="{Binding ClaudeModel, UpdateSourceTrigger=PropertyChanged}"
+                                                  Width="280" Style="{StaticResource SettingsComboBoxStyle}"/>
                                     </hc:FlexPanel>
                                     <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                         <TextBlock Text="{DynamicResource Settings_Label_ClaudeApiKey}" Style="{StaticResource SettingsLabelTextStyle}"/>
@@ -320,17 +376,24 @@
                                             </Hyperlink>
                                         </TextBlock>
                                     </hc:FlexPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="196,0,0,12">
+                                    <StackPanel Orientation="Horizontal" Margin="226,0,0,12">
                                         <Button Style="{StaticResource SettingsPrimaryButtonStyle}" Click="SaveClaudeKey_Click" Margin="0,0,8,0">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="&#xE74E;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
                                                 <TextBlock Text="{DynamicResource Settings_Button_SaveClaudeKey}" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
-                                        <Button Style="{StaticResource SettingsSecondaryButtonStyle}" Click="ClearClaudeKey_Click">
+                                        <Button Style="{StaticResource SettingsSecondaryButtonStyle}" Click="ClearClaudeKey_Click" Margin="0,0,8,0">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="&#xE74D;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
                                                 <TextBlock Text="{DynamicResource Settings_Button_ClearClaudeKey}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Command="{Binding FetchClaudeModelsCommand}"
+                                                IsEnabled="{Binding IsClaudeKeySet}" Style="{StaticResource SettingsSecondaryButtonStyle}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#xE72C;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
+                                                <TextBlock Text="{DynamicResource Settings_Button_FetchGeminiModels}" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
@@ -366,24 +429,22 @@
                                     </hc:FlexPanel>
                                 </StackPanel>
                             </Grid>
+                            </Border>
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- Error Handling -->
-                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.05"/>
-                    </Border.Effect>
+                <Border Style="{StaticResource SettingsCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                        <Border Style="{StaticResource SettingsCardHeaderStyle}">
                             <TextBlock Text="{DynamicResource Settings_Section_ErrorHandling}" Style="{StaticResource SettingsSectionHeaderTextStyle}"/>
                         </Border>
-                        <StackPanel Grid.Row="1" Margin="16,12,16,0">
+                        <StackPanel Grid.Row="1" Margin="18,14,18,4">
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_MaxRetryCount}" Style="{StaticResource SettingsLabelTextStyle}"/>
                                 <hc:NumericUpDown Value="{Binding MaxRetryCount}" Minimum="1" Maximum="10"
@@ -395,22 +456,24 @@
                 </Border>
 
                 <!-- UI Settings -->
-                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.05"/>
-                    </Border.Effect>
+                <Border Style="{StaticResource SettingsCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                        <Border Style="{StaticResource SettingsCardHeaderStyle}">
                             <TextBlock Text="{DynamicResource Settings_Section_UI}" Style="{StaticResource SettingsSectionHeaderTextStyle}"/>
                         </Border>
-                        <StackPanel Grid.Row="1" Margin="16,12,16,0">
+                        <StackPanel Grid.Row="1" Margin="18,14,18,4">
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_Theme}" Style="{StaticResource SettingsLabelTextStyle}"/>
-                                <ComboBox ItemsSource="{Binding UiThemes}" SelectedItem="{Binding UiTheme}" Width="200" Style="{StaticResource SettingsComboBoxStyle}"/>
+                                <ComboBox ItemsSource="{Binding UiThemes}" SelectedItem="{Binding UiTheme}" Width="200" IsEnabled="False" Style="{StaticResource SettingsComboBoxStyle}"/>
+                                <TextBlock Text="{DynamicResource Settings_Theme_NotImplemented}"
+                                           Margin="10,0,0,0"
+                                           FontSize="12"
+                                           Foreground="#6B7280"
+                                           VerticalAlignment="Center"/>
                             </hc:FlexPanel>
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_Language}" Style="{StaticResource SettingsLabelTextStyle}"/>
@@ -421,19 +484,16 @@
                 </Border>
 
                 <!-- Maintenance -->
-                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.05"/>
-                    </Border.Effect>
+                <Border Style="{StaticResource SettingsCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                        <Border Style="{StaticResource SettingsCardHeaderStyle}">
                             <TextBlock Text="{DynamicResource Settings_Section_Maintenance}" Style="{StaticResource SettingsSectionHeaderTextStyle}"/>
                         </Border>
-                        <StackPanel Grid.Row="1" Margin="16,12,16,0">
+                        <StackPanel Grid.Row="1" Margin="18,14,18,4">
                             <hc:FlexPanel Style="{StaticResource SettingsRowStyle}">
                                 <TextBlock Text="{DynamicResource Settings_Label_ClearLogs}" Style="{StaticResource SettingsLabelTextStyle}"/>
                                 <Button Command="{Binding ClearAllLogsCommand}"
@@ -459,22 +519,19 @@
                 </Border>
 
                 <!-- Remote Connection Section -->
-                <Border Background="White" CornerRadius="6" BorderBrush="#E5E5E5" BorderThickness="1" Margin="0,0,0,14">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.05"/>
-                    </Border.Effect>
+                <Border Style="{StaticResource SettingsCardStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Border Padding="16,9" Background="#F8F8F8" BorderBrush="#EBEBEB" BorderThickness="0,0,0,1">
+                        <Border Style="{StaticResource SettingsCardHeaderStyle}">
                             <TextBlock Text="{DynamicResource Settings_Section_Remote}" Style="{StaticResource SettingsSectionHeaderTextStyle}"/>
                         </Border>
-                        <StackPanel Grid.Row="1" Margin="16,12,16,12">
+                        <StackPanel Grid.Row="1" Margin="18,14,18,14">
                             <!-- "Not configured" message -->
                             <TextBlock Text="{DynamicResource Settings_Remote_NotConfigured}"
-                                       FontSize="12" Foreground="#888888" Margin="0,0,0,4"
+                                       FontSize="12" Foreground="#6B7280" Margin="0,0,0,4"
                                        Visibility="{Binding HasLastRemoteHost, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
                             <!-- Last Host -->
                             <hc:FlexPanel Margin="0,0,0,8"
@@ -501,7 +558,7 @@
         </ScrollViewer>
 
         <!-- Footer Buttons -->
-        <Border Grid.Row="2" Padding="24,10" Background="#FAFAFA" BorderThickness="0,1,0,0" BorderBrush="#E0E0E0">
+        <Border Grid.Row="2" Padding="28,12" Background="White" BorderThickness="0,1,0,0" BorderBrush="#E5EAF0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Command="{Binding LoadSettingsCommand}" Style="{StaticResource SettingsSecondaryButtonStyle}" Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">

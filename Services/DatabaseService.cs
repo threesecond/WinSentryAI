@@ -343,6 +343,61 @@ namespace WinSentryAI.Services
             return null;
         }
 
+        public async Task<IReadOnlyList<AnalysisReportItem>> GetAnalysisReportItemsAsync(int limit = 100, CancellationToken ct = default)
+        {
+            using var connection = GetConnection();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"
+                SELECT
+                    ar.Id,
+                    e.Id,
+                    e.Source,
+                    e.Level,
+                    e.EventId,
+                    e.ProviderName,
+                    e.Message,
+                    e.Timestamp,
+                    e.Host,
+                    ar.AiModel,
+                    ar.ModelName,
+                    ar.Response,
+                    ar.IsSuccess,
+                    ar.ErrorMessage,
+                    ar.CreatedAt
+                FROM AnalysisResults ar
+                INNER JOIN Events e ON e.Id = ar.EventId
+                ORDER BY ar.CreatedAt DESC, ar.Id DESC
+                LIMIT @limit;
+            ";
+            command.Parameters.AddWithValue("@limit", limit);
+
+            var items = new List<AnalysisReportItem>();
+            using var reader = await command.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+            {
+                items.Add(new AnalysisReportItem
+                {
+                    AnalysisId = reader.GetInt32(0),
+                    EventDbId = reader.GetInt32(1),
+                    Source = reader.GetString(2),
+                    Level = (EventLevel)reader.GetInt32(3),
+                    EventId = reader.GetInt32(4),
+                    ProviderName = reader.IsDBNull(5) ? null : reader.GetString(5),
+                    Message = reader.IsDBNull(6) ? null : reader.GetString(6),
+                    EventTimestamp = reader.GetDateTime(7),
+                    Host = reader.IsDBNull(8) ? "localhost" : reader.GetString(8),
+                    AiModel = reader.GetString(9),
+                    ModelName = reader.IsDBNull(10) ? null : reader.GetString(10),
+                    Response = reader.IsDBNull(11) ? null : reader.GetString(11),
+                    IsSuccess = reader.GetInt32(12) == 1,
+                    ErrorMessage = reader.IsDBNull(13) ? null : reader.GetString(13),
+                    AnalysisCreatedAt = reader.GetDateTime(14)
+                });
+            }
+
+            return items;
+        }
+
         public async Task SaveSystemSnapshotAsync(SystemSnapshot snapshot, CancellationToken ct = default)
         {
             using var connection = GetConnection();

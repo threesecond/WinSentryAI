@@ -32,6 +32,32 @@ namespace WinSentryAI.Services
             return !string.IsNullOrWhiteSpace(key);
         }
 
+        public async Task<IReadOnlyList<string>> FetchModelsAsync(CancellationToken ct = default)
+        {
+            string? apiKey = await _db.GetSecretAsync(SecretKey);
+            if (string.IsNullOrWhiteSpace(apiKey))
+                return Array.Empty<string>();
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.anthropic.com/v1/models?limit=1000");
+            request.Headers.Add("x-api-key", apiKey);
+            request.Headers.Add("anthropic-version", "2023-06-01");
+
+            using var resp = await _http.SendAsync(request, ct);
+            string body = await resp.Content.ReadAsStringAsync(ct);
+            resp.EnsureSuccessStatusCode();
+
+            using var doc = JsonDocument.Parse(body);
+            if (!doc.RootElement.TryGetProperty("data", out var data))
+                return Array.Empty<string>();
+
+            return data.EnumerateArray()
+                .Select(m => m.TryGetProperty("id", out var id) ? id.GetString() : null)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id!)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
         public async Task<AIAnalysisResponse> AnalyzeEventAsync(AIAnalysisRequest request, CancellationToken ct = default)
         {
             string systemPrompt = PromptBuilder.BuildSystemPrompt(request.Language);

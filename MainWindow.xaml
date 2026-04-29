@@ -23,6 +23,9 @@
         <DataTemplate DataType="{x:Type viewmodels:SystemInfoViewModel}">
             <views:SystemInfoView DataContext="{Binding}"/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type viewmodels:AIReportViewModel}">
+            <views:AIReportView DataContext="{Binding}"/>
+        </DataTemplate>
 
         <!-- Tab button style for detail panel tabs -->
         <Style x:Key="TabButtonStyle" TargetType="RadioButton">
@@ -62,11 +65,19 @@
             <Setter Property="hc:BorderElement.CornerRadius" Value="4"/>
         </Style>
 
+        <Style x:Key="ShellStatusPillStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,2"/>
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
         <!-- Figma-aligned sidebar item style -->
         <Style x:Key="SidebarNavButtonStyle" TargetType="RadioButton">
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Height" Value="34"/>
-            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Margin" Value="8,2"/>
             <Setter Property="Padding" Value="14,0"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="Normal"/>
@@ -78,6 +89,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Border x:Name="Root"
+                                CornerRadius="6"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
@@ -87,10 +99,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#EBEBEB"/>
+                                <Setter TargetName="Root" Property="Background" Value="#ECEFF3"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="#CCE4F7"/>
+                                <Setter TargetName="Root" Property="Background" Value="#EAF4FD"/>
                                 <Setter TargetName="Root" Property="BorderBrush" Value="#0078D4"/>
                                 <Setter Property="Foreground" Value="#0078D4"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
@@ -100,7 +112,7 @@
                                     <Condition Property="IsChecked" Value="True"/>
                                     <Condition Property="IsMouseOver" Value="True"/>
                                 </MultiTrigger.Conditions>
-                                <Setter TargetName="Root" Property="Background" Value="#CCE4F7"/>
+                                <Setter TargetName="Root" Property="Background" Value="#DDEFFD"/>
                             </MultiTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -117,30 +129,45 @@
         </Grid.ColumnDefinitions>
 
         <!-- 左側導覽區 -->
-        <Border Grid.Column="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" Background="#F7F8FA" BorderBrush="#D9DEE7" BorderThickness="0,0,1,0">
             <DockPanel LastChildFill="True">
                 <!-- App header -->
-                <Border DockPanel.Dock="Top" Padding="14,16,14,12" Background="#FAFAFA" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                <Border DockPanel.Dock="Top" Padding="16,18,14,14" Background="White" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1">
                     <StackPanel Orientation="Horizontal">
-                        <Border Width="28" Height="28" CornerRadius="6" Background="#0078D4">
+                        <Border Width="32" Height="32" CornerRadius="8" Background="#0078D4">
                             <TextBlock Text="&#xE83D;" Style="{StaticResource Mdl2IconTextStyle}"
-                                       FontSize="16" Foreground="White"
+                                       FontSize="17" Foreground="White"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="WinSentryAI" FontSize="13" FontWeight="SemiBold" Foreground="#1A1A1A" LineHeight="16"/>
-                            <TextBlock Text="v0.1.0 MVP" FontSize="10" Foreground="#888888" Margin="0,1,0,0"/>
+                            <TextBlock Text="v0.5.0 dev" FontSize="10" Foreground="#7A8699" Margin="0,1,0,0"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
                 <!-- Sidebar footer -->
-                <Border DockPanel.Dock="Bottom" Padding="14,10" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0">
-                    <TextBlock Text="{Binding StatusText}" FontSize="11" Foreground="#777777" TextTrimming="CharacterEllipsis"/>
+                <Border DockPanel.Dock="Bottom" Padding="10" BorderBrush="#E5E7EB" BorderThickness="0,1,0,0">
+                    <Border Style="{StaticResource ShellStatusPillStyle}" Background="White">
+                        <DockPanel LastChildFill="True">
+                            <TextBlock DockPanel.Dock="Left"
+                                       Text="&#xE10B;"
+                                       Style="{StaticResource Mdl2IconTextStyle}"
+                                       FontSize="11"
+                                       Foreground="#107C10"
+                                       Width="14"
+                                       Margin="0,0,6,0"/>
+                            <TextBlock Text="{Binding StatusText}"
+                                       FontSize="11"
+                                       Foreground="#4B5563"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Border>
                 </Border>
 
                 <!-- Navigation -->
-                <StackPanel DockPanel.Dock="Top" Margin="0,8,0,0">
+                <StackPanel DockPanel.Dock="Top" Margin="0,10,0,0">
                     <RadioButton GroupName="MainNavigation"
                                  Command="{Binding NavigateCommand}"
                                  CommandParameter="EventList"
@@ -191,7 +218,7 @@
 
         <!-- 垂直 GridSplitter（可拖拉調整側邊欄寬度） -->
         <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch" Background="{DynamicResource BorderBrush}" Opacity="0.4"/>
+                      VerticalAlignment="Stretch" Background="#D9DEE7" Opacity="0.55"/>
 
         <!-- 右側主要區域 -->
         <Grid Grid.Column="2">
@@ -230,7 +257,7 @@
                 </Border>
 
                 <!-- Remote mode banner -->
-                <Border Background="#0078D4" Padding="14,8">
+                <Border Background="#0078D4" BorderBrush="#0065B8" BorderThickness="0,0,0,1" Padding="14,7">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -246,16 +273,21 @@
                                 Command="{Binding DisconnectRemoteCommand}"
                                 Content="{DynamicResource Remote_Button_Disconnect}"
                                 Style="{StaticResource ButtonDefault}"
-                                Padding="10,3" FontSize="11"/>
+                                Padding="10,3" FontSize="11"
+                                Margin="12,0,0,0"
+                                Background="White"
+                                BorderBrush="#D9EAF7"/>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="13"
-                                       Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        Foreground="White" Margin="0,0,8,0" VerticalAlignment="Center"/>
                             <TextBlock Text="{DynamicResource Remote_Banner_ActiveMode}"
-                                       Foreground="White" FontSize="12" FontWeight="SemiBold"
-                                       VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="{Binding RemoteHost}"
-                                       Foreground="White" FontSize="12"
-                                       VerticalAlignment="Center"/>
+                                        Foreground="White" FontSize="12" FontWeight="SemiBold"
+                                        VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <Border CornerRadius="4" Background="#FFFFFF22" Padding="7,2">
+                                <TextBlock Text="{Binding RemoteHost}"
+                                           Foreground="White" FontSize="12" FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                            </Border>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -302,17 +334,51 @@
                                 </StackPanel>
                             </RadioButton>
                             <RadioButton GroupName="DetailTab" Style="{StaticResource TabButtonStyle}"
-                                         IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter=AI}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#xE73E;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
-                                    <TextBlock Text="{DynamicResource EventDetail_Tab_AI}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </RadioButton>
-                            <RadioButton GroupName="DetailTab" Style="{StaticResource TabButtonStyle}"
                                          IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter=Context}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE76C;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
                                     <TextBlock Text="{DynamicResource EventDetail_Tab_Context}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton GroupName="DetailTab" Style="{StaticResource TabButtonStyle}"
+                                         IsChecked="{Binding SelectedTab, Converter={StaticResource StringEqualityConverter}, ConverterParameter=AI}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE73E;" Style="{StaticResource Mdl2InlineIconTextStyle}"/>
+                                    <TextBlock Text="{DynamicResource EventDetail_Tab_AI}" VerticalAlignment="Center"/>
+                                    <TextBlock Text=" · " Foreground="#777777" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding AiModelName}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding AiModelName}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding AiModelName}"
+                                               MaxWidth="220"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="#666666"
+                                               VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding AiModelName}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding AiModelName}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </StackPanel>
                             </RadioButton>
                         </StackPanel>
@@ -540,6 +606,94 @@
                                                            Foreground="#1A1A1A"/>
                                             </DockPanel>
 
+                                            <ItemsControl ItemsSource="{Binding AiResponseSections}">
+                                                <ItemsControl.Style>
+                                                    <Style TargetType="ItemsControl">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasAiResponseSections}" Value="False">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ItemsControl.Style>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border CornerRadius="6"
+                                                                Background="#F8FAFC"
+                                                                BorderBrush="#E2E8F0"
+                                                                BorderThickness="1"
+                                                                Padding="12"
+                                                                Margin="0,0,0,8">
+                                                            <StackPanel>
+                                                                <DockPanel Margin="0,0,0,6">
+                                                                    <Border DockPanel.Dock="Right"
+                                                                            CornerRadius="4"
+                                                                            Padding="8,2"
+                                                                            Background="#F3F4F6">
+                                                                        <Border.Style>
+                                                                            <Style TargetType="Border">
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                <Style.Triggers>
+                                                                                    <DataTrigger Binding="{Binding Title}" Value="Severity">
+                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                    </DataTrigger>
+                                                                                    <DataTrigger Binding="{Binding SeverityBadgeText}" Value="Low">
+                                                                                        <Setter Property="Background" Value="#DCFCE7"/>
+                                                                                    </DataTrigger>
+                                                                                    <DataTrigger Binding="{Binding SeverityBadgeText}" Value="Medium">
+                                                                                        <Setter Property="Background" Value="#FEF3C7"/>
+                                                                                    </DataTrigger>
+                                                                                    <DataTrigger Binding="{Binding SeverityBadgeText}" Value="High">
+                                                                                        <Setter Property="Background" Value="#FEE2E2"/>
+                                                                                    </DataTrigger>
+                                                                                    <DataTrigger Binding="{Binding SeverityBadgeText}" Value="Critical">
+                                                                                        <Setter Property="Background" Value="#FEE2E2"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </Border.Style>
+                                                                        <TextBlock Text="{Binding SeverityBadgeText}"
+                                                                                   FontSize="11"
+                                                                                   FontWeight="SemiBold"
+                                                                                   TextTrimming="CharacterEllipsis"
+                                                                                   MaxWidth="260">
+                                                                            <TextBlock.Style>
+                                                                                <Style TargetType="TextBlock">
+                                                                                    <Setter Property="Foreground" Value="#374151"/>
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding SeverityBadgeText}" Value="Low">
+                                                                                            <Setter Property="Foreground" Value="#166534"/>
+                                                                                        </DataTrigger>
+                                                                                        <DataTrigger Binding="{Binding SeverityBadgeText}" Value="Medium">
+                                                                                            <Setter Property="Foreground" Value="#92400E"/>
+                                                                                        </DataTrigger>
+                                                                                        <DataTrigger Binding="{Binding SeverityBadgeText}" Value="High">
+                                                                                            <Setter Property="Foreground" Value="#991B1B"/>
+                                                                                        </DataTrigger>
+                                                                                        <DataTrigger Binding="{Binding SeverityBadgeText}" Value="Critical">
+                                                                                            <Setter Property="Foreground" Value="#991B1B"/>
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </TextBlock.Style>
+                                                                        </TextBlock>
+                                                                    </Border>
+                                                                    <TextBlock Text="{Binding DisplayTitle}"
+                                                                               FontSize="13"
+                                                                               FontWeight="SemiBold"
+                                                                               Foreground="#1F2937"/>
+                                                                </DockPanel>
+                                                                <TextBlock Text="{Binding DisplayContent}"
+                                                                           FontSize="12"
+                                                                           Foreground="#333333"
+                                                                           TextWrapping="Wrap"
+                                                                           LineHeight="18"/>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
                                             <TextBox Text="{Binding AiResponseText, Mode=OneWay}"
                                                      IsReadOnly="True"
                                                      TextWrapping="Wrap"
@@ -548,7 +702,18 @@
                                                      Background="Transparent"
                                                      FontSize="12"
                                                      Foreground="#333333"
-                                                     VerticalScrollBarVisibility="Disabled"/>
+                                                     VerticalScrollBarVisibility="Disabled">
+                                                <TextBox.Style>
+                                                    <Style TargetType="TextBox">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasAiResponseSections}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBox.Style>
+                                            </TextBox>
                                         </StackPanel>
                                     </Border>
 
@@ -777,26 +942,52 @@
 
             <!-- Row 3: 底部狀態列 -->
             <StatusBar Grid.Row="4" Background="#FAFAFA"
-                       BorderThickness="0,1,0,0" BorderBrush="#E0E0E0" Padding="4,0">
+                       BorderThickness="0,1,0,0" BorderBrush="#E0E0E0" Padding="8,0">
                 <StatusBarItem>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE10B;"
+                    <DockPanel LastChildFill="True" MinWidth="260">
+                        <TextBlock DockPanel.Dock="Left"
+                                   Text="&#xE10B;"
                                    Style="{StaticResource Mdl2IconTextStyle}"
                                    FontSize="12"
                                    Foreground="#107C10"
-                                   Width="12"
-                                   Margin="5,0"/>
-                        <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" FontSize="11" Margin="2,0"
-                                   Foreground="#555555"/>
-                    </StackPanel>
+                                   Width="14"
+                                   Margin="0,0,6,0"/>
+                        <TextBlock Text="{Binding StatusText}"
+                                   VerticalAlignment="Center"
+                                   FontSize="11"
+                                   Foreground="#555555"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </DockPanel>
                 </StatusBarItem>
                 <StatusBarItem HorizontalAlignment="Right">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Margin="0,0,8,0">
+                            <Border.Style>
+                                <Style TargetType="Border" BasedOn="{StaticResource ShellStatusPillStyle}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Setter Property="Background" Value="#EAF4FD"/>
+                                    <Setter Property="BorderBrush" Value="#C7E0F4"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRemoteMode}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="11"
+                                           Foreground="#0078D4" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding RemoteHost}" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="#005A9E" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
                         <!-- Connect to Remote button: hidden when already in remote mode -->
                         <Button Command="{Binding ConnectRemoteCommand}"
-                                Padding="8,2" FontSize="11" Margin="0,0,10,0">
+                                Padding="9,2" FontSize="11" Margin="0,0,8,0">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ButtonDefault}">
+                                    <Setter Property="BorderBrush" Value="#D1D5DB"/>
+                                    <Setter Property="Background" Value="White"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsRemoteMode}" Value="True">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -811,8 +1002,8 @@
                                            VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        <TextBlock Text="v0.1.0 MVP" FontSize="11" Margin="0,0,10,0"
-                                   Foreground="#888888" VerticalAlignment="Center"/>
+                        <TextBlock Text="v0.5.0 dev" FontSize="11"
+                                    Foreground="#888888" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StatusBarItem>
             </StatusBar>
