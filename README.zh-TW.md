@@ -2,8 +2,8 @@
 
 **WinSentryAI** 是一款可攜式 Windows 桌面診斷工具，用來檢視 Windows 事件記錄，並透過 AI 協助 IT 操作人員理解系統異常。
 
-目前版本：**v0.5**  
-狀態：**開發里程碑，尚未正式 release**
+目前版本：**v0.9**  
+狀態：**release candidate**
 
 語言：[English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md)
 

@@ -222,5 +222,5 @@
   <sys:String x:Key="TrayHint_DontShow">Don't show this again</sys:String>
   <sys:String x:Key="TrayHint_OK">Got it</sys:String>
   <sys:String x:Key="About_Title">About WinSentryAI</sys:String>
-  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.5.0&#x0D;&#x0A;&#x0D;&#x0A;Windows Event Log diagnostics with AI-assisted analysis.&#x0D;&#x0A;&#x0D;&#x0A;Dependencies:&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;License: MIT.</sys:String>
+  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.9.0&#x0D;&#x0A;&#x0D;&#x0A;Windows Event Log diagnostics with AI-assisted analysis.&#x0D;&#x0A;&#x0D;&#x0A;Dependencies:&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;License: MIT.</sys:String>
   </ResourceDictionary>

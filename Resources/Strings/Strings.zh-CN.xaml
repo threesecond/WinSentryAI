@@ -222,5 +222,5 @@
   <sys:String x:Key="TrayHint_DontShow">不再显示此提示</sys:String>
   <sys:String x:Key="TrayHint_OK">知道了</sys:String>
   <sys:String x:Key="About_Title">关于 WinSentryAI</sys:String>
-  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.5.0&#x0D;&#x0A;&#x0D;&#x0A;使用 AI 辅助分析 Windows 事件日志。&#x0D;&#x0A;&#x0D;&#x0A;依赖项：&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;许可：MIT。</sys:String>
+  <sys:String x:Key="About_Message" xml:space="preserve">WinSentryAI v0.9.0&#x0D;&#x0A;&#x0D;&#x0A;使用 AI 辅助分析 Windows 事件日志。&#x0D;&#x0A;&#x0D;&#x0A;依赖项：&#x0D;&#x0A;- HandyControl&#x0D;&#x0A;- CommunityToolkit.Mvvm&#x0D;&#x0A;- Microsoft.Data.Sqlite&#x0D;&#x0A;- Serilog&#x0D;&#x0A;- Hardcodet.NotifyIcon.Wpf&#x0D;&#x0A;&#x0D;&#x0A;许可：MIT。</sys:String>
   </ResourceDictionary>

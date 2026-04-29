@@ -181,7 +181,7 @@
                         </Border>
                         <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="WinSentryAI" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AppPrimaryTextBrush}" LineHeight="16"/>
-                            <TextBlock Text="v0.5.0 dev" FontSize="10" Foreground="{DynamicResource AppMutedTextBrush}" Margin="0,1,0,0"/>
+                            <TextBlock Text="v0.9.0" FontSize="10" Foreground="{DynamicResource AppMutedTextBrush}" Margin="0,1,0,0"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -1086,7 +1086,7 @@
                                            VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        <TextBlock Text="v0.5.0 dev" FontSize="11"
+                        <TextBlock Text="v0.9.0" FontSize="11"
                                    Foreground="{DynamicResource AppMutedTextBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StatusBarItem>

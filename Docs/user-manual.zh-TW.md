@@ -1,6 +1,6 @@
 # WinSentryAI 使用手冊
 
-版本：v0.5 開發里程碑
+版本：v0.9
 
 ## 1. WinSentryAI 是什麼
 
@@ -249,7 +249,7 @@ Settings 提供：
 - Ollama 本機模式取決於已安裝模型與本機硬體效能。
 - Theme 下拉選單目前使用白底以確保可讀性。
 - AI 輸出可能不完整或不正確，必須由 IT 人員判斷。
-- v0.5 尚未是正式 release package。
+- v0.9 為 release candidate，正式穩定版打包仍在進行中。
 
 ## 13. 相關文件
 

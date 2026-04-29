@@ -1,6 +1,6 @@
 # WinSentryAI User Manual
 
-Version: v0.5 development milestone
+Version: v0.9
 
 ## 1. What WinSentryAI Is
 
@@ -249,7 +249,7 @@ Known theme limitation:
 - Ollama local mode depends on installed local models and machine performance.
 - Theme dropdowns currently use white backgrounds for readability.
 - AI output can be incomplete or incorrect and must be reviewed by IT personnel.
-- v0.5 is not an official release package yet.
+- v0.9 is a release candidate. Official stable release packaging is still in progress.
 
 ## 13. Related Documents
 

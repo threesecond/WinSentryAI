@@ -2,8 +2,8 @@
 
 **WinSentryAI** is a portable Windows desktop diagnostic tool for reviewing Windows Event Logs and using AI to help IT operators understand system anomalies.
 
-Current version: **v0.5**  
-Status: **development milestone, not an official release yet**
+Current version: **v0.9**  
+Status: **release candidate**
 
 Languages: [English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md)
 
