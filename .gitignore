@@ -16,6 +16,7 @@ GEMINI.md
 
 ## Release artifacts (uploaded to GitHub Releases, not source code)
 WinSentryAI-v*-win-x64-portable.zip
+.binpublish/
 
 ## Runtime-generated files (created on first launch)
 settings.ini
