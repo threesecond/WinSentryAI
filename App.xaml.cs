@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using Serilog;
 using WinSentryAI.Services;
 using WinSentryAI.Models;
@@ -18,6 +19,7 @@ namespace WinSentryAI
         private const string SingleInstancePipeName = "WinSentryAI.SingleInstance.ShowMainWindow";
         private Mutex? _singleInstanceMutex;
         private CancellationTokenSource? _singleInstancePipeCts;
+        private int _isShowingUnhandledExceptionDialog;
         public bool ShowOnboarding { get; private set; }
         public bool IsShuttingDown { get; set; }
 
@@ -39,6 +41,7 @@ namespace WinSentryAI
 
             // 1. 初始化 Serilog
             ConfigureLogging();
+            RegisterGlobalExceptionHandlers();
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             // 2. 註冊 AppUserModelId
@@ -279,6 +282,71 @@ namespace WinSentryAI
                 .CreateLogger();
 
             Log.Logger = logConfig;
+        }
+
+        private void RegisterGlobalExceptionHandlers()
+        {
+            DispatcherUnhandledException += OnDispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
+            TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+        }
+
+        private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            Log.Error(e.Exception, "Unhandled UI exception.");
+            e.Handled = true;
+            ShowUnhandledExceptionDialog("WinSentryAI encountered an unexpected error. The error has been written to the log file.");
+        }
+
+        private void OnAppDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.ExceptionObject is Exception ex)
+            {
+                Log.Fatal(ex, "Unhandled AppDomain exception. IsTerminating: {IsTerminating}", e.IsTerminating);
+            }
+            else
+            {
+                Log.Fatal("Unhandled AppDomain exception object: {ExceptionObject}. IsTerminating: {IsTerminating}", e.ExceptionObject, e.IsTerminating);
+            }
+
+            ShowUnhandledExceptionDialog("WinSentryAI encountered a fatal error and may need to close. The error has been written to the log file.");
+        }
+
+        private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+        {
+            Log.Error(e.Exception, "Unobserved task exception.");
+            e.SetObserved();
+            ShowUnhandledExceptionDialog("A background task failed unexpectedly. The error has been written to the log file.");
+        }
+
+        private void ShowUnhandledExceptionDialog(string message)
+        {
+            if (IsShuttingDown || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                return;
+
+            if (Interlocked.Exchange(ref _isShowingUnhandledExceptionDialog, 1) == 1)
+                return;
+
+            try
+            {
+                if (Dispatcher.CheckAccess())
+                {
+                    MessageBox.Show(message, "WinSentryAI", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    Dispatcher.Invoke(() =>
+                        MessageBox.Show(message, "WinSentryAI", MessageBoxButton.OK, MessageBoxImage.Error));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to show unhandled exception dialog.");
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _isShowingUnhandledExceptionDialog, 0);
+            }
         }
 
         internal void ApplyLanguage(string lang)

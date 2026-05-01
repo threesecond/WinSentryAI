@@ -28,12 +28,12 @@ namespace WinSentryAI.Services
         {
             if (string.IsNullOrEmpty(message)) return message;
 
-            string redacted = ReplaceKnownUser(message, context);
+            string redacted = UserPathRegex().Replace(message, m =>
+                m.Groups["prefix"].Value + context.GetOrAdd(m.Groups["user"].Value, "USER"));
             redacted = DomainUserRegex().Replace(redacted, m =>
                 m.Groups["prefix"].Value + context.GetOrAdd(m.Groups["user"].Value, "USER"));
-            redacted = UserPathRegex().Replace(redacted, m =>
-                m.Groups["prefix"].Value + context.GetOrAdd(m.Groups["user"].Value, "USER"));
             redacted = EmailRegex().Replace(redacted, m => context.GetOrAdd(m.Value, "EMAIL"));
+            redacted = ReplaceKnownUser(redacted, context);
             return redacted;
         }
 
@@ -46,7 +46,7 @@ namespace WinSentryAI.Services
             return message.Replace(userName, placeholder, StringComparison.OrdinalIgnoreCase);
         }
 
-        [GeneratedRegex(@"(?<prefix>\b[^\\\s,:""']+\\)(?<user>[^\\,\s""'\]]+)", RegexOptions.Compiled)]
+        [GeneratedRegex(@"(?<prefix>\b[^\[\\\s,:""']+\\)(?<user>[^\[\\,\s""'\]]+)", RegexOptions.Compiled)]
         private static partial Regex DomainUserRegex();
 
         [GeneratedRegex(@"(?<prefix>[Cc]:\\[Uu]sers\\)(?<user>[^\\,\s""'\]]+)", RegexOptions.Compiled)]

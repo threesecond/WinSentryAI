@@ -51,6 +51,10 @@ Operational details are maintained in the user manual:
 - [User Manual](Docs/user-manual.md)
 - [使用手冊（繁體中文）](Docs/user-manual.zh-TW.md)
 - [用户手册（简体中文）](Docs/user-manual.zh-CN.md)
+- [Privacy Policy](PRIVACY.md)
+- [Security Policy](SECURITY.md)
+- [Code Signing Policy](CODE_SIGNING_POLICY.md)
+- [Third-Party Notices](THIRD_PARTY_NOTICES.md)
 
 The manual covers installation requirements, build and run instructions, API key setup, AI provider limits, remote connection setup, tray behavior, theme settings, known limitations, and troubleshooting notes.
 
@@ -62,4 +66,4 @@ AI results should be reviewed by qualified IT personnel before taking action.
 
 ## License
 
-MIT License is planned for this project.
+WinSentryAI is licensed under the [MIT License](LICENSE).

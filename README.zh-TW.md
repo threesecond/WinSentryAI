@@ -51,6 +51,10 @@ AI provider 設定支援 Gemini、OpenAI、Claude、Ollama，並提供本機隱�
 - [User Manual](Docs/user-manual.md)
 - [使用手冊（繁體中文）](Docs/user-manual.zh-TW.md)
 - [用户手册（简体中文）](Docs/user-manual.zh-CN.md)
+- [隱私政策](PRIVACY.md)
+- [安全政策](SECURITY.md)
+- [程式碼簽章政策](CODE_SIGNING_POLICY.md)
+- [第三方套件授權聲明](THIRD_PARTY_NOTICES.md)
 
 使用手冊包含安裝需求、build 與執行方式、API key 設定、AI provider 免費/付費限制、遠端連線設定、系統匣行為、佈景設定、已知限制與疑難排解注意事項。
 
@@ -62,4 +66,4 @@ WinSentryAI 只提供診斷輔助。它不會自動修復系統、不會修改�
 
 ## 授權
 
-本專案預計採用 MIT License。
+WinSentryAI 採用 [MIT License](LICENSE) 授權。

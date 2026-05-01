@@ -15,6 +15,12 @@ namespace WinSentryAI.Services
             Load();
         }
 
+        public SettingsService(string filePath)
+        {
+            _filePath = filePath;
+            Load();
+        }
+
         public string Get(string section, string key, string defaultValue = "")
         {
             if (_data.TryGetValue(section, out var sectionData) && sectionData.TryGetValue(key, out var value))

@@ -54,6 +54,7 @@ Release candidate.
 
 - Remote Event Log mode still needs broader testing in real office and network environments.
 - Claude end-to-end validation depends on available API credits.
+- v0.9.0 release candidate binaries are not yet Authenticode-signed. Code signing is being evaluated for the v1.0 release path.
 - AI suggestions are advisory only. WinSentryAI does not execute fixes automatically.
 
 ## Requirements
@@ -88,3 +89,11 @@ Runtime files are created next to the executable:
 - `logs\app-YYYYMMDD.log`
 
 Cloud provider API keys are stored locally using Windows DPAPI encryption and are tied to the current Windows user account.
+
+## Project Policies
+
+- License: [MIT License](LICENSE)
+- Privacy: [PRIVACY.md](PRIVACY.md)
+- Security: [SECURITY.md](SECURITY.md)
+- Code signing: [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md)
+- Third-party notices: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)

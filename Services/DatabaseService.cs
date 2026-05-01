@@ -19,6 +19,12 @@ namespace WinSentryAI.Services
             _connectionString = $"Data Source={_dbPath}";
         }
 
+        public DatabaseService(string dbPath)
+        {
+            _dbPath = dbPath;
+            _connectionString = $"Data Source={_dbPath}";
+        }
+
         public SqliteConnection GetConnection()
         {
             var connection = new SqliteConnection(_connectionString);
@@ -41,81 +47,7 @@ namespace WinSentryAI.Services
                 command.ExecuteNonQuery();
             }
 
-            // 建立資料表與唯一索引
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                    -- 主要事件表
-                    CREATE TABLE IF NOT EXISTS Events (
-                        Id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                        Source        TEXT    NOT NULL,
-                        Level         INTEGER NOT NULL,
-                        EventId       INTEGER NOT NULL,
-                        ProviderName  TEXT,
-                        Message       TEXT,
-                        Timestamp     DATETIME NOT NULL,
-                        IsAnalyzed    INTEGER  DEFAULT 0,
-                        Host          TEXT     DEFAULT 'localhost',
-                        CreatedAt     DATETIME DEFAULT CURRENT_TIMESTAMP
-                    );
-
-                    -- 去重唯一索引
-                    CREATE UNIQUE INDEX IF NOT EXISTS idx_events_unique ON Events(EventId, Source, Timestamp);
-
-                    -- 上下文日誌
-                    CREATE TABLE IF NOT EXISTS ContextLogs (
-                        Id             INTEGER PRIMARY KEY AUTOINCREMENT,
-                        TriggerEventId INTEGER NOT NULL REFERENCES Events(Id) ON DELETE CASCADE,
-                        Source         TEXT    NOT NULL,
-                        Level          INTEGER NOT NULL,
-                        EventId        INTEGER NOT NULL,
-                        Message        TEXT,
-                        Timestamp      DATETIME NOT NULL
-                    );
-
-                    -- AI 分析結果
-                    CREATE TABLE IF NOT EXISTS AnalysisResults (
-                        Id           INTEGER PRIMARY KEY AUTOINCREMENT,
-                        EventId      INTEGER NOT NULL REFERENCES Events(Id) ON DELETE CASCADE,
-                        AiModel      TEXT    NOT NULL,
-                        ModelName    TEXT,
-                        Prompt       TEXT,
-                        Response     TEXT,
-                        IsSuccess    INTEGER DEFAULT 1,
-                        ErrorMessage TEXT,
-                        CreatedAt    DATETIME DEFAULT CURRENT_TIMESTAMP
-                    );
-
-                    -- 應用程式設定
-                    CREATE TABLE IF NOT EXISTS AppSettings (
-                        Key         TEXT PRIMARY KEY,
-                        Value       TEXT,
-                        IsEncrypted INTEGER DEFAULT 0
-                    );
-
-                    -- 系統環境快照
-                    CREATE TABLE IF NOT EXISTS SystemSnapshots (
-                        Id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-                        OsVersion          TEXT,
-                        OsBuild            TEXT,
-                        ComputerName       TEXT,
-                        DomainOrWorkgroup  TEXT,
-                        IpAddresses        TEXT,
-                        TotalRamMb         INTEGER,
-                        CpuName            TEXT,
-                        GpuInfo            TEXT,
-                        CapturedAt         DATETIME DEFAULT CURRENT_TIMESTAMP
-                    );
-
-                    -- 索引
-                    CREATE INDEX IF NOT EXISTS idx_events_timestamp ON Events(Timestamp DESC);
-                    CREATE INDEX IF NOT EXISTS idx_events_level     ON Events(Level);
-                    CREATE INDEX IF NOT EXISTS idx_events_host      ON Events(Host);
-                    CREATE INDEX IF NOT EXISTS idx_context_trigger  ON ContextLogs(TriggerEventId);
-                    CREATE INDEX IF NOT EXISTS idx_analysis_event   ON AnalysisResults(EventId);
-                ";
-                command.ExecuteNonQuery();
-            }
+            DatabaseMigrationRunner.Run(connection);
 
             // 資料清理 (依據保留天數)
             using (var command = connection.CreateCommand())

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:controls="clr-namespace:WinSentryAI.Controls"
         xmlns:views="clr-namespace:WinSentryAI.Views"
         xmlns:viewmodels="clr-namespace:WinSentryAI.ViewModels"
         mc:Ignorable="d"
@@ -835,9 +836,11 @@
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Border.Style>
-                                                    <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontSize="12">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
+                                                    <controls:MarkdownTextBlock Markdown="{Binding Content}"
+                                                                                TextWrapping="Wrap"
+                                                                                FontSize="12">
+                                                        <controls:MarkdownTextBlock.Style>
+                                                            <Style TargetType="{x:Type controls:MarkdownTextBlock}">
                                                                 <Setter Property="Foreground" Value="{DynamicResource AppPrimaryTextBrush}"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Role}" Value="User">
@@ -845,8 +848,8 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
+                                                        </controls:MarkdownTextBlock.Style>
+                                                    </controls:MarkdownTextBlock>
                                                 </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
