@@ -380,6 +380,9 @@ namespace WinSentryAI.Services
         public async Task SaveSecretAsync(string key, string value)
         {
             string encryptedValue = EncryptionHelper.Encrypt(value);
+            if (!string.IsNullOrEmpty(value) && string.IsNullOrEmpty(encryptedValue))
+                throw new InvalidOperationException("Failed to encrypt secret with Windows DPAPI.");
+
             using var connection = GetConnection();
             using var command = connection.CreateCommand();
             command.CommandText = @"
@@ -406,7 +409,10 @@ namespace WinSentryAI.Services
 
                 if (isEncrypted == 1)
                 {
-                    return EncryptionHelper.Decrypt(value);
+                    if (EncryptionHelper.TryDecrypt(value, out var plainText))
+                        return plainText;
+
+                    throw new SecretDecryptionException(key);
                 }
                 return value;
             }

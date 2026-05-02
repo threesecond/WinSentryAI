@@ -28,8 +28,20 @@ namespace WinSentryAI.Services
 
         public async Task<bool> IsConfiguredAsync(CancellationToken ct = default)
         {
-            var key = await _db.GetSecretAsync(SecretKey);
-            return !string.IsNullOrWhiteSpace(key);
+            try
+            {
+                var key = await _db.GetSecretAsync(SecretKey);
+                return !string.IsNullOrWhiteSpace(key);
+            }
+            catch (SecretDecryptionException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to check Claude API key presence.");
+                return false;
+            }
         }
 
         public async Task<IReadOnlyList<string>> FetchModelsAsync(CancellationToken ct = default)
@@ -87,6 +99,12 @@ namespace WinSentryAI.Services
             string model = ModelName;
             string? apiKey;
             try { apiKey = await _db.GetSecretAsync(SecretKey); }
+            catch (SecretDecryptionException)
+            {
+                return new(false, sys, usr, null,
+                    "The saved Claude API key could not be decrypted by the current Windows account. Re-enter the API key in Settings -> AI.",
+                    model);
+            }
             catch (Exception ex) { return new(false, sys, usr, null, $"Secure storage error: {ex.Message}", model); }
 
             if (string.IsNullOrWhiteSpace(apiKey))
@@ -105,7 +123,9 @@ namespace WinSentryAI.Services
                 string body = await resp.Content.ReadAsStringAsync(ct);
 
                 if (!resp.IsSuccessStatusCode)
-                    return new(false, sys, usr, null, $"Claude HTTP {(int)resp.StatusCode}: {body}", model);
+                    return new(false, sys, usr, null,
+                        AIHttpErrorClassifier.ClassifyHttpError("Claude", resp.StatusCode, body).Message,
+                        model);
 
                 using var doc = JsonDocument.Parse(body);
                 string text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString() ?? "";
@@ -114,7 +134,9 @@ namespace WinSentryAI.Services
             catch (Exception ex)
             {
                 Log.Error(ex, "Claude API call failed.");
-                return new(false, sys, usr, null, ex.Message, model);
+                return new(false, sys, usr, null,
+                    AIHttpErrorClassifier.ClassifyException("Claude", ex, ct.IsCancellationRequested).Message,
+                    model);
             }
         }
 

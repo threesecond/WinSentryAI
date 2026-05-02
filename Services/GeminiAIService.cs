@@ -40,6 +40,10 @@ namespace WinSentryAI.Services
                 var key = await _db.GetSecretAsync(SecretKey);
                 return !string.IsNullOrWhiteSpace(key);
             }
+            catch (SecretDecryptionException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 Log.Warning(ex, "Failed to check Gemini API key presence.");
@@ -132,7 +136,7 @@ namespace WinSentryAI.Services
                     return ExtractText(body) ?? "[Error] Gemini returned an empty response.";
                 }
 
-                return $"[Error] {ClassifyHttpError(resp.StatusCode, body)}";
+                return $"[Error] {AIHttpErrorClassifier.ClassifyHttpError("Gemini", resp.StatusCode, body).Message}";
             }
             catch (Exception ex)
             {
@@ -256,84 +260,37 @@ namespace WinSentryAI.Services
                 }
 
                 // 非 2xx — 分類錯誤
-                string classifiedError = ClassifyHttpError(resp.StatusCode, body);
-                bool retryable = IsRetryableStatusCode(resp.StatusCode);
+                var classifiedError = AIHttpErrorClassifier.ClassifyHttpError("Gemini", resp.StatusCode, body);
 
                 Log.Warning("Gemini HTTP {Status} — retryable={Retryable}: {Summary}",
-                    (int)resp.StatusCode, retryable, SanitizeSummary(classifiedError));
+                    (int)resp.StatusCode, classifiedError.IsRetryable, SanitizeSummary(classifiedError.Message));
 
-                return retryable
-                    ? AttemptResult.Retryable(classifiedError)
-                    : AttemptResult.Permanent(classifiedError);
+                return classifiedError.IsRetryable
+                    ? AttemptResult.Retryable(classifiedError.Message)
+                    : AttemptResult.Permanent(classifiedError.Message);
             }
             catch (TaskCanceledException) when (ct.IsCancellationRequested)
             {
                 // 使用者取消 — 不重試
-                return AttemptResult.Permanent("[Cancelled] Analysis was cancelled.");
+                return AttemptResult.Permanent(AIHttpErrorClassifier.ClassifyException("Gemini", new TaskCanceledException(), true).Message);
             }
             catch (TaskCanceledException ex)
             {
                 // HttpClient.Timeout 觸發 — 可重試
                 Log.Warning(ex, "Gemini request timed out.");
-                return AttemptResult.Retryable("[Timeout] Gemini request timed out. Check your internet connection.");
+                return AttemptResult.Retryable(AIHttpErrorClassifier.ClassifyException("Gemini", ex, false).Message);
             }
             catch (HttpRequestException ex)
             {
                 Log.Warning(ex, "Network error calling Gemini.");
-                return AttemptResult.Retryable($"[Network Error] {ex.Message}");
+                return AttemptResult.Retryable(AIHttpErrorClassifier.ClassifyException("Gemini", ex, false).Message);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Unexpected error calling Gemini.");
-                return AttemptResult.Permanent($"[Unexpected Error] {ex.GetType().Name}: {ex.Message}");
+                return AttemptResult.Permanent(AIHttpErrorClassifier.ClassifyException("Gemini", ex, false).Message);
             }
         }
-
-        // ──────────────────────────────────────────────────────────────────────
-        // 錯誤分類
-        // ──────────────────────────────────────────────────────────────────────
-
-        private static string ClassifyHttpError(HttpStatusCode code, string body)
-        {
-            string? apiMessage = ExtractApiError(body);
-            string baseMsg = apiMessage ?? $"HTTP {(int)code}";
-
-            return code switch
-            {
-                HttpStatusCode.Unauthorized =>
-                    $"[Invalid Key] Authentication failed (401). Your Gemini API key is invalid or expired. Please update it in Settings → AI. Detail: {baseMsg}",
-
-                HttpStatusCode.Forbidden =>
-                    $"[Access Denied] Permission denied (403). Your key may not have access to model '{ExtractModelFromError(body)}'. Detail: {baseMsg}",
-
-                (HttpStatusCode)429 =>
-                    $"[Quota / Rate Limit] Too many requests (429). You may have exceeded your Gemini free tier quota or hit a rate limit. Wait a moment before retrying. Detail: {baseMsg}",
-
-                HttpStatusCode.BadRequest =>
-                    $"[Bad Request] The request was rejected by Gemini (400). This is likely a prompt formatting issue. Detail: {baseMsg}",
-
-                HttpStatusCode.NotFound =>
-                    $"[Not Found] Model or endpoint not found (404). Check that the model name in Settings is correct. Detail: {baseMsg}",
-
-                HttpStatusCode.InternalServerError =>
-                    $"[Server Error] Gemini internal server error (500). Will retry. Detail: {baseMsg}",
-
-                HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout =>
-                    $"[Server Unavailable] Gemini service temporarily unavailable ({(int)code}). Will retry. Detail: {baseMsg}",
-
-                _ => $"[HTTP {(int)code}] {baseMsg}"
-            };
-        }
-
-        private static bool IsRetryableStatusCode(HttpStatusCode code) => code switch
-        {
-            (HttpStatusCode)429 => true,               // quota / rate limit — backoff 後重試
-            HttpStatusCode.InternalServerError => true, // 500
-            HttpStatusCode.BadGateway => true,          // 502
-            HttpStatusCode.ServiceUnavailable => true,  // 503
-            HttpStatusCode.GatewayTimeout => true,      // 504
-            _ => false
-        };
 
         // ──────────────────────────────────────────────────────────────────────
         // 輔助方法
@@ -394,36 +351,6 @@ namespace WinSentryAI.Services
                 return sb.ToString();
             }
             catch { return null; }
-        }
-
-        private static string? ExtractApiError(string body)
-        {
-            try
-            {
-                using var doc = JsonDocument.Parse(body);
-                if (doc.RootElement.TryGetProperty("error", out var err))
-                {
-                    string status = err.TryGetProperty("status", out var s) ? s.GetString() ?? string.Empty : string.Empty;
-                    string msg = err.TryGetProperty("message", out var m) ? m.GetString() ?? string.Empty : string.Empty;
-                    return string.IsNullOrEmpty(status) ? msg : $"{status}: {msg}";
-                }
-            }
-            catch { }
-            return null;
-        }
-
-        private static string? ExtractModelFromError(string body)
-        {
-            // 回傳 model name 若 error.message 裡有，否則 null
-            try
-            {
-                using var doc = JsonDocument.Parse(body);
-                if (doc.RootElement.TryGetProperty("error", out var err) &&
-                    err.TryGetProperty("message", out var m))
-                    return m.GetString();
-            }
-            catch { }
-            return null;
         }
 
         private static readonly JsonSerializerOptions JsonOpts = new()

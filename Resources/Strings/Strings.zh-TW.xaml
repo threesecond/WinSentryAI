@@ -99,6 +99,7 @@
     <sys:String x:Key="Settings_Button_ClearGeminiKey">清除</sys:String>
     <sys:String x:Key="Settings_GeminiKey_Set">已儲存 Gemini API 金鑰（使用 Windows DPAPI 加密）。</sys:String>
     <sys:String x:Key="Settings_GeminiKey_NotSet">尚未設定 Gemini API 金鑰。</sys:String>
+    <sys:String x:Key="Settings_GeminiKey_Unreadable">已儲存 Gemini API 金鑰，但目前 Windows 帳號無法解密。請重新輸入 API 金鑰。</sys:String>
     <sys:String x:Key="Settings_GeminiKey_Saved">Gemini API 金鑰已儲存。</sys:String>
     <sys:String x:Key="Settings_GeminiKey_Cleared">Gemini API 金鑰已清除。</sys:String>
     <sys:String x:Key="Settings_GeminiKey_EmptyWarning">請先輸入 API 金鑰。</sys:String>
@@ -145,6 +146,7 @@
   <sys:String x:Key="Settings_Button_ClearOpenAiKey">清除</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_Set">已儲存 OpenAI API 金鑰（使用 Windows DPAPI 加密）。</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_NotSet">尚未設定 OpenAI API 金鑰。</sys:String>
+  <sys:String x:Key="Settings_OpenAiKey_Unreadable">已儲存 OpenAI API 金鑰，但目前 Windows 帳號無法解密。請重新輸入 API 金鑰。</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_Saved">OpenAI API 金鑰已儲存。</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_Cleared">OpenAI API 金鑰已清除。</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_EmptyWarning">請先輸入 API 金鑰。</sys:String>
@@ -155,6 +157,7 @@
   <sys:String x:Key="Settings_Button_ClearClaudeKey">清除</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_Set">已儲存 Claude API 金鑰（使用 Windows DPAPI 加密）。</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_NotSet">尚未設定 Claude API 金鑰。</sys:String>
+  <sys:String x:Key="Settings_ClaudeKey_Unreadable">已儲存 Claude API 金鑰，但目前 Windows 帳號無法解密。請重新輸入 API 金鑰。</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_Saved">Claude API 金鑰已儲存。</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_Cleared">Claude API 金鑰已清除。</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_EmptyWarning">請先輸入 API 金鑰。</sys:String>

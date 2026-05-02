@@ -99,6 +99,7 @@
     <sys:String x:Key="Settings_Button_ClearGeminiKey">Clear</sys:String>
     <sys:String x:Key="Settings_GeminiKey_Set">A Gemini API key is currently saved (encrypted with Windows DPAPI).</sys:String>
     <sys:String x:Key="Settings_GeminiKey_NotSet">No Gemini API key is configured yet.</sys:String>
+    <sys:String x:Key="Settings_GeminiKey_Unreadable">A Gemini API key is saved, but Windows cannot decrypt it for the current user. Re-enter the API key.</sys:String>
     <sys:String x:Key="Settings_GeminiKey_Saved">Gemini API key saved.</sys:String>
     <sys:String x:Key="Settings_GeminiKey_Cleared">Gemini API key cleared.</sys:String>
     <sys:String x:Key="Settings_GeminiKey_EmptyWarning">Please enter an API key first.</sys:String>
@@ -145,6 +146,7 @@
   <sys:String x:Key="Settings_Button_ClearOpenAiKey">Clear</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_Set">An OpenAI API key is currently saved (encrypted with Windows DPAPI).</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_NotSet">No OpenAI API key is configured yet.</sys:String>
+  <sys:String x:Key="Settings_OpenAiKey_Unreadable">An OpenAI API key is saved, but Windows cannot decrypt it for the current user. Re-enter the API key.</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_Saved">OpenAI API key saved.</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_Cleared">OpenAI API key cleared.</sys:String>
   <sys:String x:Key="Settings_OpenAiKey_EmptyWarning">Please enter an API key first.</sys:String>
@@ -155,6 +157,7 @@
   <sys:String x:Key="Settings_Button_ClearClaudeKey">Clear</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_Set">A Claude API key is currently saved (encrypted with Windows DPAPI).</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_NotSet">No Claude API key is configured yet.</sys:String>
+  <sys:String x:Key="Settings_ClaudeKey_Unreadable">A Claude API key is saved, but Windows cannot decrypt it for the current user. Re-enter the API key.</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_Saved">Claude API key saved.</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_Cleared">Claude API key cleared.</sys:String>
   <sys:String x:Key="Settings_ClaudeKey_EmptyWarning">Please enter an API key first.</sys:String>

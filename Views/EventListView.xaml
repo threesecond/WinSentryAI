@@ -297,9 +297,37 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="{DynamicResource EventList_Column_Time}" DisplayMemberBinding="{Binding Timestamp, StringFormat='HH:mm:ss'}" Width="88"/>
-                        <GridViewColumn Header="{DynamicResource EventList_Column_Source}" DisplayMemberBinding="{Binding Source}" Width="120"/>
-                        <GridViewColumn Header="{DynamicResource EventList_Column_EventId}" DisplayMemberBinding="{Binding EventId}" Width="72"/>
+                        <GridViewColumn Header="{DynamicResource EventList_Column_Time}" Width="88">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type models:EventRecord}">
+                                    <TextBlock Text="{Binding Timestamp, StringFormat='HH:mm:ss'}"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource AppPrimaryTextBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="{DynamicResource EventList_Column_Source}" Width="120">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type models:EventRecord}">
+                                    <TextBlock Text="{Binding Source}"
+                                               TextTrimming="CharacterEllipsis"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource AppPrimaryTextBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="{DynamicResource EventList_Column_EventId}" Width="72">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type models:EventRecord}">
+                                    <TextBlock Text="{Binding EventId}"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource AppPrimaryTextBrush}"
+                                               VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                         <GridViewColumn Header="{DynamicResource EventList_Column_Message}" Width="520">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate DataType="{x:Type models:EventRecord}">

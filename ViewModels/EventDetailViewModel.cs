@@ -120,6 +120,7 @@ namespace WinSentryAI.ViewModels
         private ObservableCollection<AiResponseSection> _aiResponseSections = new();
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasAiErrorMessage))]
         private string? _aiErrorMessage;
 
         [ObservableProperty]
@@ -159,6 +160,7 @@ namespace WinSentryAI.ViewModels
         public bool IsAiSuccess => AiStatus == AiAnalysisStatus.Success;
         public bool IsAiFailure => AiStatus == AiAnalysisStatus.Failure;
         public bool HasAiResponseSections => AiResponseSections.Count > 0;
+        public bool HasAiErrorMessage => !string.IsNullOrWhiteSpace(AiErrorMessage);
         public bool HasRedactionEntries => RedactionEntries.Count > 0;
         public bool HasInitialAnalysisContext => IsAiSuccess && !string.IsNullOrWhiteSpace(_initialUserMessageForChat);
 
@@ -280,6 +282,9 @@ namespace WinSentryAI.ViewModels
             {
                 Log.Warning(ex, "AI configuration check failed.");
                 AiStatus = AiAnalysisStatus.NoKey;
+                AiErrorMessage = ex is SecretDecryptionException
+                    ? "The saved API key could not be decrypted by the current Windows account. Re-enter the API key in Settings -> AI."
+                    : ex.Message;
                 return;
             }
 

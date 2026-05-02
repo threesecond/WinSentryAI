@@ -29,8 +29,20 @@ namespace WinSentryAI.Services
 
         public async Task<bool> IsConfiguredAsync(CancellationToken ct = default)
         {
-            var key = await _db.GetSecretAsync(SecretKey);
-            return !string.IsNullOrWhiteSpace(key);
+            try
+            {
+                var key = await _db.GetSecretAsync(SecretKey);
+                return !string.IsNullOrWhiteSpace(key);
+            }
+            catch (SecretDecryptionException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to check OpenAI API key presence.");
+                return false;
+            }
         }
 
         public async Task<IReadOnlyList<string>> FetchModelsAsync(CancellationToken ct = default)
@@ -144,6 +156,12 @@ namespace WinSentryAI.Services
             string model = ModelName;
             string? apiKey;
             try { apiKey = await _db.GetSecretAsync(SecretKey); }
+            catch (SecretDecryptionException)
+            {
+                return new(false, sys, usr, null,
+                    "The saved OpenAI API key could not be decrypted by the current Windows account. Re-enter the API key in Settings -> AI.",
+                    model);
+            }
             catch (Exception ex) { return new(false, sys, usr, null, $"Secure storage error: {ex.Message}", model); }
 
             if (string.IsNullOrWhiteSpace(apiKey))
@@ -161,7 +179,9 @@ namespace WinSentryAI.Services
                 string body = await resp.Content.ReadAsStringAsync(ct);
 
                 if (!resp.IsSuccessStatusCode)
-                    return new(false, sys, usr, null, $"OpenAI HTTP {(int)resp.StatusCode}: {body}", model);
+                    return new(false, sys, usr, null,
+                        AIHttpErrorClassifier.ClassifyHttpError("OpenAI", resp.StatusCode, body).Message,
+                        model);
 
                 using var doc = JsonDocument.Parse(body);
                 string text = doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
@@ -170,7 +190,9 @@ namespace WinSentryAI.Services
             catch (Exception ex)
             {
                 Log.Error(ex, "OpenAI API call failed.");
-                return new(false, sys, usr, null, ex.Message, model);
+                return new(false, sys, usr, null,
+                    AIHttpErrorClassifier.ClassifyException("OpenAI", ex, ct.IsCancellationRequested).Message,
+                    model);
             }
         }
 

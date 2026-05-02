@@ -61,7 +61,9 @@ namespace WinSentryAI.Services
                 if (!resp.IsSuccessStatusCode)
                 {
                     string err = await resp.Content.ReadAsStringAsync(ct);
-                    return new AIAnalysisResponse(false, systemPrompt, userMessage, null, $"Ollama Error: {resp.StatusCode} - {err}", ModelName);
+                    return new AIAnalysisResponse(false, systemPrompt, userMessage, null,
+                        AIHttpErrorClassifier.ClassifyHttpError("Ollama", resp.StatusCode, err).Message,
+                        ModelName);
                 }
 
                 var result = await resp.Content.ReadFromJsonAsync<OllamaChatResponse>(cancellationToken: ct);
@@ -69,7 +71,9 @@ namespace WinSentryAI.Services
             }
             catch (Exception ex)
             {
-                return new AIAnalysisResponse(false, systemPrompt, userMessage, null, ex.Message, ModelName);
+                return new AIAnalysisResponse(false, systemPrompt, userMessage, null,
+                    AIHttpErrorClassifier.ClassifyException("Ollama", ex, ct.IsCancellationRequested).Message,
+                    ModelName);
             }
         }
 
@@ -95,7 +99,7 @@ namespace WinSentryAI.Services
                 if (!resp.IsSuccessStatusCode)
                 {
                     string err = await resp.Content.ReadAsStringAsync(ct);
-                    return $"[Error] Ollama: {resp.StatusCode} - {err}";
+                    return $"[Error] {AIHttpErrorClassifier.ClassifyHttpError("Ollama", resp.StatusCode, err).Message}";
                 }
 
                 var result = await resp.Content.ReadFromJsonAsync<OllamaChatResponse>(cancellationToken: ct);
@@ -103,7 +107,7 @@ namespace WinSentryAI.Services
             }
             catch (Exception ex)
             {
-                return $"[Error] {ex.Message}";
+                return $"[Error] {AIHttpErrorClassifier.ClassifyException("Ollama", ex, ct.IsCancellationRequested).Message}";
             }
         }
 

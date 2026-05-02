@@ -141,7 +141,7 @@ namespace WinSentryAI.ViewModels
                     string secretKey = SelectedProvider switch
                     {
                         "gemini" => "GeminiApiKey",
-                        "openai" => "OpenAIApiKey",
+                        "openai" => "OpenAiApiKey",
                         "claude" => "ClaudeApiKey",
                         _ => throw new NotSupportedException()
                     };

@@ -24,24 +24,29 @@ namespace WinSentryAI.Services
             }
         }
 
-        public static string? Decrypt(string cipherText)
+        public static bool TryDecrypt(string cipherText, out string? plainText)
         {
-            if (string.IsNullOrEmpty(cipherText)) return null;
+            plainText = null;
+            if (string.IsNullOrEmpty(cipherText)) return true;
             
             try
             {
                 byte[] cipherBytes = Convert.FromBase64String(cipherText);
                 byte[] plainBytes = ProtectedData.Unprotect(cipherBytes, Entropy, DataProtectionScope.CurrentUser);
-                return Encoding.UTF8.GetString(plainBytes);
+                plainText = Encoding.UTF8.GetString(plainBytes);
+                return true;
             }
             catch (CryptographicException)
             {
-                return null;
+                return false;
             }
             catch (Exception)
             {
-                return null;
+                return false;
             }
         }
+
+        public static string? Decrypt(string cipherText) =>
+            TryDecrypt(cipherText, out var plainText) ? plainText : null;
     }
 }

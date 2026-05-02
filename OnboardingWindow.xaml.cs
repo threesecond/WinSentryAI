@@ -1,4 +1,6 @@
 using System.Windows;
+using WinSentryAI.Models;
+using WinSentryAI.Services;
 
 namespace WinSentryAI
 {
@@ -7,6 +9,13 @@ namespace WinSentryAI
         public OnboardingWindow()
         {
             InitializeComponent();
+            SourceInitialized += (_, _) => ApplyTitleBarTheme();
+        }
+
+        private void ApplyTitleBarTheme()
+        {
+            string theme = AppState.Instance.Settings?.Get("UI", "Theme", "System") ?? "System";
+            ThemeService.ApplyTitleBar(this, theme);
         }
     }
 }

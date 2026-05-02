@@ -76,16 +76,34 @@ namespace WinSentryAI.ViewModels
         [NotifyPropertyChangedFor(nameof(ClaudeKeyStatusText))]
         private bool _isClaudeKeySet;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(GeminiKeyStatusText))]
+        private bool _isGeminiKeyUnreadable;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(OpenAiKeyStatusText))]
+        private bool _isOpenAiKeyUnreadable;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ClaudeKeyStatusText))]
+        private bool _isClaudeKeyUnreadable;
+
         public string GeminiKeyStatusText => IsGeminiKeySet
             ? GetString("Settings_GeminiKey_Set")
+            : IsGeminiKeyUnreadable
+                ? GetString("Settings_GeminiKey_Unreadable")
             : GetString("Settings_GeminiKey_NotSet");
 
         public string OpenAiKeyStatusText => IsOpenAiKeySet
             ? GetString("Settings_OpenAiKey_Set")
+            : IsOpenAiKeyUnreadable
+                ? GetString("Settings_OpenAiKey_Unreadable")
             : GetString("Settings_OpenAiKey_NotSet");
 
         public string ClaudeKeyStatusText => IsClaudeKeySet
             ? GetString("Settings_ClaudeKey_Set")
+            : IsClaudeKeyUnreadable
+                ? GetString("Settings_ClaudeKey_Unreadable")
             : GetString("Settings_ClaudeKey_NotSet");
 
         public ObservableCollection<string> AiProviders { get; } = new() { "gemini", "openai", "claude", "ollama" };
@@ -204,6 +222,7 @@ namespace WinSentryAI.ViewModels
             try
             {
                 await _databaseService.SaveSecretAsync(GeminiSecretKey, trimmed);
+                IsGeminiKeyUnreadable = false;
                 IsGeminiKeySet = true;
                 MessageBox.Show(GetString("Settings_GeminiKey_Saved"),
                                 GetString("Settings_Title"),
@@ -222,6 +241,7 @@ namespace WinSentryAI.ViewModels
             try
             {
                 await _databaseService.DeleteSecretAsync(GeminiSecretKey);
+                IsGeminiKeyUnreadable = false;
                 IsGeminiKeySet = false;
                 MessageBox.Show(GetString("Settings_GeminiKey_Cleared"),
                                 GetString("Settings_Title"),
@@ -463,6 +483,7 @@ namespace WinSentryAI.ViewModels
             try
             {
                 await _databaseService.SaveSecretAsync(OpenAiSecretKey, trimmed);
+                IsOpenAiKeyUnreadable = false;
                 IsOpenAiKeySet = true;
                 MessageBox.Show(GetString("Settings_OpenAiKey_Saved"),
                                 GetString("Settings_Title"),
@@ -481,6 +502,7 @@ namespace WinSentryAI.ViewModels
             try
             {
                 await _databaseService.DeleteSecretAsync(OpenAiSecretKey);
+                IsOpenAiKeyUnreadable = false;
                 IsOpenAiKeySet = false;
                 MessageBox.Show(GetString("Settings_OpenAiKey_Cleared"),
                                 GetString("Settings_Title"),
@@ -506,6 +528,7 @@ namespace WinSentryAI.ViewModels
             try
             {
                 await _databaseService.SaveSecretAsync(ClaudeSecretKey, trimmed);
+                IsClaudeKeyUnreadable = false;
                 IsClaudeKeySet = true;
                 MessageBox.Show(GetString("Settings_ClaudeKey_Saved"),
                                 GetString("Settings_Title"),
@@ -524,6 +547,7 @@ namespace WinSentryAI.ViewModels
             try
             {
                 await _databaseService.DeleteSecretAsync(ClaudeSecretKey);
+                IsClaudeKeyUnreadable = false;
                 IsClaudeKeySet = false;
                 MessageBox.Show(GetString("Settings_ClaudeKey_Cleared"),
                                 GetString("Settings_Title"),
@@ -540,34 +564,58 @@ namespace WinSentryAI.ViewModels
             try
             {
                 var gemini = await _databaseService.GetSecretAsync(GeminiSecretKey);
+                IsGeminiKeyUnreadable = false;
                 IsGeminiKeySet = !string.IsNullOrWhiteSpace(gemini);
+            }
+            catch (SecretDecryptionException ex)
+            {
+                Serilog.Log.Warning(ex, "Gemini API key exists but cannot be decrypted by the current Windows user.");
+                IsGeminiKeySet = false;
+                IsGeminiKeyUnreadable = true;
             }
             catch (Exception ex)
             {
                 Serilog.Log.Warning(ex, "Failed to read Gemini API key state (likely DPAPI failure under different user).");
                 IsGeminiKeySet = false;
+                IsGeminiKeyUnreadable = false;
             }
 
             try
             {
                 var openai = await _databaseService.GetSecretAsync(OpenAiSecretKey);
+                IsOpenAiKeyUnreadable = false;
                 IsOpenAiKeySet = !string.IsNullOrWhiteSpace(openai);
+            }
+            catch (SecretDecryptionException ex)
+            {
+                Serilog.Log.Warning(ex, "OpenAI API key exists but cannot be decrypted by the current Windows user.");
+                IsOpenAiKeySet = false;
+                IsOpenAiKeyUnreadable = true;
             }
             catch (Exception ex)
             {
                 Serilog.Log.Warning(ex, "Failed to read OpenAI API key state.");
                 IsOpenAiKeySet = false;
+                IsOpenAiKeyUnreadable = false;
             }
 
             try
             {
                 var claude = await _databaseService.GetSecretAsync(ClaudeSecretKey);
+                IsClaudeKeyUnreadable = false;
                 IsClaudeKeySet = !string.IsNullOrWhiteSpace(claude);
+            }
+            catch (SecretDecryptionException ex)
+            {
+                Serilog.Log.Warning(ex, "Claude API key exists but cannot be decrypted by the current Windows user.");
+                IsClaudeKeySet = false;
+                IsClaudeKeyUnreadable = true;
             }
             catch (Exception ex)
             {
                 Serilog.Log.Warning(ex, "Failed to read Claude API key state.");
                 IsClaudeKeySet = false;
+                IsClaudeKeyUnreadable = false;
             }
         }
 

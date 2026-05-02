@@ -13,9 +13,16 @@ namespace WinSentryAI
         public MainWindow()
         {
             InitializeComponent();
+            SourceInitialized += MainWindow_SourceInitialized;
             Loaded += MainWindow_Loaded;
             Closing += MainWindow_Closing;
             DataContextChanged += (_, _) => SubscribeToViewModel();
+        }
+
+        private void MainWindow_SourceInitialized(object? sender, EventArgs e)
+        {
+            string theme = AppState.Instance.Settings?.Get("UI", "Theme", "System") ?? "System";
+            ThemeService.ApplyTitleBar(this, theme);
         }
 
         private void SubscribeToViewModel()

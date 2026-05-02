@@ -13,6 +13,13 @@ namespace WinSentryAI.Services
             var effectiveTheme = ResolveTheme(theme);
             ApplyHandyControlSkin(app, effectiveTheme);
             ApplyAppBrushes(app, effectiveTheme);
+            ApplyTitleBars(app, effectiveTheme);
+        }
+
+        public static void ApplyTitleBar(Window window, string theme)
+        {
+            var effectiveTheme = ResolveTheme(theme);
+            DwmTitleBarService.Apply(window, effectiveTheme);
         }
 
         private static string ResolveTheme(string theme)
@@ -104,6 +111,12 @@ namespace WinSentryAI.Services
         private static void SetBrush(Application app, string key, string color)
         {
             app.Resources[key] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
+        }
+
+        private static void ApplyTitleBars(Application app, string effectiveTheme)
+        {
+            foreach (Window window in app.Windows)
+                DwmTitleBarService.Apply(window, effectiveTheme);
         }
     }
 }
