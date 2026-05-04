@@ -284,6 +284,15 @@ namespace WinSentryAI.ViewModels
 
                 ModelFetchStatusText = string.Format(GetString("Settings_ModelFetch_Success"), models.Count);
             }
+            catch (SecretDecryptionException ex)
+            {
+                Serilog.Log.Warning(ex, "Gemini API key exists but cannot be decrypted while fetching models.");
+                IsGeminiKeySet = false;
+                IsGeminiKeyUnreadable = true;
+                MessageBox.Show(GetString("Settings_GeminiKey_Unreadable"),
+                                GetString("Settings_Title"),
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
             catch (Exception ex)
             {
                 Serilog.Log.Error(ex, "Failed to fetch Gemini models.");
@@ -302,9 +311,8 @@ namespace WinSentryAI.ViewModels
             ModelFetchStatusText = string.Empty;
             try
             {
-                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
                 string url = $"{OllamaEndpoint.TrimEnd('/')}/api/tags";
-                using var resp = await http.GetAsync(url);
+                using var resp = await SharedHttpClientProvider.ShortTimeout.GetAsync(url);
                 if (!resp.IsSuccessStatusCode)
                 {
                     MessageBox.Show($"Failed to fetch Ollama models: {resp.StatusCode}",
@@ -366,6 +374,15 @@ namespace WinSentryAI.ViewModels
 
                 ModelFetchStatusText = string.Format(GetString("Settings_ModelFetch_Success"), models.Count);
             }
+            catch (SecretDecryptionException ex)
+            {
+                Serilog.Log.Warning(ex, "OpenAI API key exists but cannot be decrypted while fetching models.");
+                IsOpenAiKeySet = false;
+                IsOpenAiKeyUnreadable = true;
+                MessageBox.Show(GetString("Settings_OpenAiKey_Unreadable"),
+                                GetString("Settings_Title"),
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
             catch (Exception ex)
             {
                 Serilog.Log.Error(ex, "Failed to fetch OpenAI models.");
@@ -402,6 +419,15 @@ namespace WinSentryAI.ViewModels
                     ClaudeModel = ClaudeModels[0];
 
                 ModelFetchStatusText = string.Format(GetString("Settings_ModelFetch_Success"), models.Count);
+            }
+            catch (SecretDecryptionException ex)
+            {
+                Serilog.Log.Warning(ex, "Claude API key exists but cannot be decrypted while fetching models.");
+                IsClaudeKeySet = false;
+                IsClaudeKeyUnreadable = true;
+                MessageBox.Show(GetString("Settings_ClaudeKey_Unreadable"),
+                                GetString("Settings_Title"),
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {

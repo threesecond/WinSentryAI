@@ -165,6 +165,10 @@
   <sys:String x:Key="Settings_Label_EnableRedaction">Privacy Redaction</sys:String>
   <sys:String x:Key="Settings_Redaction_Note">Cloud AI only; Ollama always keeps local raw data.</sys:String>
   <sys:String x:Key="AI_Redaction_MapTitle">Local redaction map</sys:String>
+  <sys:String x:Key="Startup_SystemInfoMismatch_Title">System information mismatch</sys:String>
+  <sys:String x:Key="Startup_SystemInfoMismatch_Message">WinSentryAI detected that this portable database was last used on a different computer.&#x0a;&#x0a;Previous computer: {0}&#x0a;Current computer: {1}&#x0a;&#x0a;System information has been re-detected for this computer. Because previous Event Log records and AI analysis may no longer be relevant, do you want to delete the existing event records and reload events from this computer?</sys:String>
+  <sys:String x:Key="Startup_SystemInfoMismatch_Cleared">Existing event records and AI analysis were cleared. WinSentryAI will now load events from this computer.</sys:String>
+  <sys:String x:Key="Startup_SystemInfoMismatch_ClearFailed">WinSentryAI could not clear the existing event records. See the log file for details.</sys:String>
   <sys:String x:Key="NonAdmin_Banner_Text">Limited mode: WinSentryAI is not running as administrator. Security log access may be unavailable.</sys:String>
   <sys:String x:Key="Tray_Menu_Show">Show WinSentryAI</sys:String>
   <sys:String x:Key="Tray_Menu_Exit">Exit</sys:String>

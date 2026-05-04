@@ -25,7 +25,7 @@ namespace WinSentryAI.ViewModels
             _ = LoadSnapshotAsync();
         }
 
-        private async Task LoadSnapshotAsync()
+        public async Task LoadSnapshotAsync()
         {
             try
             {

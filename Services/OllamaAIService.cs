@@ -19,7 +19,7 @@ namespace WinSentryAI.Services
         public OllamaAIService(ISettingsService settings, HttpClient? http = null)
         {
             _settings = settings;
-            _http = http ?? new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+            _http = http ?? SharedHttpClientProvider.Default;
         }
 
         public async Task<bool> IsConfiguredAsync(CancellationToken ct = default)
@@ -55,25 +55,57 @@ namespace WinSentryAI.Services
                 Stream = false
             };
 
+            int maxRetries = Math.Clamp(_settings.GetInt("ErrorHandling", "MaxRetryCount", 3), 1, 10);
+            var attempt = await AIHttpRetryPolicy.ExecuteAsync(
+                "Ollama",
+                maxRetries,
+                token => SendRequestOnceAsync(systemPrompt, userMessage, payload, token),
+                ct);
+
+            return attempt.Value ?? new AIAnalysisResponse(false, systemPrompt, userMessage, null,
+                attempt.ErrorMessage ?? "Ollama request failed.",
+                ModelName);
+        }
+
+        private async Task<AIHttpAttempt<AIAnalysisResponse>> SendRequestOnceAsync(
+            string systemPrompt,
+            string userMessage,
+            OllamaChatRequest payload,
+            CancellationToken ct)
+        {
             try
             {
                 using var resp = await _http.PostAsJsonAsync($"{Endpoint}/api/chat", payload, ct);
                 if (!resp.IsSuccessStatusCode)
                 {
                     string err = await resp.Content.ReadAsStringAsync(ct);
-                    return new AIAnalysisResponse(false, systemPrompt, userMessage, null,
-                        AIHttpErrorClassifier.ClassifyHttpError("Ollama", resp.StatusCode, err).Message,
-                        ModelName);
+                    var error = AIHttpErrorClassifier.ClassifyHttpError("Ollama", resp.StatusCode, err);
+                    return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
                 }
 
                 var result = await resp.Content.ReadFromJsonAsync<OllamaChatResponse>(cancellationToken: ct);
-                return new AIAnalysisResponse(true, systemPrompt, userMessage, result?.Message?.Content, null, ModelName);
+                return AIHttpAttempt<AIAnalysisResponse>.Success(
+                    new AIAnalysisResponse(true, systemPrompt, userMessage, result?.Message?.Content, null, ModelName));
+            }
+            catch (TaskCanceledException) when (ct.IsCancellationRequested)
+            {
+                var error = AIHttpErrorClassifier.ClassifyException("Ollama", new TaskCanceledException(), cancellationRequested: true);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
+            }
+            catch (TaskCanceledException ex)
+            {
+                var error = AIHttpErrorClassifier.ClassifyException("Ollama", ex, cancellationRequested: false);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
+            }
+            catch (HttpRequestException ex)
+            {
+                var error = AIHttpErrorClassifier.ClassifyException("Ollama", ex, cancellationRequested: false);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
             }
             catch (Exception ex)
             {
-                return new AIAnalysisResponse(false, systemPrompt, userMessage, null,
-                    AIHttpErrorClassifier.ClassifyException("Ollama", ex, ct.IsCancellationRequested).Message,
-                    ModelName);
+                var error = AIHttpErrorClassifier.ClassifyException("Ollama", ex, cancellationRequested: false);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
             }
         }
 
@@ -93,21 +125,50 @@ namespace WinSentryAI.Services
                 Stream = false
             };
 
+            int maxRetries = Math.Clamp(_settings.GetInt("ErrorHandling", "MaxRetryCount", 3), 1, 10);
+            var attempt = await AIHttpRetryPolicy.ExecuteAsync(
+                "Ollama",
+                maxRetries,
+                SendChatOnceAsync,
+                ct);
+
+            return attempt.Value ?? $"[Error] {attempt.ErrorMessage ?? "Ollama request failed."}";
+
+            async Task<AIHttpAttempt<string>> SendChatOnceAsync(CancellationToken token)
+            {
             try
             {
-                using var resp = await _http.PostAsJsonAsync($"{Endpoint}/api/chat", payload, ct);
+                    using var resp = await _http.PostAsJsonAsync($"{Endpoint}/api/chat", payload, token);
                 if (!resp.IsSuccessStatusCode)
                 {
-                    string err = await resp.Content.ReadAsStringAsync(ct);
-                    return $"[Error] {AIHttpErrorClassifier.ClassifyHttpError("Ollama", resp.StatusCode, err).Message}";
+                        string err = await resp.Content.ReadAsStringAsync(token);
+                        var error = AIHttpErrorClassifier.ClassifyHttpError("Ollama", resp.StatusCode, err);
+                        return AIHttpAttempt<string>.Failure(error.Message, error.IsRetryable);
                 }
 
-                var result = await resp.Content.ReadFromJsonAsync<OllamaChatResponse>(cancellationToken: ct);
-                return result?.Message?.Content ?? "[Error] Empty response from Ollama.";
-            }
-            catch (Exception ex)
-            {
-                return $"[Error] {AIHttpErrorClassifier.ClassifyException("Ollama", ex, ct.IsCancellationRequested).Message}";
+                    var result = await resp.Content.ReadFromJsonAsync<OllamaChatResponse>(cancellationToken: token);
+                    return AIHttpAttempt<string>.Success(result?.Message?.Content ?? "[Error] Empty response from Ollama.");
+                }
+                catch (TaskCanceledException) when (token.IsCancellationRequested)
+                {
+                    var error = AIHttpErrorClassifier.ClassifyException("Ollama", new TaskCanceledException(), cancellationRequested: true);
+                    return AIHttpAttempt<string>.Failure(error.Message, error.IsRetryable);
+                }
+                catch (TaskCanceledException ex)
+                {
+                    var error = AIHttpErrorClassifier.ClassifyException("Ollama", ex, cancellationRequested: false);
+                    return AIHttpAttempt<string>.Failure(error.Message, error.IsRetryable);
+                }
+                catch (HttpRequestException ex)
+                {
+                    var error = AIHttpErrorClassifier.ClassifyException("Ollama", ex, cancellationRequested: false);
+                    return AIHttpAttempt<string>.Failure(error.Message, error.IsRetryable);
+                }
+                catch (Exception ex)
+                {
+                    var error = AIHttpErrorClassifier.ClassifyException("Ollama", ex, cancellationRequested: false);
+                    return AIHttpAttempt<string>.Failure(error.Message, error.IsRetryable);
+                }
             }
         }
 

@@ -1,0 +1,31 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  build-test:
+    name: Windows x64 build and tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore Tests\WinSentryAI.Tests.csproj
+
+      - name: Build
+        run: dotnet build WinSentryAI.csproj -c Debug -p:Platform=x64 --no-restore
+
+      - name: Test
+        run: dotnet test Tests\WinSentryAI.Tests.csproj -c Debug -p:Platform=x64 --no-restore

@@ -165,6 +165,10 @@
   <sys:String x:Key="Settings_Label_EnableRedaction">隐私遮蔽</sys:String>
   <sys:String x:Key="Settings_Redaction_Note">仅应用于云端 AI；Ollama 始终保留本地原始数据。</sys:String>
   <sys:String x:Key="AI_Redaction_MapTitle">本地遮蔽对照表</sys:String>
+  <sys:String x:Key="Startup_SystemInfoMismatch_Title">系统信息与数据库不符</sys:String>
+  <sys:String x:Key="Startup_SystemInfoMismatch_Message">WinSentryAI 检测到此 portable 数据库上次是在不同电脑上使用。&#x0a;&#x0a;上一台电脑：{0}&#x0a;当前电脑：{1}&#x0a;&#x0a;系统信息已重新检测为当前电脑。由于上一台电脑的事件记录与 AI 分析可能已不具参考意义，是否要删除现有事件记录并重新加载当前电脑的事件？</sys:String>
+  <sys:String x:Key="Startup_SystemInfoMismatch_Cleared">现有事件记录与 AI 分析已清除。WinSentryAI 将加载当前电脑的事件。</sys:String>
+  <sys:String x:Key="Startup_SystemInfoMismatch_ClearFailed">WinSentryAI 无法清除现有事件记录，请查看 log 文件获取详细信息。</sys:String>
   <sys:String x:Key="NonAdmin_Banner_Text">受限模式：WinSentryAI 未以管理员身份运行，Security 日志可能无法读取。</sys:String>
   <sys:String x:Key="Tray_Menu_Show">显示 WinSentryAI</sys:String>
   <sys:String x:Key="Tray_Menu_Exit">退出</sys:String>

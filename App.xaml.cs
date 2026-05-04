@@ -80,22 +80,6 @@ namespace WinSentryAI
             var dbService = new DatabaseService();
             dbService.Initialize(retentionDays);
 
-            // 6. 收集系統快照（背景執行，不等待）
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    var snapshotService = new SystemSnapshotService();
-                    var snapshot = await snapshotService.CollectAsync();
-                    await dbService.SaveSystemSnapshotAsync(snapshot);
-                    Log.Information("System snapshot saved.");
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Failed to save system snapshot at startup.");
-                }
-            });
-
             // 7. 初始化全域狀態
             var eventLogService = new EventLogService();
             AppState.Instance.Database = dbService;

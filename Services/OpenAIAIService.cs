@@ -24,7 +24,7 @@ namespace WinSentryAI.Services
         {
             _db = db;
             _settings = settings;
-            _http = http ?? new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+            _http = http ?? SharedHttpClientProvider.Default;
         }
 
         public async Task<bool> IsConfiguredAsync(CancellationToken ct = default)
@@ -168,7 +168,25 @@ namespace WinSentryAI.Services
                 return new(false, sys, usr, null, "[No Key] OpenAI API key not configured. Open Settings → AI to add your key.", model);
 
             var payload = new OpenAiRequest { Model = model, Messages = messages.ToArray(), Stream = false };
+            int maxRetries = Math.Clamp(_settings.GetInt("ErrorHandling", "MaxRetryCount", 3), 1, 10);
 
+            var attempt = await AIHttpRetryPolicy.ExecuteAsync(
+                "OpenAI",
+                maxRetries,
+                token => SendRequestOnceAsync(sys, usr, model, apiKey, payload, token),
+                ct);
+
+            return attempt.Value ?? new(false, sys, usr, null, attempt.ErrorMessage ?? "OpenAI request failed.", model);
+        }
+
+        private async Task<AIHttpAttempt<AIAnalysisResponse>> SendRequestOnceAsync(
+            string sys,
+            string usr,
+            string model,
+            string apiKey,
+            OpenAiRequest payload,
+            CancellationToken ct)
+        {
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint);
@@ -179,20 +197,37 @@ namespace WinSentryAI.Services
                 string body = await resp.Content.ReadAsStringAsync(ct);
 
                 if (!resp.IsSuccessStatusCode)
-                    return new(false, sys, usr, null,
-                        AIHttpErrorClassifier.ClassifyHttpError("OpenAI", resp.StatusCode, body).Message,
-                        model);
+                {
+                    var error = AIHttpErrorClassifier.ClassifyHttpError("OpenAI", resp.StatusCode, body);
+                    return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
+                }
 
                 using var doc = JsonDocument.Parse(body);
                 string text = doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
-                return new(true, sys, usr, text, null, model);
+                return AIHttpAttempt<AIAnalysisResponse>.Success(new(true, sys, usr, text, null, model));
+            }
+            catch (TaskCanceledException) when (ct.IsCancellationRequested)
+            {
+                var error = AIHttpErrorClassifier.ClassifyException("OpenAI", new TaskCanceledException(), cancellationRequested: true);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
+            }
+            catch (TaskCanceledException ex)
+            {
+                Log.Warning(ex, "OpenAI API call timed out.");
+                var error = AIHttpErrorClassifier.ClassifyException("OpenAI", ex, cancellationRequested: false);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
+            }
+            catch (HttpRequestException ex)
+            {
+                Log.Warning(ex, "OpenAI network request failed.");
+                var error = AIHttpErrorClassifier.ClassifyException("OpenAI", ex, cancellationRequested: false);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "OpenAI API call failed.");
-                return new(false, sys, usr, null,
-                    AIHttpErrorClassifier.ClassifyException("OpenAI", ex, ct.IsCancellationRequested).Message,
-                    model);
+                var error = AIHttpErrorClassifier.ClassifyException("OpenAI", ex, cancellationRequested: false);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
             }
         }
 

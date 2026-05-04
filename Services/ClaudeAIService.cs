@@ -23,7 +23,7 @@ namespace WinSentryAI.Services
         {
             _db = db;
             _settings = settings;
-            _http = http ?? new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+            _http = http ?? SharedHttpClientProvider.Default;
         }
 
         public async Task<bool> IsConfiguredAsync(CancellationToken ct = default)
@@ -111,7 +111,25 @@ namespace WinSentryAI.Services
                 return new(false, sys, usr, null, "[No Key] Claude API key not configured. Open Settings → AI to add your key.", model);
 
             var payload = new ClaudeRequest { Model = model, System = sys, Messages = messages.ToArray(), MaxTokens = 4096, Stream = false };
+            int maxRetries = Math.Clamp(_settings.GetInt("ErrorHandling", "MaxRetryCount", 3), 1, 10);
 
+            var attempt = await AIHttpRetryPolicy.ExecuteAsync(
+                "Claude",
+                maxRetries,
+                token => SendRequestOnceAsync(sys, usr, model, apiKey, payload, token),
+                ct);
+
+            return attempt.Value ?? new(false, sys, usr, null, attempt.ErrorMessage ?? "Claude request failed.", model);
+        }
+
+        private async Task<AIHttpAttempt<AIAnalysisResponse>> SendRequestOnceAsync(
+            string sys,
+            string usr,
+            string model,
+            string apiKey,
+            ClaudeRequest payload,
+            CancellationToken ct)
+        {
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint);
@@ -123,20 +141,37 @@ namespace WinSentryAI.Services
                 string body = await resp.Content.ReadAsStringAsync(ct);
 
                 if (!resp.IsSuccessStatusCode)
-                    return new(false, sys, usr, null,
-                        AIHttpErrorClassifier.ClassifyHttpError("Claude", resp.StatusCode, body).Message,
-                        model);
+                {
+                    var error = AIHttpErrorClassifier.ClassifyHttpError("Claude", resp.StatusCode, body);
+                    return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
+                }
 
                 using var doc = JsonDocument.Parse(body);
                 string text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString() ?? "";
-                return new(true, sys, usr, text, null, model);
+                return AIHttpAttempt<AIAnalysisResponse>.Success(new(true, sys, usr, text, null, model));
+            }
+            catch (TaskCanceledException) when (ct.IsCancellationRequested)
+            {
+                var error = AIHttpErrorClassifier.ClassifyException("Claude", new TaskCanceledException(), cancellationRequested: true);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
+            }
+            catch (TaskCanceledException ex)
+            {
+                Log.Warning(ex, "Claude API call timed out.");
+                var error = AIHttpErrorClassifier.ClassifyException("Claude", ex, cancellationRequested: false);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
+            }
+            catch (HttpRequestException ex)
+            {
+                Log.Warning(ex, "Claude network request failed.");
+                var error = AIHttpErrorClassifier.ClassifyException("Claude", ex, cancellationRequested: false);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Claude API call failed.");
-                return new(false, sys, usr, null,
-                    AIHttpErrorClassifier.ClassifyException("Claude", ex, ct.IsCancellationRequested).Message,
-                    model);
+                var error = AIHttpErrorClassifier.ClassifyException("Claude", ex, cancellationRequested: false);
+                return AIHttpAttempt<AIAnalysisResponse>.Failure(error.Message, error.IsRetryable);
             }
         }
 

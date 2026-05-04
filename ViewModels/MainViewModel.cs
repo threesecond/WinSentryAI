@@ -183,6 +183,8 @@ namespace WinSentryAI.ViewModels
 
             try
             {
+                await CheckSystemSnapshotAsync(ct);
+
                 // 1. 從 DB 載入既有事件
                 var dbEvents = await AppState.Instance.Database.GetRecentEventsAsync(200, ct);
                 Events.Clear();
@@ -269,6 +271,89 @@ namespace WinSentryAI.ViewModels
             {
                 Log.Error(ex, "Failed to initialize MainViewModel.");
                 StatusText = GetString("Shell_Status_Error");
+            }
+        }
+
+        private async Task CheckSystemSnapshotAsync(CancellationToken ct)
+        {
+            try
+            {
+                var previousSnapshot = await _databaseService.GetLatestSnapshotAsync(ct);
+                var snapshotService = new SystemSnapshotService();
+                var collectTask = snapshotService.CollectAsync(ct);
+                var completedTask = await Task.WhenAny(collectTask, Task.Delay(TimeSpan.FromSeconds(12), ct));
+                if (completedTask != collectTask)
+                {
+                    Log.Warning("System snapshot refresh timed out at startup; continuing with event loading.");
+                    return;
+                }
+
+                var currentSnapshot = await collectTask;
+                bool differentComputer = SystemSnapshotChangeDetector.IsLikelyDifferentComputer(previousSnapshot, currentSnapshot);
+
+                await _databaseService.SaveSystemSnapshotAsync(currentSnapshot, ct);
+                await _systemInfoViewModel.LoadSnapshotAsync();
+                Log.Information("System snapshot refreshed. DifferentComputerDetected: {DifferentComputer}", differentComputer);
+
+                if (differentComputer)
+                {
+                    await PromptForDatabaseCleanupAfterComputerChangeAsync(previousSnapshot, currentSnapshot, ct);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to refresh system snapshot at startup; continuing with event loading.");
+            }
+        }
+
+        private async Task PromptForDatabaseCleanupAfterComputerChangeAsync(
+            SystemSnapshot? previousSnapshot,
+            SystemSnapshot currentSnapshot,
+            CancellationToken ct)
+        {
+            string previousComputer = string.IsNullOrWhiteSpace(previousSnapshot?.ComputerName)
+                ? "Unknown"
+                : previousSnapshot.ComputerName!;
+            string currentComputer = string.IsNullOrWhiteSpace(currentSnapshot.ComputerName)
+                ? Environment.MachineName
+                : currentSnapshot.ComputerName!;
+
+            string message = string.Format(
+                GetString("Startup_SystemInfoMismatch_Message"),
+                previousComputer,
+                currentComputer);
+
+            var result = MessageBox.Show(
+                message,
+                GetString("Startup_SystemInfoMismatch_Title"),
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                Log.Information("User kept existing event database after system mismatch detection.");
+                return;
+            }
+
+            try
+            {
+                await _databaseService.ClearAllLogsAsync(ct);
+                ClearLoadedEvents();
+                Log.Information("Event database cleared after system mismatch detection.");
+                MessageBox.Show(
+                    GetString("Startup_SystemInfoMismatch_Cleared"),
+                    GetString("Startup_SystemInfoMismatch_Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to clear event database after system mismatch detection.");
+                MessageBox.Show(
+                    GetString("Startup_SystemInfoMismatch_ClearFailed"),
+                    GetString("Startup_SystemInfoMismatch_Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 

@@ -30,7 +30,7 @@ namespace WinSentryAI.Services
         {
             _db = db;
             _settings = settings;
-            _http = http ?? new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+            _http = http ?? SharedHttpClientProvider.Default;
         }
 
         public async Task<bool> IsConfiguredAsync(CancellationToken ct = default)
@@ -148,6 +148,10 @@ namespace WinSentryAI.Services
         {
             string? apiKey;
             try { apiKey = await _db.GetSecretAsync(SecretKey); }
+            catch (SecretDecryptionException)
+            {
+                throw;
+            }
             catch { return Array.Empty<string>(); }
 
             if (string.IsNullOrWhiteSpace(apiKey))
